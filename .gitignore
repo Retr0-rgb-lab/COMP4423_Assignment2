@@ -1,0 +1,63 @@
+# ---- 数据集：体积大，提交走网盘 + DATASET_LINK.txt，不入 git ----
+# 注意：这里必须写 data/* 而不是 data/。若写 data/，git 不会进入该目录，
+# 下面的 ! 反选规则将永远无法生效，标注 CSV 会一起被丢掉。
+data/*
+!data/annotations/
+data/annotations/*
+!data/annotations/*.csv
+data/raw/
+data/curated/
+*.jpg
+*.jpeg
+*.png
+!docs/**/*.png
+*.heic
+*.heif
+
+# ---- 模型产物：可由脚本重新生成 ----
+*.pkl
+*.joblib
+*.sav
+*.h5
+*.npy
+*.npz
+*.onnx
+models/
+outputs/
+artifacts/
+
+# ---- 特征缓存 ----
+cache/
+*.cache
+features/
+
+# ---- 训练运行产物 ----
+runs/
+wandb/
+mlruns/
+logs/
+*.log
+
+# ---- 提交用的网盘链接（规格要求文件在 ZIP 内，单独留一份） ----
+# 注意：DATASET_LINK.txt 若已填好且确定提交，可按需 git add -f
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
