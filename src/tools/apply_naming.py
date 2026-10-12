@@ -56,28 +56,59 @@ def strip_prefix(name):
 
 
 def area_dirs():
-    """小写名 → 实际目录名。目录名大小写未必与 manifest 文件名一致，
-    而 Windows 盘的挂载常常对大小写不敏感，显式建映射避免依赖该巧合。"""
-    return {d.lower(): os.path.join(PICTURES, d)
-            for d in os.listdir(PICTURES)
-            if os.path.isdir(os.path.join(PICTURES, d))}
+    """递归索引 data/pictures 下所有叶子目录 → 目录的相对路径（小写）。
+
+    目录结构是 `pictures/{inside,outside}/<场所名>/`，层级可能继续加深。
+    同一个场所名可能同时出现在 inside 与 outside 下（如 night），因此以
+    **相对路径**而非目录名作为键，避免互相覆盖。
+    """
+    index = {}
+    for root, dirs, files in os.walk(PICTURES):
+        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        if not any(f.lower().endswith(IMG_EXT) for f in files):
+            continue                      # 只登记真正装了图片的目录
+        key = os.path.relpath(root, PICTURES).replace(os.sep, '/').lower()
+        index.setdefault(key, os.path.abspath(root))
+    return index
+
+
+def manifest_files():
+    """递归找出全部 manifest，返回 (文件列表, {相对路径: 绝对路径})。
+
+    manifest 放在 data/annotations 下与照片镜像的层级里，
+    例如 data/annotations/outside/night_manifest.csv 对应
+    data/pictures/outside/night/。
+    """
+    files, index = [], {}
+    for root, dirs, names in os.walk(ANNOTATIONS):
+        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        for n in sorted(names):
+            if not n.endswith('_manifest.csv'):
+                continue
+            rel = os.path.relpath(root, ANNOTATIONS)
+            key = n[:-len('_manifest.csv')] if rel == '.' \
+                else f'{rel.replace(os.sep, "/")}/{n[:-len("_manifest.csv")]}'
+            files.append(os.path.join(root, n))
+            index[key.lower()] = os.path.join(root, n)
+    return files, index
 
 
 def load_manifests():
-    """读取全部 manifest，返回按 (区域目录, 文件名) 索引的记录列表。"""
+    """读取全部 manifest，返回 (记录列表, 字段名, 文件列表)。"""
     records, fields = [], None
-    files = sorted(f for f in os.listdir(ANNOTATIONS)
-                   if f.endswith('_manifest.csv'))
+    files, index = manifest_files()
     if not files:
-        sys.exit(f'没有找到 manifest: {ANNOTATIONS}/*_manifest.csv')
+        sys.exit(f'没有找到 manifest: {ANNOTATIONS}/**/*_manifest.csv')
 
     dirs = area_dirs()
-    for mf in files:
-        area = mf[:-len('_manifest.csv')]
-        area_dir = dirs.get(area.lower())
+    for path in files:
+        rel = os.path.relpath(os.path.dirname(path), ANNOTATIONS)
+        stem = os.path.basename(path)[:-len('_manifest.csv')]
+        key = stem if rel == '.' else f'{rel.replace(os.sep, "/")}/{stem}'
+        area_dir = dirs.get(key.lower())
         if area_dir is None:
-            sys.exit(f'{mf}: data/pictures/ 下找不到区域目录「{area}」')
-        with open(os.path.join(ANNOTATIONS, mf), encoding='utf-8-sig') as fh:
+            sys.exit(f'{path}: data/pictures/ 下找不到对应目录「{key}」')
+        with open(path, encoding='utf-8-sig') as fh:
             reader = csv.DictReader(fh)
             if fields is None:
                 fields = reader.fieldnames
@@ -86,7 +117,7 @@ def load_manifests():
                 row['_cur'] = row['filename']
                 row['_old'] = strip_prefix(row['filename'])
                 row['_dir'] = area_dir
-                row['_csv'] = mf
+                row['_csv'] = os.path.relpath(path, ANNOTATIONS)
                 records.append(row)
 
     return records, fields, files
