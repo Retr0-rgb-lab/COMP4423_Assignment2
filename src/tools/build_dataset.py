@@ -39,6 +39,13 @@ CAP = 50                  # 单个地点组上限
 RATIO = (0.6, 0.2, 0.2)  # train / val / test
 SPLITS = ('train', 'val', 'test')
 
+# 互见约束：下列组之间隔着一条路就能互相看到，属于 PDF 所说的
+# 「同一场景的邻近取景」，即便地点不同也不能分到不同 split，
+# 否则会构成泄漏。划分时把它们当作一个原子单元。
+KEEP_TOGETHER = [
+    ('OUT-05', 'OUT-08'),   # 西九 M+ 博物館 与 Art Park，隔路互相通视
+]
+
 
 def even_sample(items, k):
     """从 items 中等距取 k 个，保留原有的视点跨度。"""
@@ -52,46 +59,81 @@ def even_sample(items, k):
 
 
 def largest_remainder(n, ratio):
-    """按比例把 n 个组分配到各 split，至少 1 个，返回 (train, val, test)。"""
+    """按比例把 n 个单元分配到各 split（最大余数法），返回 [train, val, test]。"""
     raw = [n * r for r in ratio]
-    base = [max(1, int(x)) for x in raw]
-    while sum(base) > n:                      # 多出来的从最大的 split 回收
+    base = [int(x) for x in raw]
+    rest = n - sum(base)
+    # 余数按小数部分从大到小依次分配，每个 split 至多拿一次
+    order = sorted(range(len(raw)), key=lambda i: raw[i] - base[i], reverse=True)
+    for i in order[:max(0, rest)]:
+        base[i] += 1
+    # 每个 split 至少 1 个单元；超出总数时从最大的回收
+    for i in range(len(base)):
+        base[i] = max(1, base[i])
+    while sum(base) > n and max(base) > 1:
         base[base.index(max(base))] -= 1
-    while sum(base) < n:                      # 余数按小数部分从大到小补
-        frac = [(raw[i] - int(raw[i]), i) for i in range(len(raw))]
-        base[max(frac)[1]] += 1
     return base
+
+
+def build_clusters(groups):
+    """把 KEEP_TOGETHER 里互相通视的组合并成原子单元。
+
+    返回 {单元代表: [group_id, ...]}，未受约束的组各自成单元。
+    """
+    parent = {g: g for g in groups}
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    for a, b in KEEP_TOGETHER:
+        if a in parent and b in parent:
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                parent[rb] = ra
+
+    clusters = defaultdict(list)
+    for g in groups:
+        clusters[find(g)].append(g)
+    return clusters
 
 
 def assign_groups(groups, ratio):
     # groups: {group_id: [rows]}，按组容量排序
     """把一个类别的地点组分配到各 split。
 
-    组数少的时候（大类只有 5~7 个组），硬套 60/20/20 会让 val / test 只剩
+    组数少的时候（大类只有 5~9 个组），硬套 60/20/20 会让 val / test 只剩
     1 个组，指标失去意义。策略是：
 
-    1. train 拿走配额内**最大的**那几个组 —— 训练数据量最大
-    2. 剩下的组在 val / test 之间轮流分配，且每轮选当前图片数少的一边，
+    1. 互相通视的组先合并成原子单元（见 KEEP_TOGETHER），否则会泄漏
+    2. train 拿走配额内**最大的**那几个单元 —— 训练数据量最大
+    3. 剩下的单元在 val / test 之间轮流分配，且每轮选当前图片数少的一边，
        使两者的图片数尽量接近
-    3. val / test 的组数不强行相等（组数不够时无法做到），但会尽量均衡
+    4. val / test 的组数不强行相等（组数不够时无法做到），但会尽量均衡
 
     返回 {group_id: split}
     """
-    n = len(groups)
+    clusters = build_clusters(sorted(groups))
+    n = len(clusters)
     quota = largest_remainder(n, ratio)
-    order = sorted(groups, key=lambda g: -len(groups[g]))   # 组容量降序
+    order = sorted(clusters.values(),
+                   key=lambda c: -sum(len(groups[g]) for g in c))
 
     out = {}
-    for gid in order[:quota[0]]:
-        out[gid] = SPLITS[0]
+    for c in order[:quota[0]]:
+        for g in c:
+            out[g] = SPLITS[0]
 
     buckets = {SPLITS[1]: [], SPLITS[2]: []}
     load = {SPLITS[1]: 0, SPLITS[2]: 0}
-    for gid in order[quota[0]:]:
+    for c in order[quota[0]:]:
         s = min(buckets, key=lambda k: (len(buckets[k]), load[k]))
-        buckets[s].append(gid)
-        load[s] += len(groups[gid])
-        out[gid] = s
+        buckets[s].append(c)
+        load[s] += sum(len(groups[g]) for g in c)
+        for g in c:
+            out[g] = s
     return out
 
 
@@ -170,6 +212,9 @@ def main():
 
     # ── 5. 校验 ─────────────────────────────────────────────────────
     errs = []
+    for a, b in KEEP_TOGETHER:
+        if a in split_of and b in split_of and split_of[a] != split_of[b]:
+            errs.append(f'互见组 {a} 与 {b} 被分到不同 split（会泄漏）')
     seen = defaultdict(set)
     for cls in balanced:
         for gid, s in split_of.items():
@@ -241,7 +286,9 @@ def write_summary(balanced, split_of, meta, by_group, dropped, cap):
          f'review {dropped["review"]} 张', 
          f'- 单一地点组上限 {cap} 张（组内等距取样，保留视点跨度）',
          '- 类别对齐到较小的一侧',
-         '- **地点组为不可分割单元**：同一组全部照片进入同一 split', '',
+         '- **地点组为不可分割单元**：同一组全部照片进入同一 split',
+         '- 互见组绑定同 split：' + '；'.join(' / '.join(t) for t in KEEP_TOGETHER)
+           + '（隔路可互相看到）', '',
          '## 每类每 split 的图片数与地点组数', '',
          '| split | 类别 | 图片数 | 地点组数 | 地点组 |', '|---|---|---:|---:|---|']
     for s in SPLITS:
