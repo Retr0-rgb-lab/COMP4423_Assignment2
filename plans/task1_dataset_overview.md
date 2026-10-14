@@ -3,7 +3,7 @@
 **课程**：COMP4423 Computer Vision 2026/27 Semester 1
 **题目**：PolyU Main Campus Image Classification
 **截止**：2026-10-28 23:59 HKT
-**图 1**：`docs/figures/figure1_inside_locations_annotated.png`
+**图 1**：`docs/figures/figure1_inside_locations_annotated.png`（7 个 inside 地点组，数字为可用张数）
 **标注数据**：`data/annotations/`
 **划分结果**：`data/annotations/splits.csv`、`dataset_summary.md`
 
@@ -125,7 +125,9 @@ PDF 的口径是「同一庭院、**建筑或地标**的邻近取景归为同一
 
 ## 4. 四轴变化方案
 
-| 维度 | inside（每组 35 张） | outside（每组 38 张） | 拍法 |
+组内拍摄按视点 / 距离 / 近景 / 光照四轴分配。下表是**组内配额**，不是各地点组的最终张数；最终张数见第 3 节。
+
+| 维度 | inside 组内配额 | outside 组内配额 | 拍法 |
 |---|---|---|---|
 | 视点 | 24 | 26 | 6 个站位 × 约 4 张 |
 | 距离 | 6 | 6 | 2 个站位各拍近 / 中 / 远 |
@@ -151,18 +153,19 @@ PDF 的口径是「同一庭院、**建筑或地标**的邻近取景归为同一
 
 ## 5. 难负样本设计
 
-outside 的 9 个组分别针对 inside 的具体视觉签名：
+outside 的 9 个组分别针对 inside 的具体视觉签名。下表用的是收敛后的地点组。
 
 | outside 组 | 针对的 inside 场景 | 视觉重合点 |
 |---|---|---|
-| OUT-06 港大 Main Building | IN-03 校內紅磡樓群 | 爱德华时期红砖立面 + 花岗岩柱 |
-| OUT-02 港大现代教学楼 | IN-03 / IN-06 | 现代幕墙、玻璃顶连廊、水平带窗 |
-| OUT-09 西九維港海濱 | IN-10 步行主轴与坡道台阶 | 海滨长廊、开阔铺装、栏杆 |
-| OUT-08 西九 Art Park | IN-02 / IN-06 | 开敞绿地、步道、开阔尺度 |
-| OUT-05 西九 M+ | IN-02 P/Q 區 | 现代建筑 + 大面积硬质广场 |
-| OUT-03 九龙公园 | IN-01 / IN-07 | 中式庭園、湖面、草坪 |
-| OUT-01 佐敦 | IN-12 立面近景 | 低层高密度旧唐楼、霓虹招牌 |
-| OUT-02 港大室内走廊 | IN-03 / IN-09 | **室内空间按地理位置判为 outside** |
+| OUT-06 港大 Main Building | IN-01 J 區紅磡樓、IN-03 圖書館紅磡樓體、IN-04 FSCH/VS 紅磡樓 | 爱德华时期红砖立面 + 花岗岩柱。OUT-06 与 IN-03 同在 test |
+| OUT-02 港大现代教学楼与连廊 | IN-02 P/Q 藻井走道、IN-06 有蓋長廊 | 现代幕墙、玻璃顶连廊、水平带窗。组内另有 5 张室内走廊（校内无室内样本），用来挡住「室内 = inside」 |
+| OUT-09 西九維港海濱 | IN-05 主入口台阶与铺装、IN-06 A 座大楼梯 | 海滨长廊、开阔铺装、栏杆、坡道。OUT-09 与 IN-05 同在 val |
+| OUT-08 西九 Art Park | IN-02 林大輝廣場、IN-06 開敞廣場、IN-07 庭院 | 开敞绿地、步道、开阔尺度 |
+| OUT-05 西九 M+ | IN-02 P/Q 區、IN-06 開敞廣場 | 现代建筑 + 大面积硬质广场。与 OUT-08 互见，绑定同 split |
+| OUT-04 圆方 Elements | IN-02 藻井顶棚、IN-06 有盖长廊 | 大跨顶棚下的开敞空间 |
+| OUT-03 九龙公园 | IN-05 草坪花园、IN-07 CMA 庭院、IN-04 泳池绿地 | 中式庭園、湖面、草坪 |
+| OUT-07 港大校园绿地 | IN-05 草坪、IN-07 庭院绿地 | 校园林荫，不是红砖捷径。与 IN-07 同在 test |
+| OUT-01 佐敦 | IN-01 J 區与 IN-06 楼群的建筑立面 | 低层高密度旧唐楼、霓虹招牌 |
 
 **红砖反例**由 OUT-06（港大 Main Building 20 张）与 OUT-03（九龙公园中式庭園 11 张）共同提供，避免模型学到「见红砖即 inside」的捷径。
 
@@ -193,7 +196,7 @@ outside 的 9 个组分别针对 inside 的具体视觉签名：
 | IN-04 `IMG_1229` | 「何鸿燊樓 STANLEY HO BUILDING」 |
 | IN-05 `IMG_1304` | 「THE HONG KONG POLYTECHNIC UNIVERSITY 香港理工大學」+ POLYU 校徽 |
 | IN-02 `IMG_1593` | 「林大輝廣場 Lam Tai Fai Amphitheatre」+「Q 陳永禮樓」+「HESWICK HALL」 |
-| IN-07 `IMG_1428` | 「香港中華煤氣有限公司 CMA BUILDING」 |
+| IN-07 `IMG_1428` | 「香港中華廠商聯合會樓 CMA BUILDING」+「LUI CHE WOO BUILDING 呂志和樓」 |
 | OUT-01 `IMG_1002` | 「Jordan Road 佐敦道」路牌 +「東方賓館 Oriental Guest House」 |
 | OUT-03 `IMG_0765` | 「九龍公園 Kowloon Park」招牌 |
 | OUT-03 `IMG_0795` | 「柯士甸道 Austin Road」路牌 |
