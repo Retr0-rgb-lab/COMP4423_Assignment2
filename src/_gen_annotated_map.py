@@ -1,29 +1,36 @@
 # -*- coding: utf-8 -*-
-"""Task 1 交付物 Figure 1: 在官方 Campus Map 鸟瞰图上标注 12 个 inside 采集地点组。"""
+"""Task 1 交付物 Figure 1：在官方 Campus Map 鸟瞰图上标注 7 个 inside 地点组。
+
+底图：docs/figures/campus_map_base.png
+（由官方 3D Campus Map 截图裁出，1537×1336，不含图钉。）
+图钉坐标按图上的楼宇字母（A–Z、VA、VS、M、P、Q）逐区核对。
+张数为 status = include 的可用张数，不是入库封顶后的训练张数。
+"""
+import os
+
 from PIL import Image, ImageDraw, ImageFont
 
-SRC = '/mnt/c/Users/Lenovo/Pictures/Screenshots/屏幕截图 2026-10-08 103421.png'
-OUT = 'figure1_inside_locations_annotated.png'
-
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC = os.path.join(ROOT, 'docs', 'figures', 'campus_map_base.png')
+OUT = os.path.join(ROOT, 'docs', 'figures', 'figure1_inside_locations_annotated.png')
 FONT = '/home/peleclic/.local/share/fonts/msyh.ttc'
-def f(sz): return ImageFont.truetype(FONT, sz)
 
-# (编号, 场景类型, x, y)  —— 坐标由 100px 网格逐区核对得出
+
+def f(sz):
+    return ImageFont.truetype(FONT, sz)
+
+
+# (编号, 场景, x, y, 可用张数) —— 坐标在 1537×1336 底图上
 PINS = [
-    ('01', '运动场与球场绿地区（VA / VS）',              500,  690),
-    ('02', '中央开敞铺装广场',                            975,  665),
-    ('03', '高层塔楼底座广场（A–G、J、L 区）',            465, 1115),
-    ('04', '红砖建筑群（Z 区砖楼）',                      620,  120),
-    ('05', '弧形地标楼（Y）',                            1010,  300),
-    ('06', '圆柱形塔楼周边（M）',                          682,  735),
-    ('07', '林荫步道（西南侧树带）',                       300,  880),
-    ('08', '校内车行道与人车交汇段',                       760,  555),
-    ('09', '建筑入口前庭（B / C / D 区庭院）',             330, 1195),
-    ('10', '步行主轴与坡道台阶',                          605,  928),
-    ('11', '开阔处远景（望向远处塔楼）',                    370,  800),
-    ('12', '立面与地面交界近景（L / E 区）',               760, 1080),
+    ('01', '走道（J 区 — VA 区）',     590,  860, 71),
+    ('02', 'P/Q 区藻井走道',           940,  755, 62),
+    ('03', '大学图书馆与中央平台',     705,  880, 25),
+    ('04', 'FSCH / VS 区 / 泳池',      390,  690, 53),
+    ('05', '校门与主入口',             520,  720, 38),
+    ('06', '楼群庭院与 A 座入口',      255, 1145, 40),
+    ('07', 'CMA 庭院',                 575, 1245, 17),
 ]
-PER_GROUP = 35
+TOTAL = sum(p[4] for p in PINS)
 LEG_W = 580
 
 map_im = Image.open(SRC).convert('RGB')
@@ -32,23 +39,22 @@ canvas = Image.new('RGB', (W + LEG_W, H), '#FFFFFF')
 canvas.paste(map_im, (0, 0))
 d = ImageDraw.Draw(canvas, 'RGBA')
 
-# ---- 图钉 ----
 R = 21
-for num, name, x, y in PINS:
-    d.ellipse([x-R+3, y-R+5, x+R+3, y+R+5], fill=(0, 0, 0, 60))   # 阴影
-    d.ellipse([x-R, y-R, x+R, y+R], fill=(200, 30, 30, 235),
+for num, name, x, y, _ in PINS:
+    d.ellipse([x - R + 3, y - R + 5, x + R + 3, y + R + 5], fill=(0, 0, 0, 60))
+    d.ellipse([x - R, y - R, x + R, y + R], fill=(200, 30, 30, 235),
               outline=(255, 255, 255, 255), width=4)
     d.text((x, y), num, font=f(21), fill=(255, 255, 255, 255), anchor='mm')
 
-# ---- 图例 ----
 lx = W
 d.rectangle([lx, 0, W + LEG_W, H], fill=(255, 255, 255))
 d.line([(lx, 0), (lx, H)], fill=(225, 225, 225), width=2)
 
 y0 = 120
 d.text((lx + 34, y0), 'Figure 1 — inside 采集地点组', font=f(27), fill=(15, 15, 15))
-d.text((lx + 34, y0 + 42), 'PolyU 主校区（label = 1）· 12 组 · 每组 35 张', font=f(16),
-       fill=(95, 95, 95))
+d.text((lx + 34, y0 + 42),
+       f'PolyU 主校区（label = 1）· {len(PINS)} 组 · 可用 {TOTAL} 张',
+       font=f(16), fill=(95, 95, 95))
 d.line([(lx + 34, y0 + 76), (W + LEG_W - 34, y0 + 76)], fill=(215, 215, 215), width=2)
 
 ry = y0 + 100
@@ -56,34 +62,40 @@ for head, xoff in (('编号', 34), ('场景类型', 84), ('张数', 480)):
     d.text((lx + xoff, ry), head, font=f(15), fill=(130, 130, 130))
 ry += 26
 d.line([(lx + 34, ry), (W + LEG_W - 34, ry)], fill=(232, 232, 232), width=1)
-ry += 12
+ry += 16
 
-for num, name, _, _ in PINS:
+for num, name, _, _, n in PINS:
     d.ellipse([lx + 34, ry + 3, lx + 34 + 24, ry + 27], fill=(200, 30, 30, 235))
     d.text((lx + 46, ry + 15), num, font=f(14), fill=(255, 255, 255), anchor='mm')
     d.text((lx + 70, ry + 15), f'IN-{num}', font=f(14), fill=(150, 150, 150))
     d.text((lx + 128, ry + 15), name, font=f(15), fill=(25, 25, 25), anchor='lm')
-    d.text((lx + LEG_W - 36, ry + 15), str(PER_GROUP), font=f(15),
+    d.text((lx + LEG_W - 36, ry + 15), str(n), font=f(15),
            fill=(25, 25, 25), anchor='rm')
-    ry += 34
+    ry += 42
 
-ry += 4
+ry += 8
 d.line([(lx + 34, ry), (W + LEG_W - 34, ry)], fill=(232, 232, 232), width=1)
-ry += 20
-d.text((lx + 34, ry), f'合计  {len(PINS)} 组 × {PER_GROUP} 张 = {len(PINS)*PER_GROUP} 张',
+ry += 24
+d.text((lx + 34, ry),
+       f'合计  {len(PINS)} 组 · 可用 {TOTAL} 张',
        font=f(17), fill=(200, 30, 30))
-ry += 46
+ry += 28
+d.text((lx + 34, ry), '（status = include；入库时单组上限 50）',
+       font=f(13), fill=(150, 150, 150))
+ry += 50
 
 for line in [
-    '拍摄对象为 scene-level 场景照，',
-    '每组内变化视点 / 距离 / 光照 / 背景，',
+    '一个物理场所 = 一个地点组。',
+    '组内变化视点 / 距离 / 光照 / 背景，',
+    '不另建组。拍摄为 scene-level 场景照，',
     '画面保留环境上下文，不拍孤立物体。',
 ]:
     d.text((lx + 34, ry), line, font=f(14), fill=(90, 90, 90))
-    ry += 22
+    ry += 24
 
-ry += 14
-d.rectangle([lx + 34, ry, W + LEG_W - 34, ry + 122], fill=(253, 246, 238))
+ry += 18
+box_h = 122
+d.rectangle([lx + 34, ry, W + LEG_W - 34, ry + box_h], fill=(253, 246, 238))
 d.text((lx + 46, ry + 12), '按规格排除（不采集）', font=f(14), fill=(170, 70, 20))
 excluded = ['校门与门槛位置　·　连接天桥与连廊',
             '校园边界位置　·　跨越边界的取景',
