@@ -1,10 +1,13 @@
 # ---- 数据集：体积大，提交走网盘 + DATASET_LINK.txt，不入 git ----
 # 注意：这里必须写 data/* 而不是 data/。若写 data/，git 不会进入该目录，
 # 下面的 ! 反选规则将永远无法生效，标注 CSV 会一起被丢掉。
+# CSV 在 annotations 的子目录里：必须先反选子目录，再反选 **/*.csv。
+# 只反选 data/annotations/*.csv 不会递归，inside/ outside/ 下的源 manifest 会被丢掉。
 data/*
 !data/annotations/
-data/annotations/*
-!data/annotations/*.csv
+data/annotations/**
+!data/annotations/**/
+!data/annotations/**/*.csv
 data/raw/
 data/curated/
 *.jpg
