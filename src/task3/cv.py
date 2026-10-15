@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """5 折地点组留出。选择分数是各折 balanced accuracy 的平均。"""
 import csv
+import hashlib
+import json
 import time
 
 import numpy as np
@@ -20,11 +22,59 @@ from src.task3.config import (
     FEATURE_NAME,
     FEATURE_ORDER,
     FOLDS,
+    IMAGE_SIZE,
     OUTPUT_DIR,
+    ROOT,
+    SPLITS_CSV,
 )
 from src.task3.data import by_split, partition_fold
 from src.task3.models import make_pipeline
 from src.task3.preprocess import horizontal_flip, load_rgb, resize_and_crop
+
+
+def preprocess_tag():
+    return f"s{IMAGE_SIZE}"
+
+
+def source_fingerprint():
+    """splits.csv 与 src/task3 源码的哈希。续跑对不上就拒绝复用旧结果。"""
+    digest = hashlib.sha256()
+    digest.update(SPLITS_CSV.read_bytes())
+    for path in sorted((ROOT / "src" / "task3").glob("*.py")):
+        digest.update(path.name.encode())
+        digest.update(path.read_bytes())
+    digest.update(preprocess_tag().encode())
+    digest.update(str(AUG_HFLIP).encode())
+    return digest.hexdigest()
+
+
+def assert_resume_allowed(force):
+    stamp_path = OUTPUT_DIR / "run_stamp.json"
+    current = source_fingerprint()
+    has_table = (OUTPUT_DIR / "stage_a.csv").is_file() or (OUTPUT_DIR / "stage_b.csv").is_file()
+    if force or not has_table:
+        return current
+    if not stamp_path.is_file():
+        raise SystemExit(
+            "已有结果表但没有 run_stamp.json，拒绝续跑。确认后加 --force。"
+        )
+    saved = json.loads(stamp_path.read_text(encoding="utf-8"))["fingerprint"]
+    if saved != current:
+        raise SystemExit(
+            "splits.csv 或 src/task3 代码与已有结果不一致，拒绝续跑。确认后加 --force。"
+        )
+    return current
+
+
+def write_run_stamp():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "fingerprint": source_fingerprint(),
+        "preprocess": preprocess_tag(),
+    }
+    (OUTPUT_DIR / "run_stamp.json").write_text(
+        json.dumps(payload, indent=2), encoding="utf-8",
+    )
 
 
 def load_cropped(records):
@@ -33,13 +83,12 @@ def load_cropped(records):
     folder.mkdir(parents=True, exist_ok=True)
     images = []
     for i, rec in enumerate(records, start=1):
-        path = folder / f"{rec['filename']}.npy"
-        if path.is_file():
-            images.append(np.load(path))
-        else:
+        path = folder / f"{preprocess_tag()}__{rec['filename']}.npy"
+        image = np.load(path) if path.is_file() else None
+        if image is None or image.shape != (IMAGE_SIZE, IMAGE_SIZE, 3):
             image = resize_and_crop(load_rgb(rec["path"]))
             np.save(path, image)
-            images.append(image)
+        images.append(image)
         if i % 100 == 0 or i == len(records):
             print(f"  读图 {i}/{len(records)}", flush=True)
     return images

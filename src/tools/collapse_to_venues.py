@@ -21,6 +21,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 ANNOTATIONS = os.path.join(ROOT, 'data', 'annotations')
 
 # 细分组 → (场所级 group_id, 场所名, 场所内部细分)
+# inside 已在 data/annotations/inside/ 写成场所级，location_name 以那些 manifest 为准，
+# 不在这里用单一 sub_area 覆盖。
 VENUE_MAP = {
     'OUT-01': ('OUT-01', '佐敦 Jordan',           '佐敦道街道段'),
     'OUT-02': ('OUT-01', '佐敦 Jordan',           '廟街夜市'),

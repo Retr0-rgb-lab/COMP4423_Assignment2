@@ -5,11 +5,13 @@ import json
 
 from src.task3.config import CLF_ORDER, HIST_FEATURES, OUTPUT_DIR
 from src.task3.cv import (
+    assert_resume_allowed,
     choose_features,
     choose_pipeline,
     evaluate_config,
     read_rows,
     write_rows,
+    write_run_stamp,
 )
 from src.task3.data import load_index
 
@@ -30,6 +32,7 @@ def main():
     print("第二段特征:", ", ".join(
         f"{row['feature_id']} BA={row['ba_mean']:.3f}" for row in top), flush=True)
 
+    assert_resume_allowed(args.force)
     records = load_index()
     out = OUTPUT_DIR / "stage_b.csv"
     rows = []
@@ -74,6 +77,7 @@ def main():
     (OUTPUT_DIR / "selection.json").write_text(
         json.dumps(selection, ensure_ascii=False, indent=2), encoding="utf-8",
     )
+    write_run_stamp()
     print(f"\n锁定 {winner['feature_id']} × {winner['clf_id']} "
           f"BA={winner['ba_mean']:.3f}", flush=True)
 

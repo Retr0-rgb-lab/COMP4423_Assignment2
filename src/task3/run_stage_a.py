@@ -4,7 +4,13 @@ import argparse
 import sys
 
 from src.task3.config import FEATURE_ORDER, OUTPUT_DIR
-from src.task3.cv import choose_features, evaluate_config, write_rows
+from src.task3.cv import (
+    assert_resume_allowed,
+    choose_features,
+    evaluate_config,
+    write_rows,
+    write_run_stamp,
+)
 from src.task3.data import load_index
 from src.task3.features import assert_dims, sift_cached
 from src.task3.models import make_pipeline
@@ -50,6 +56,7 @@ def main():
         run_check(records)
         return
 
+    assert_resume_allowed(args.force)
     out = OUTPUT_DIR / "stage_a.csv"
     done = set()
     rows = []
@@ -71,6 +78,7 @@ def main():
           flush=True)
     if len(rows) != len(FEATURE_ORDER):
         sys.exit(f"第一段行数是 {len(rows)}，期望 {len(FEATURE_ORDER)}")
+    write_run_stamp()
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ data/*
 data/annotations/**
 !data/annotations/**/
 !data/annotations/**/*.csv
+!data/annotations/**/*.md
 data/raw/
 data/curated/
 *.jpg

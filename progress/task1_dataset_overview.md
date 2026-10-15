@@ -69,6 +69,8 @@ PDF 的口径是「同一庭院、**建筑或地标**的邻近取景归为同一
 
 清洗后按单组上限 50 张抽稀并对齐类别，交付 **540 张**（inside 270 : outside 270 = 1.00），详见 `dataset_summary.md`。
 
+规模够用是因为瓶颈在地点组，不在张数。作业按地点组划分，16 个组已经能在每一类里同时放下训练、验证和测试，并做 5 折地点留出。再往同一组里加照片不会增加没见过的场所，而场所才是泛化要考的单位。
+
 ### 3.1 各地点组
 
 | group_id | 场所 | 张数 | 场所内部分区 |
@@ -182,9 +184,9 @@ outside 的 9 个组分别针对 inside 的具体视觉签名。下表用的是�
 | group_id | 张数 | 原因 |
 |---|---:|---|
 | IN-05 | 11 | 校门名牌位置与闸机通道 —— 门槛位置，违反边界排除；部分含近距可辨人物 |
-| OUT-01 | 2 | 前景车辆车牌完整可读（`JF 0367`、`VA 7003`），属可识别个人信息 |
+| OUT-01 | 2 | 前景车辆车牌完整可读。`OUT-01_020_IMG_0816` 为丰田牌 `WX 9304`（2026-10-15 对照画面更正，原记录误作 `JF 0367`）；`OUT-01_052_IMG_1003` 的 notes 为 `VA 7003` |
 | OUT-02 | 2 | 般咸道 / 蒲路福倫道路牌，位于校园边界外侧 |
-| OUT-03 | 1 | 同上 |
+| OUT-03 | 1 | 含多张可识别人物面部 |
 
 另有 22 张曾因车牌与人像存疑列于待复核，**逐张核对后确认无可辨识车牌与人脸，判定可用**。
 
@@ -198,14 +200,14 @@ outside 的 9 个组分别针对 inside 的具体视觉签名。下表用的是�
 | IN-01 `IMG_1469` | 「JIMMY T. M. LEUNG BUILDING 劉德成樓」 |
 | IN-03 `IMG_1459` | 「大學圖書館 UNIVERSITY LIBRARY」+ 理工大学校徽 |
 | IN-04 `IMG_1229` | 「何鸿燊樓 STANLEY HO BUILDING」 |
-| IN-05 `IMG_1304` | 「THE HONG KONG POLYTECHNIC UNIVERSITY 香港理工大學」+ POLYU 校徽 |
+| IN-05 `IMG_1339` | J 樓標識與導覽牌（`IMG_1304` 校名牌在门槛上，已 exclude，不作锚点） |
 | IN-02 `IMG_1593` | 「林大輝廣場 Lam Tai Fai Amphitheatre」+「Q 陳永禮樓」+「HESWICK HALL」 |
 | IN-07 `IMG_1428` | 「香港中華廠商聯合會樓 CMA BUILDING」+「LUI CHE WOO BUILDING 呂志和樓」 |
 | OUT-01 `IMG_1002` | 「Jordan Road 佐敦道」路牌 +「東方賓館 Oriental Guest House」 |
 | OUT-03 `IMG_0765` | 「九龍公園 Kowloon Park」招牌 |
 | OUT-03 `IMG_0795` | 「柯士甸道 Austin Road」路牌 |
 | OUT-05 `IMG_1070` | 「M+」馆标识 |
-| OUT-02 `IMG_0863` | 「THE UNIVERSITY OF HONG KONG」+ Main Building 楼名 |
+| OUT-06 `IMG_0863` | 「THE UNIVERSITY OF HONG KONG」+ Main Building 楼名 |
 | OUT-02 `IMG_0921` | 「SCIENCE BLOCK 科學院樓」 |
 | OUT-02 `IMG_0928` | 「THE SHAW BUILDINGS 邵逸夫樓」 |
 
@@ -255,6 +257,17 @@ outside 的 9 个组分别针对 inside 的具体视觉签名。下表用的是�
 
 ---
 
-## 9. GenAI 使用声明（待补充）
+## 9. GenAI 使用声明
 
-本节将在报告定稿时填写：AI 参与了哪些环节（数据格式转换、图表生成、脚本编写、场景分类、重复检测）、观察到的错误与局限、以及基于自行验证所做的修正。
+生成式模型参与了数据脚本、Figure 1、Task 3 训练代码和实验记录的起草。照片、地点归属和 exclude / include 由人工判定。模型没有被允许用文件名或文件夹名当特征，也没有用神经网络。
+
+核对后改过的地方：
+
+- 标注目录下的源 manifest 曾被 `.gitignore` 漏掉，只跟踪了派生产物 `splits.csv`。已改忽略规则，把 CSV 纳入版本库。
+- Task 1 文档和 Figure 1 曾停留在 12 个 inside 组的草案。收敛成 7 个场所组之后，图和 §5 的组号已按 `splits.csv` 重写。失效编号包括 IN-09、IN-10、IN-12。
+- CMA 楼名曾被记成「香港中華煤氣」。画面招牌是「香港中華廠商聯合會樓」，已改。
+- `OUT-01_020_IMG_0816` 的车牌曾被记成 `JF 0367`。2026-10-15 看画面，牌号是 `WX 9304`，manifest 与本节 6.1 已改。另一张 `VA 7003` 仍以 manifest notes 为准，没有在这一轮重看画面。
+- 有过用 ORB 代替 SIFT 的建议。SIFT 来自 `opencv-contrib`，不可用时应当停下来改计划，而不是悄悄换描述子。本次环境里 `cv2.SIFT_create` 可用，词袋仍用 SIFT。
+- 颜色直方图在验证集上并不总是最差，但地点留出只有 0.538，低于 HOG。这和「红砖颜色会变成 inside 捷径、所以要收港大」的采集理由一致，选择时没有改用验证集分数。
+
+22 张曾因车牌或人像存疑的照片是逐张看过再改回 include 的，不是按模型输出改的。测试集只评估了锁定后的一条流水线，没有按测试集分数重选特征或分类器。

@@ -1,0 +1,7 @@
+# Task 3 运行依赖。必须是 opencv-contrib-python，不能换成 opencv-python，否则没有 SIFT。
+numpy==2.4.3
+Pillow==12.1.1
+opencv-contrib-python==5.0.0.93
+scikit-image==0.26.0
+scikit-learn==1.8.0
+joblib==1.5.3

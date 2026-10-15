@@ -141,7 +141,7 @@ IN-01 出现两次，因为 outside 原子有 5 个、inside 组只有 4 个。�
 6. 在测试集上只评估这一次。写 `outputs/task3/test_metrics.json`，并保存每张测试图的预测，供 Task 4 挑例子。
 7. `joblib` 保存整条 `Pipeline` 到 `models/task3_pipeline.joblib`。
 
-中断后可以重跑。特征缓存放在 `cache/task3/`，键包含预处理参数和特征编号。缓存只存像素算出来的描述；词袋词典不进跨折缓存，每折单独拟合。
+中断后可以重跑。裁剪缓存键是 `s{IMAGE_SIZE}__文件名`（2026-10-15 起；原先只用文件名，改尺寸会静默读到旧图）。`run_stage_a` / `run_stage_b` 续跑前核对 `splits.csv` 与 `src/task3/*.py` 的哈希，不一致就退出，除非 `--force`。词袋词典不进跨折缓存，每折单独拟合。
 
 ### 4.3 训练证据
 
