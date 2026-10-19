@@ -3,7 +3,7 @@
 - Course template and assignment PDF are in English. This draft is the paste-ready report body.
 - Replace `<姓名>` and `<学号>` before export. Filename must be `Assignment2_Report_<学号>_<姓名>.pdf`. A wrong name scores zero.
 - Paste the real public dataset URL over `<PASTE_THE_SAME_PUBLIC_URL_AS_IN_DATASET_LINK.txt>`. The same URL goes in `DATASET_LINK.txt`. Do not invent one.
-- Task 5 is not in this repository. Section 6 is a gap statement. Replace it only when that program exists. Do not leave it written as finished work.
+- Section 6 describes the Task 5 desktop program (`src/task5/`, `progress/task5_app.md`, root `README.md`) as part of the submission ZIP. That code is on pull request #2. Include it in the ZIP with this report. Locked test metrics in Sections 4 and 5 stay as published.
 - Every metric is from `progress/task3_experiment.md` §8, `plans/task1_3_review_2026-10-15.md` §4, `progress/task1_dataset_overview.md`, or `data/annotations/dataset_summary.md`, or is the rounding of those integer counts (worked in `progress/task4_analysis.md`). No new training was run for this draft.
 - Photo grids of correct and incorrect test images are not included. `outputs/task3/test_predictions.csv` and `data/pictures/` are absent here. Insert them later with `docs/figures/plot_task4_locked.py`. Do not name an image file as a miss until that CSV lists it.
 
@@ -54,9 +54,9 @@ At the main entrance, 11 photographs were removed under this rule: 4 taken at th
 
 Deep networks and CNN features are not used. Task 3 of the assignment excludes them.
 
-### 1.4 What this report does not claim
+### 1.4 Local application
 
-Sections 1–5 and 7–10 describe the dataset, the locked classifier, and the one test evaluation. Section 6 records that the local upload application (Task 5) is not in this branch. The saved pipeline and `resize_and_crop` are the interface that application must call. This report does not describe it as running.
+Section 6 is the desktop program that loads `models/task3_pipeline.joblib` and shows one photograph’s prediction. Sections 4 and 5 are the validation report and the single test evaluation of that same object. The application does not choose features and does not rescore the test set.
 
 ---
 
@@ -289,7 +289,7 @@ joblib==1.5.3
 
 The crop cache key includes the image size (`s256__filename`). `run_stage_a` and `run_stage_b` hash `splits.csv` and `src/task3/*.py` before reusing a results table. A mismatch stops the run unless `--force` is passed. The 2026-10-15 change to that key was not followed by a new training run. The tables in Section 4 are the 2026-10-14 run.
 
-Code layout: `src/task3/config.py`, `data.py`, `preprocess.py`, `features.py`, `models.py`, `cv.py`, `run_stage_a.py`, `run_stage_b.py`, `evaluate.py`. Dataset construction is `src/tools/build_dataset.py`. File names are resolved only in `data.py`, to find a path. `transform` receives arrays.
+Code layout: `src/task3/config.py`, `data.py`, `preprocess.py`, `features.py`, `models.py`, `cv.py`, `run_stage_a.py`, `run_stage_b.py`, `evaluate.py`. Dataset construction is `src/tools/build_dataset.py`. File names are resolved only in `data.py`, to find a path. `transform` receives arrays. The local window is `src/task5/app.py` and `src/task5/predict.py` (Section 6). It loads the saved pipeline and does not fit a new one.
 
 ---
 
@@ -476,16 +476,75 @@ Accuracy 0.594 and inside recall 0.357 are the score of the pipeline that was lo
 
 ## 6. Application (Task 5)
 
-**Status: not implemented in this repository as of 19 October 2026.** There is no desktop or local web entry point on this branch. This section is not a claim that the application runs, and it is not a substitute for the program. If a separate change adds the application, replace this section with that program’s launch instructions and a screenshot of one prediction. Until then, the markers for upload, display, loading the saved classifier, pixel-only output, and local instructions are unmet.
+The local program lets a user select one scene photograph, shows that photograph, and returns either “Inside PolyU main campus” or “Outside PolyU main campus”. It is a desktop window written with Tk from the Python standard library. Nothing was added to `requirements.txt`. Pillow, joblib, OpenCV, and scikit-learn are the Task 3 dependencies. The design and the checks in Section 6.4 are recorded in `progress/task5_app.md`. The same launch lines are in the root `README.md`.
 
-The contract, already implemented on the model side and required of any later interface, is:
+The program does not train and does not edit `splits.csv`. The classifier remains the locked HOG+LBP random forest in `models/task3_pipeline.joblib`. The test accuracy 0.594 and the other Section 4–5 figures are unchanged.
 
-- Load `models/task3_pipeline.joblib`.
-- Display the image the user selected.
-- Preprocess with `resize_and_crop` from `src/task3/preprocess.py`, the same function evaluation uses. Do not write a second resizer.
-- Predict from pixels. Do not read the class out of the path, the folder, or a widget.
-- Show one of the two strings stored on the pipeline: “Inside PolyU main campus” or “Outside PolyU main campus”.
-- Run on the local machine, with a short note on how to start it and how to pick a file.
+### 6.1 How to launch
+
+From the repository root, in the same environment as Task 3:
+
+```
+python -m src.task5.app
+```
+
+That opens the window. With no display, the same loader and the same preprocessing print one image and do not open a window:
+
+```
+python -m src.task5.app --image path\to\photo.jpg
+```
+
+The command prints the English label and, for this forest, the outside and inside probabilities. If the file cannot be read, it prints the error and exits with status 1.
+
+On Windows, `pythonw -m src.task5.app` opens the window without a console. The official Windows installer includes Tk. If Ubuntu reports that `_tkinter` is missing, install `python3-tk`. If `models/task3_pipeline.joblib` is absent, the window tells the user to run `python -m src.task3.evaluate` and does not run that training step itself. In this submission the saved file is already present.
+
+### 6.2 What the window shows
+
+The window title is “PolyU Main Campus Classifier”.
+
+1. **Select image…** opens a file dialog. Ctrl+O does the same. The dialog accepts jpg, jpeg, png, bmp, tif, tiff, and webp.
+2. The left pane shows the selected photograph and its original width and height. The file name is written next to the button so the user can see which file is open. That string is not given to the classifier.
+3. The right pane prints the sentence stored on the pipeline as `display_`: “Inside PolyU main campus” or “Outside PolyU main campus”.
+4. This random forest implements `predict_proba`, so the window also draws the inside probability and the outside probability.
+5. The thumbnail is the array returned by `resize_and_crop`: the 256×256 center crop that the model receives. The widget scales that crop for display. The array passed to `predict` stays 256×256×3.
+
+A line at the bottom of the window names `models/task3_pipeline.joblib` and states that the file name, folder, EXIF, and GPS are not used.
+
+### 6.3 How prediction is called
+
+`src/task5/predict.py` is the prediction path. `src/task5/app.py` is the window and the `--image` printer. The order matches `src/task3/evaluate.py`: crop, then predict.
+
+1. `load_rgb` in `src/task3/preprocess.py` reads the file as RGB `uint8`. It does not rotate from EXIF. Training and evaluation did not rotate, so the application does not add a rotation the model never saw.
+2. `resize_and_crop` in the same module scales the short side to 256 and center-crops to 256×256×3. There is no second resizer.
+3. `pipeline.predict([cropped])` returns 0 for outside or 1 for inside. The argument is a one-image list. A bare array would be iterated by rows.
+4. `pipeline.predict_proba([cropped])` fills the two probabilities. If a future estimator had no `predict_proba`, the window would say so and would still show the label. This forest has the method.
+5. `pipeline.display_[label_id]` is the English sentence written when the pipeline was saved: `{0: "Outside PolyU main campus", 1: "Inside PolyU main campus"}`.
+
+`joblib.load` returns a scikit-learn `Pipeline` with two steps. `features` is `ImageFeatures(feature_id="F4")`, which is `HogLbp`. `clf` is `RandomForestClassifier` with 300 trees, `max_depth=12`, and `random_state=42`. `classes_` is `[0, 1]`.
+
+`HogLbp.transform` calls `resize_and_crop` again. When the image is already 256×256, that function returns the same array. The call written in the application is still `src.task3.preprocess.resize_and_crop`.
+
+`predict_rgb` accepts an RGB array. The path is used only to read those pixels and to label the button row with the file name.
+
+### 6.4 Checks recorded for the application
+
+`progress/task5_app.md` §4 records these checks on the installed `requirements.txt`. They do not refit the forest and they do not replace Section 4 or Section 5.
+
+- From open to label, one image takes about 0.1 seconds, including HOG+LBP, `predict`, and `predict_proba`.
+- Every crop is `(256, 256, 3)`. Calling `resize_and_crop` again on that crop leaves the array unchanged. Predicting the uncropped original returns the same label as cropping first.
+- The same pixels saved as `IN-99_inside_campus.jpg` and as `OUT-99_outside_campus.jpg` produce the same label and the same probabilities. The name in the window changes. The sentence does not.
+- An unreadable text file opens an error dialog and keeps the previous label. The command-line form exits with status 1.
+- Noise, a 1×1 image, a very wide image, all black, all white, a grayscale JPEG, a PNG with an alpha channel, and a 3840×2400 JPEG each returned one of the two English sentences.
+- The window opened at about 880×585. After a file was chosen, the canvas showed the original, the thumbnail showed the crop, and the prediction text was one of the two sentences. `python -m src.task5.app --image <file>` and `python src/task5/app.py --image <file>` printed that same label and both probabilities.
+
+`data/pictures/` was not in that checkout, so the 69-image test split was not replayed through the window. The example figure on page 2 of the assignment PDF was cut at the midline only to confirm that the program returns a label and does not crash. Those two halves are not the test set, and they were not used to change the model.
+
+| Half of the assignment example figure | Pixels | Program output | outside | inside |
+|---|---|---|---:|---:|
+| Left: courtyard, captioned inside on the figure | 960×1080 | Outside PolyU main campus | 0.512 | 0.488 |
+| Right: street, captioned outside on the figure | 960×1080 | Inside PolyU main campus | 0.460 | 0.540 |
+
+Both probability pairs sit near one half. That is this locked pipeline on two scenes it was not trained on. It is not a new test accuracy. The held-out test result remains accuracy 0.594, inside recall 0.357, and the four place rates in Section 5.
 
 ---
 
@@ -501,6 +560,8 @@ The learning program was designed as two locked stages rather than a search over
 
 Testing of the data side is the check inside `build_dataset.py`: no group crosses a split, the two mutually visible West Kowloon groups stay together, and every split contains both classes. Testing of the numbers is the 2026-10-15 review, which matched the published tables to the result CSV files and recomputed the test confusion matrix from the per-image predictions. The commands and package pins are in Section 3.6.
 
+The desktop program is tested apart from that selection. `progress/task5_app.md` records that one array saved under `IN-99_inside_campus.jpg` and under `OUT-99_outside_campus.jpg` yields the same label and the same probabilities, that a second `resize_and_crop` on a 256×256 crop does not change the array, and that an unreadable file keeps the previous window label and makes `--image` exit with status 1. Those checks do not rescore the 69 test images.
+
 ### How do you ensure the robustness of the program in a real scenario?
 
 Robustness here means a new place, a renamed file, a change of lighting, and a lookalike building.
@@ -509,8 +570,8 @@ Robustness here means a new place, a renamed file, a change of lighting, and a l
 - Eleven of thirteen scene types occur in both classes, so a background such as “walkway” or “lawn” is not privately owned by one label.
 - Night frames stay in the place’s own group. The training code does not jitter color, so lighting remains a real axis instead of being augmented away.
 - The split unit is the place. Bursts, revisits, day and night, and edits of one place stay in one split. Flips happen only after the split, and only on training images.
-- The classifier never sees the file name. Renaming a photograph cannot flip the prediction except by changing pixels.
-- Evaluation and any later application share `resize_and_crop` and the saved pipeline, so the reported test score is the score of the object that would be loaded.
+- The classifier never sees the file name. Renaming a photograph cannot flip the prediction except by changing pixels. Section 6.4 records that check: the same pixels under an `IN-` name and an `OUT-` name keep the same label and the same probabilities.
+- Evaluation and the Task 5 window both call `resize_and_crop` and load `models/task3_pipeline.joblib`, so the reported test score is the score of the object the window loads.
 - The cache key includes the crop size, and a rerun stops when the split file or the training code has changed. That prevents a silent mix of old crops and new code.
 
 The measured limit is in Section 5. On two campus places the model had not seen, inside recall is 0.357, and 53 of 69 predictions are outside. A real “is this the main campus?” decision that must not miss campus scenes is not supported by that recall. More unseen campus places would be required before trusting the negative prediction. The present test groups stay held out.
@@ -529,6 +590,7 @@ The measured limit is in Section 5. On two campus places the model had not seen,
 | A crop cache keyed only by file name would reuse a 256×256 image after a size change. | The key now includes the size. This was fixed after the published run and was not a reason to rerun selection. |
 | All seven inside manifests once shared one place name, which reads like a leaked group. | Each inside group now has its own place name. The 540-way split of filenames, groups, and labels was unchanged. |
 | Test inside recall is 0.357. | Recorded in Section 5. The pipeline was not retuned on the test set. |
+| A name such as `IN-99` could be read as the class. | `predict_rgb` receives the RGB array only. The same pixels under `IN-99_inside_campus.jpg` and `OUT-99_outside_campus.jpg` return the same label and the same probabilities (Section 6.4). |
 
 ### How do you use GenAI to assist you in the implementation?
 
