@@ -328,7 +328,7 @@ The locked pipeline is **F4 HOG+LBP + C4 random forest**.
 
 On the same F4 features, the linear SVM’s validation accuracy is 0.779 and the forest’s is 0.691. The forest is still the one selected, because its location-holdout balanced accuracy is higher (0.757 against 0.721). k-NN’s outside recall is higher (0.922 on F4) and its inside recall is 0.556. On fold 2, which holds out IN-04 and OUT-03, k-NN labels almost all of the held-out campus as outside. The forest’s balanced accuracy on that fold is 0.616, the highest of the five F4 classifiers.
 
-The five folds of the location holdout, balanced accuracy for the five F4 classifiers, are the evidence behind that mean. Fold 0 holds out IN-01 and OUT-05, fold 1 IN-02 and OUT-01, fold 2 IN-04 and OUT-03, fold 3 IN-06 and OUT-04, fold 4 IN-05 and OUT-08.
+The five folds of the location holdout, balanced accuracy for the five F4 classifiers, are the evidence behind that mean. They are the folds of Section 3.5: fold 0 holds out IN-01 and OUT-01, fold 1 IN-02 and OUT-02, fold 2 IN-04 and OUT-03, fold 3 IN-06 and OUT-04, and fold 4 IN-01 together with OUT-05 and OUT-08.
 
 | F4 classifier | fold 0 | fold 1 | fold 2 | fold 3 | fold 4 | mean |
 |---|---:|---:|---:|---:|---:|---:|
@@ -338,7 +338,7 @@ The five folds of the location holdout, balanced accuracy for the five F4 classi
 | **C4 random forest** | 0.840 | 0.790 | **0.616** | 0.700 | 0.841 | **0.757** |
 | C5 histogram gradient boosting | 0.870 | 0.700 | 0.561 | 0.750 | 0.722 | 0.721 |
 
-The forest does not win every fold. It wins fold 1 and fold 4, ties the others, and is the only classifier that stays above 0.78 on fold 1 while also being the one that recovers most on fold 2. k-NN has the best single fold at 0.861 but the worst fold 2 at 0.510, which is the same collapse the validation column hides. These are the `ba_0` to `ba_4` columns of `stage_b.csv`, copied without rounding beyond three decimals.
+The forest does not win every fold. It takes fold 1 at 0.790 and fold 2 at 0.616, is second on fold 4 at 0.841 behind k-NN at 0.861, and on fold 0 it shares 0.840 with three other classifiers behind gradient boosting at 0.870, the best single fold in the table. On fold 3 it comes fourth at 0.700. k-NN has the opposite shape: it wins fold 3 and fold 4 but is last on fold 2 at 0.510, the same collapse the validation column hides, and on fold 0 it is tied for the lowest. What the mean rewards is the middle of the distribution rather than its best point, and the forest has the highest floor of the five: its worst fold is the 0.616 of fold 2, and every other classifier drops below that somewhere, k-NN to 0.510, gradient boosting to 0.561, and both linear models to 0.534. These are the `ba_0` to `ba_4` columns of `stage_b.csv`, copied without rounding beyond three decimals.
 
 F4 logistic regression has a higher holdout inside recall than the forest (0.701 against 0.660) and a lower balanced accuracy (0.722 against 0.757). The written score is balanced accuracy. The test set’s later inside recall does not reopen that choice.
 
