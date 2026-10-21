@@ -65,3 +65,9 @@ env/
 Thumbs.db
 desktop.ini
 ~$*
+
+# LaTeX build products and the submission archive are outputs, not source.
+*.aux
+*.out
+*.toc
+Assignment2_Code_*.zip

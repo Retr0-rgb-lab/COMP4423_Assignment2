@@ -46,6 +46,19 @@ The official Windows Python build ships with Tk. Use `pythonw -m src.task5.app` 
 
 The photographs are not in this archive. They are on Google Drive, and the link is in `DATASET_LINK.txt` and in the report. The folder is shared as "anyone with the link", so no sign-in is needed. The file names inside are the ones used throughout the code and the report.
 
+## Report
+
+The report body is `progress/task6_report_draft.md`. It is converted to LaTeX and compiled with:
+
+```
+python docs/make_report.py
+pdflatex Assignment2_Report_24101322D_HUANG_Haoran.tex
+```
+
+`docs/report_template.tex` holds the title page, the fonts and the page layout. The conversion script wraps the two Chinese signs in a CJK environment, lets long file names break inside table cells, and merges the hand written caption into the figure caption so that it is not printed twice.
+
+The Chinese working records under `progress/` are the source of the report. The report itself is in English.
+
 ## What is in this archive
 
 ```
@@ -56,6 +69,7 @@ models/             the locked pipeline
 data/annotations/   splits.csv, the per-class counts, and the source manifests
 outputs/task3/      the raw result tables behind the numbers in the report
 docs/figures/       the report figures
+docs/make_report.py the report build script
 progress/           the working records the report is written from
 plans/              the review record and the remediation list
 ```

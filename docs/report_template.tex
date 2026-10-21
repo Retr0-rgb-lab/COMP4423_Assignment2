@@ -1,0 +1,152 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------------------------------------------------------------- fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{tgpagella}      % TeX Gyre Pagella for the body text
+\usepackage{tgcursor}       % TeX Gyre Cursor for the monospaced runs
+\usepackage{CJKutf8}        % for the two Chinese strings in the body
+\usepackage{textcomp}
+\usepackage{upquote}
+
+% ---------------------------------------------------------------- layout
+\usepackage[a4paper,top=2.4cm,bottom=2.4cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{needspace}
+\usepackage{microtype}
+\usepackage{setspace}
+\setstretch{1.08}
+\widowpenalty=10000
+\clubpenalty=10000
+\setlength{\emergencystretch}{3em}
+
+% ---------------------------------------------------------------- headings
+% The section numbers are written into the headings themselves, because the
+% report's own cross references quote them ("Section 5.2"). LaTeX must
+% therefore not add a second number in front of them.
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{}{0pt}{}
+\titleformat{\subsubsection}{\normalfont\small\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{2.2ex plus 1ex minus .2ex}{1.1ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.6ex plus .8ex minus .2ex}{0.8ex plus .2ex}
+\titlespacing*{\subsubsection}{0pt}{1.3ex plus .6ex minus .2ex}{0.6ex plus .2ex}
+
+% ---------------------------------------------------------------- tables
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{calc}
+\renewcommand{\arraystretch}{1.15}
+\renewcommand{\LTpost}{4pt}
+
+% ---------------------------------------------------------------- figures
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xurl}
+\graphicspath{{docs/figures/}{../docs/figures/}}
+\captionsetup{font=small,labelfont=bf,labelsep=period,width=0.92\textwidth}
+\captionsetup[table]{font=small}
+% keep every figure on the page where it is discussed, so that a caption is
+% never left behind at the foot of a page while the image drifts to the next
+\makeatletter
+\renewcommand{\fps@figure}{H}
+\renewcommand{\fps@table}{H}
+\makeatother
+
+% ---------------------------------------------------------------- lists
+\usepackage{enumitem}
+\setlist{leftmargin=1.4em,itemsep=0.25em,topsep=0.4em}
+\setlist[itemize]{label=\textbullet}
+
+% ---------------------------------------------------------------- headers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------------------------------------------------------------- links
+\usepackage{xcolor}
+\usepackage[unicode=true,hidelinks,breaklinks=true]{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue!60!black,pdfborder={0 0 0}}
+
+% ---------------------------------------------------------------- code
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{fontsize=\small,commandchars=\\\{\}}
+\fvset{fontsize=\small}
+
+% ------------------------------------------------- macros pandoc expects
+\providecommand{\real}[1]{#1}
+\providecommand{\passthrough}[1]{#1}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% pandoc wraps every image in \pandocbounded, which has to scale the box down
+% to the text width or the text height, whichever binds first. Without this the
+% wide figure runs off the right edge of the page.
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{%
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@
+    \scalebox{\@tempb}{\usebox\pandoc@box}%
+  \else
+    \scalebox{\@tempa}{\usebox\pandoc@box}%
+  \fi%
+}
+\makeatother
+% longtable increments \LTcaptype at the end of every table; pandoc sets that
+% counter to "none" for the tables that carry no caption, so the counter has
+% to exist even though nothing reads it.
+\newcounter{none}
+\makeatletter\@ifpackageloaded{fancyvrb}{}{\fvset{fontsize=\small}}\makeatother
+
+% ---------------------------------------------------------------- title
+\newcommand{\reporttitle}{COMP4423 Assignment 2}
+\newcommand{\reportsubtitle}{PolyU Main Campus Image Classification}
+\newcommand{\studentname}{Huang Haoran}
+\newcommand{\studentnumber}{24101322D}
+\newcommand{\dataseturl}{https://drive.google.com/drive/folders/1\_ld7gsHLhzyFJY3bUgTIwoOeVXRDFuAr}
+
+\begin{document}
+
+\begin{titlepage}
+\vspace*{3.2cm}
+\begin{center}
+{\LARGE\bfseries \reporttitle\par}
+\vspace{0.7cm}
+{\Large \reportsubtitle\par}
+\vspace{1.6cm}
+{\large \textbf{Name:} \studentname\par}
+\vspace{0.2cm}
+{\large \textbf{Student number:} \studentnumber\par}
+\vspace{0.2cm}
+{\large \textbf{Course:} COMP4423 Computer Vision, 2026/27 Semester 1\par}
+\vspace{0.2cm}
+{\large \textbf{Deadline:} 23:59 HKT, 28 October 2026\par}
+\vspace{1.4cm}
+\begin{minipage}{0.86\textwidth}\small
+\textbf{Dataset link} (the same string as \texttt{DATASET\_LINK.txt}):\\
+\url{\dataseturl}
+\end{minipage}
+\vspace{1.0cm}
+\begin{minipage}{0.86\textwidth}\small
+The complete photograph set is on Google Drive as 27 zip parts named
+\texttt{COMP4423\_A2\_dataset\_part01.zip} through
+\texttt{COMP4423\_A2\_dataset\_part27.zip}. Download all 27 and unpack them
+into one directory; the file names inside are the ones used in this report.
+The link is shared as \emph{anyone with the link}, so no sign-in is needed.
+\end{minipage}
+\end{center}
+\vfill
+\end{titlepage}
+
+\setcounter{page}{1}
+$body$
+
+\end{document}
