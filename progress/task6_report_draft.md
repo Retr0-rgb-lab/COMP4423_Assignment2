@@ -4,8 +4,8 @@
 - Replace `<姓名>` and `<学号>` before export. Filename must be `Assignment2_Report_<学号>_<姓名>.pdf`. A wrong name scores zero.
 - Paste the real public dataset URL over `<PASTE_THE_SAME_PUBLIC_URL_AS_IN_DATASET_LINK.txt>`. The same URL goes in `DATASET_LINK.txt`. Do not invent one.
 - Section 6 describes the Task 5 desktop program (`src/task5/`, `progress/task5_app.md`, root `README.md`) as part of the submission ZIP. That code is on pull request #2. Include it in the ZIP with this report. Locked test metrics in Sections 4 and 5 stay as published.
-- Every metric is from `progress/task3_experiment.md` §8, `plans/task1_3_review_2026-10-15.md` §4, `progress/task1_dataset_overview.md`, or `data/annotations/dataset_summary.md`, or is the rounding of those integer counts (worked in `progress/task4_analysis.md`). No new training was run for this draft.
-- Photo grids of correct and incorrect test images are not included. `outputs/task3/test_predictions.csv` and `data/pictures/` are absent here. Insert them later with `docs/figures/plot_task4_locked.py`. Do not name an image file as a miss until that CSV lists it.
+- Every metric is from `progress/task3_experiment.md` §8, `plans/task1_3_review_2026-10-15.md` §4, `progress/task1_dataset_overview.md`, or `data/annotations/dataset_summary.md`, or is the rounding of those integer counts (worked in `progress/task4_evaluation.md`). No new training was run for this draft.
+- Photo grids of correct and incorrect test images are in the draft as Figure 5. `docs/figures/plot_task4_locked.py` drew them from `outputs/task3/test_predictions.csv` and `data/pictures/`; the script checks the table against the locked counts before drawing, and `docs/figures/task4_example_manifest.csv` lists the thirteen files. Do not re-pick a frame because it looks like the conclusion — the selection rule is filename order within each cell.
 
 ---
 
@@ -389,7 +389,7 @@ A classifier that always says outside scores 27/69 = 0.391 accuracy and 0.5 bala
 
 ## 5. Error analysis
 
-The full working note is `progress/task4_analysis.md`. This section is what goes in the report.
+The full working note is `progress/task4_evaluation.md`. This section is what goes in the report.
 
 ### 5.1 How to read the test matrix
 
@@ -458,15 +458,15 @@ This is the ceiling of HOG+LBP on a place it has not seen, under a protocol that
 
 ### 5.4 Qualitative examples
 
-Figures 2–4 are the quantitative figures. Figure 1 is the collection map. A contact sheet of individual predictions is not in the draft.
+Figures 2–4 are the quantitative figures. Figure 1 is the collection map. Figure 5 is the contact sheet of individual test predictions, and it is now in the draft.
 
-`outputs/` is gitignored, and this workspace has neither `outputs/task3/test_predictions.csv` nor the photographs under `data/pictures/`. Naming a file as a correct or incorrect example would be a guess. The report should gain that sheet before submission, and only by this rule:
+The sheet was produced by `docs/figures/plot_task4_locked.py` from `outputs/task3/test_predictions.csv` and the photographs in `data/pictures/`. The script refuses to draw unless the prediction table still sums to 26, 1, 27, 15 and the four place rates still equal 19/20, 7/7, 9/25 and 6/17, so a figure can only ever be drawn from the locked predictions. `docs/figures/task4_example_manifest.csv` records which file sits in which cell.
 
-1. Run `python docs/figures/plot_task4_locked.py` on a machine where the CSV and the photographs are both present.
-2. The script checks that the CSV still sums to 26, 1, 27, 15 and to 19/20, 7/7, 9/25, 6/17. If it does not, the script stops and does not replace the locked counts.
-3. It then takes, in filename order: 2 correct OUT-06, 2 correct OUT-07, the single false inside (necessarily OUT-06), 2 missed IN-03, 2 missed IN-07, 2 correct IN-03, and 2 correct IN-07.
+The thirteen frames were chosen by a rule fixed in advance, not by how they look: within each cell, in filename order — 2 correct OUT-06, 2 correct OUT-07, the single false inside (necessarily OUT-06), 2 missed IN-03, 2 missed IN-07, 2 correct IN-03, and 2 correct IN-07. A frame was never picked because it appeared to support the conclusion.
 
-Until those files exist, the qualitative comparison is the group comparison already in Section 5.2: HKU Main Building against the library, and HKU green against the CMA courtyard. Captions must say which cell the file came from. They must not be chosen because the frame “looks like” the conclusion.
+The grid shows the two failure modes at once. The one false inside is `OUT-06_012_IMG_0892.jpg`, a glass entrance and a flight of steps at HKU, not the red-brick facade that dominates its group — the 10 OUT-06 facade frames are all correct. The missed inside frames are `IN-03_001_IMG_1444.jpg` and `IN-03_002_IMG_1445.jpg`, a brick rib wall filling the frame, and `IN-07_005_IMG_1431.jpg` and `IN-07_006_IMG_1432.jpg`, the CMA courtyard pulled back to include trees and seating. Against those, `IN-07_001_IMG_1427.jpg` and `IN-07_002_IMG_1428.jpg` are the same courtyard framed close on its patterned wall and doorway, and both are correct. The viewpoint, not the building, separates them.
+
+The Chinese working record `progress/task4_evaluation.md` §5.1 carries the same eight frames with a scene-by-scene description of each one; the English captions here are deliberately terse so that the figure and the record cannot drift apart.
 
 ### 5.5 The test numbers do not retune the model
 
@@ -660,4 +660,4 @@ What would actually change the evidence is more inside places, collected under t
 | 2 | `docs/figures/task4_val_confusion_matrix.png` | Validation confusion matrix, locked pipeline. |
 | 3 | `docs/figures/task4_test_confusion_matrix.png` | Test confusion matrix, one evaluation. |
 | 4 | `docs/figures/task4_test_per_group.png` | Test accuracy by place. |
-| — | Not generated | Correct and incorrect test photographs. Waiting on `outputs/task3/test_predictions.csv` and `data/pictures/`. |
+| 5 | `docs/figures/task4_example_grid.png` | Thirteen test photographs, one per selected cell, labelled with the place and the outcome. The file list is in `docs/figures/task4_example_manifest.csv`. |
