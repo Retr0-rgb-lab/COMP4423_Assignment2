@@ -49,11 +49,16 @@
 \graphicspath{{docs/figures/}{../docs/figures/}}
 \captionsetup{font=small,labelfont=bf,labelsep=period,width=0.92\textwidth}
 \captionsetup[table]{font=small}
-% keep every figure on the page where it is discussed, so that a caption is
-% never left behind at the foot of a page while the image drifts to the next
+% A figure and its caption are one box, so the caption cannot be left behind
+% on the page before the image. Let the float move instead, and allow a page
+% to carry both text and a figure.
 \makeatletter
-\renewcommand{\fps@figure}{H}
-\renewcommand{\fps@table}{H}
+\renewcommand{\fps@figure}{htbp}
+\renewcommand{\fps@table}{htbp}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
 \makeatother
 
 % ---------------------------------------------------------------- lists
