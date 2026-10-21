@@ -1,0 +1,14 @@
+role,filename,group_id,y_true,y_pred
+true_outside,OUT-06_001_IMG_0863.jpg,OUT-06,0,0
+true_outside,OUT-06_002_IMG_0864.jpg,OUT-06,0,0
+true_outside,OUT-07_001_IMG_0934.jpg,OUT-07,0,0
+true_outside,OUT-07_002_IMG_0935.jpg,OUT-07,0,0
+false_inside,OUT-06_012_IMG_0892.jpg,OUT-06,0,1
+false_outside,IN-03_001_IMG_1444.jpg,IN-03,1,0
+false_outside,IN-03_002_IMG_1445.jpg,IN-03,1,0
+false_outside,IN-07_005_IMG_1431.jpg,IN-07,1,0
+false_outside,IN-07_006_IMG_1432.jpg,IN-07,1,0
+true_inside,IN-03_003_IMG_1446.jpg,IN-03,1,1
+true_inside,IN-03_004_IMG_1447.jpg,IN-03,1,1
+true_inside,IN-07_001_IMG_1427.jpg,IN-07,1,1
+true_inside,IN-07_002_IMG_1428.jpg,IN-07,1,1
