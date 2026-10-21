@@ -1,24 +1,15 @@
-# DRAFTING NOTES — do not paste this block into the PDF
-
-- Course template and assignment PDF are in English. This draft is the paste-ready report body.
-- Replace `<姓名>` and `<学号>` before export. Filename must be `Assignment2_Report_<学号>_<姓名>.pdf`. A wrong name scores zero.
-- Paste the real public dataset URL over `<PASTE_THE_SAME_PUBLIC_URL_AS_IN_DATASET_LINK.txt>`. The same URL goes in `DATASET_LINK.txt`. Do not invent one.
-- Section 6 describes the Task 5 desktop program (`src/task5/`, `progress/task5_app.md`, root `README.md`) as part of the submission ZIP. That code is on pull request #2. Include it in the ZIP with this report. Locked test metrics in Sections 4 and 5 stay as published.
-- Every metric is from `progress/task3_experiment.md` §8, `plans/task1_3_review_2026-10-15.md` §4, `progress/task1_dataset_overview.md`, or `data/annotations/dataset_summary.md`, or is the rounding of those integer counts (worked in `progress/task4_evaluation.md`). No new training was run for this draft.
-- Photo grids of correct and incorrect test images are in the draft as Figure 5. `docs/figures/plot_task4_locked.py` drew them from `outputs/task3/test_predictions.csv` and `data/pictures/`; the script checks the table against the locked counts before drawing, and `docs/figures/task4_example_manifest.csv` lists the thirteen files. Do not re-pick a frame because it looks like the conclusion — the selection rule is filename order within each cell.
-
----
-
 # COMP4423 Assignment 2
 
 ## PolyU Main Campus Image Classification
 
-**Name:** `<姓名>`
-**Student number:** `<学号>`
+**Name:** Huang Haoran
+**Student number:** 24101322D
 **Course:** COMP4423 Computer Vision, 2026/27 Semester 1
 **Deadline:** 23:59 HKT, 28 October 2026
 
-Dataset link (same string as `DATASET_LINK.txt`): `<PASTE_THE_SAME_PUBLIC_URL_AS_IN_DATASET_LINK.txt>`
+Dataset link (same string as `DATASET_LINK.txt`): https://drive.google.com/drive/folders/1_ld7gsHLhzyFJY3bUgTIwoOeVXRDFuAr
+
+The complete photograph set is on Google Drive as 27 zip parts named `COMP4423_A2_dataset_part01.zip` through `COMP4423_A2_dataset_part27.zip`. Download all 27 and unpack them into one directory; the file names inside are the ones used in this report. The link is shared as "anyone with the link", so no sign-in is needed.
 
 ---
 
