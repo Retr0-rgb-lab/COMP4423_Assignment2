@@ -174,14 +174,14 @@ def load_rows():
 
 
 def main():
-    ap = argparse.ArgumentParser(description='清洗数据集并按地点组划分')
-    ap.add_argument('--cap', type=int, default=CAP, help='单组容量上限')
+    ap = argparse.ArgumentParser(description='Clean the dataset and split it by location group')
+    ap.add_argument('--cap', type=int, default=CAP, help='maximum images kept per location group')
     ap.add_argument('--dry-run', action='store_true')
     args = ap.parse_args()
 
     rows = load_rows()
     if not rows:
-        sys.exit('没有可用的 manifest')
+        sys.exit('no usable manifest was found')
 
     # ── 1. Keep only include ─────────────────────────────────────────
     kept = [r for r in rows if r['status'] == 'include']
@@ -240,19 +240,19 @@ def main():
     errs = []
     for a, b in KEEP_TOGETHER:
         if a in split_of and b in split_of and split_of[a] != split_of[b]:
-            errs.append(f'互见组 {a} 与 {b} 被分到不同 split（会泄漏）')
+            errs.append(f'mutually visible groups {a} and {b} landed in different splits, which leaks')
     seen = defaultdict(set)
     for cls in balanced:
         for gid, s in split_of.items():
             if gid in seen and seen[gid] != {s}:
-                errs.append(f'{gid} 被分到多个 split')
+                errs.append(f'{gid} landed in more than one split')
             seen[gid] = {s}
     for s in SPLITS:
         cs = {meta[g][1] for g in split_of if split_of[g] == s}
         if cs != {'0', '1'}:
-            errs.append(f'split {s} 类别不全：{sorted(cs)}')
+            errs.append(f'split {s} does not hold both classes: {sorted(cs)}')
     if errs:
-        sys.exit('校验失败：\n  ' + '\n  '.join(errs))
+        sys.exit('validation failed:\n  ' + '\n  '.join(errs))
 
     # ── 6. Output ───────────────────────────────────────────────────
     out = []
@@ -271,7 +271,7 @@ def main():
     out.sort(key=lambda r: (r['class'], r['split'], r['group_id'], r['filename']))
 
     if args.dry_run:
-        print('[dry-run] 未写入文件')
+        print('[dry-run] no file was written')
     else:
         with open(SPLIT_FILE, 'w', encoding='utf-8-sig', newline='') as fh:
             w = csv.DictWriter(fh, fieldnames=list(out[0].keys()))
@@ -280,11 +280,11 @@ def main():
         write_summary(balanced, split_of, meta, by_group, dropped, args.cap)
 
     # ── Report ──────────────────────────────────────────────────────
-    print(f'原始 {len(rows)} 张 → 剔除 exclude {dropped["exclude"]} 张、'
-          f'review {dropped["review"]} 张 → 可用 {len(kept)} 张')
-    print(f'单组上限 {args.cap} → 封顶后 {sum(len(v) for v in capped.values())} 张')
-    print(f'类别平衡后 {sum(len(v) for c in balanced for v in balanced[c].values())} 张\n')
-    hdr = f'{"split":<8}{"class":<8}{"图片数":>8}{"地点组":>8}{"组列表":<26}'
+    print(f'read {len(rows)} images, dropped {dropped["exclude"]} marked exclude '
+          f'and {dropped["review"]} marked review, {len(kept)} usable')
+    print(f'per-group cap {args.cap}, {sum(len(v) for v in capped.values())} images after capping')
+    print(f'{sum(len(v) for c in balanced for v in balanced[c].values())} images after class balancing\n')
+    hdr = f'{"split":<8}{"class":<8}{"images":>8}{"groups":>8}{"group ids":<26}'
     print(hdr)
     print('-' * len(hdr))
     for s in SPLITS:
@@ -296,8 +296,8 @@ def main():
     tot = defaultdict(int)
     for r in out:
         tot[(r['split'], r['class'])] += 1
-    print(f'\n合计 {len(out)} 张 · 地点组 {len(split_of)} 个 · '
-          f'两类比例 {tot[("train","0")]+tot[("val","0")]+tot[("test","0")]}'
+    print(f'\ntotal {len(out)} images, {len(split_of)} location groups, '
+          f'class ratio {tot[("train","0")]+tot[("val","0")]+tot[("test","0")]}'
           f':{tot[("train","1")]+tot[("val","1")]+tot[("test","1")]}')
 
 

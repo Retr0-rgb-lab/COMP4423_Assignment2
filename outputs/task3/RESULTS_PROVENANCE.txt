@@ -1,0 +1,36 @@
+Provenance of the files in this directory
+=========================================
+
+These are the raw artefacts behind every number quoted in the report. They are
+included so that the tables in the report can be checked without rerunning
+anything.
+
+stage_a.csv            6 feature rows, fixed linear SVM, 5 venue-holdout folds
+stage_b.csv            10 feature/classifier rows, same folds; also carries the
+                       per-fold columns ba_0 .. ba_4
+selection.json         the feature and classifier that were locked
+val_metrics.json       validation confusion matrix and per-class metrics
+test_metrics.json      test confusion matrix and per-class metrics
+test_predictions.csv   one row per test image: filename, group_id, y_true, y_pred
+dataset_summary.md     the per-class, per-split counts
+
+They were produced by the run of 2026-10-14.
+
+Two things changed in src/task3/ after that run, so a rerun correctly refuses
+to reuse these tables:
+
+  2026-10-15  the crop cache key gained the image size (s256__filename)
+  2026-10-21  comments and docstrings were translated to English; no
+              executable statement was changed
+
+Because the source fingerprint no longer matches, run_stage_a and run_stage_b
+exit with
+
+  "splits.csv or the src/task3 code differs from the existing results,
+   refusing to resume. Add --force once you have confirmed."
+
+That is the intended behaviour, not a fault. Pass --force only after reading
+the note above and confirming that a fresh run is what you want. The tables
+above are the ones the report quotes, and the report says so in Section 4.
+
+No new training was run for this archive, and the test set was scored once.

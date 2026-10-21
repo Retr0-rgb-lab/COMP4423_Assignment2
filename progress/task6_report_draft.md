@@ -27,7 +27,7 @@ The assignment’s definitions are used without a local rewrite.
 
 | Label | Definition used in this project |
 |---|---|
-| inside (1) | The camera and the main scene are inside the PolyU main campus, using the official campus map as the boundary (`https://www.polyu.edu.hk/campus-map/`). |
+| inside (1) | The camera and the main scene are inside the PolyU main campus, using the official campus map as the boundary [10]. |
 | outside (0) | The camera and the main scene are outside that campus. Affiliated sites off the main campus stay outside. |
 
 Uncertain boundary views are excluded: gate thresholds, covered turnstiles at the entrance, connecting bridges, and shots that look across the boundary. The camera and the subject must be on the same side. Labels are not assigned from red brick, a logo, or architectural style. The classifier receives pixels only. GPS, EXIF, file names, folder names, and map lookups may be used to check a label or to find a file. They are not features.
@@ -93,7 +93,9 @@ Row sums equal 718. Façades and covered walkways are the two largest types (142
 
 Night frames are 31/306 = 10.1% of usable inside images and 56/412 = 13.6% of usable outside images. The rates are close, so brightness alone is a weak class cue. All 31 campus night frames stay in the daytime group of the same place (IN-01, IN-02, IN-04, or IN-05).
 
-Figure 1 (`docs/figures/figure1_inside_locations_annotated.png`) marks the seven inside places on a PolyU campus map. The counts printed on that figure sum to 306, which is the usable inside total before the cap. Marker 05 was placed on the south side of J Core, and its legend is the inner lawn and clock tower at the main entrance. The gate threshold itself is in the excluded set, not in IN-05.
+![Seven inside locations on the PolyU campus map](docs/figures/figure1_inside_locations_annotated.png)
+
+*Figure 1. The seven inside places on a PolyU campus map. The counts printed on the figure sum to 306, which is the usable inside total before the cap. Marker 05 is on the south side of J Core; its legend is the inner lawn and clock tower at the main entrance. The gate threshold itself is in the excluded set, not in IN-05.*
 
 ### 2.2 Hard negatives
 
@@ -148,6 +150,8 @@ Image counts and groups, from `data/annotations/dataset_summary.md`:
 | test | inside | 42 | 2 | IN-03, IN-07 |
 
 Totals: train 403, validation 68, test 69, sum 540. By images that is 403/540, 68/540, and 69/540 (about 74.6%, 12.6%, and 12.8%). By groups it is 10/16, 2/16, and 4/16, which is 62.5%, 12.5%, and 25%. The assignment asks for a split of location groups aiming at 60/20/20, with both classes in every split. Both classes are present in every split. The group shares are the ones to read. OUT-07 has 7 images and cannot fill a 20% outside test group by itself; the test outside side is OUT-06 plus OUT-07, and the validation outside side is the single group OUT-09.
+
+The validation split is the one place where the 60/20/20 target is not met, at 2 of 16 groups, and the reason is worth stating plainly. There are 7 inside groups and 9 outside groups, and a validation split that holds out one group per class costs one group from each side. Holding out two groups per class instead would leave 5 inside and 7 outside groups for training, but it would also take IN-05, the main entrance, out of training. IN-05 is the group that covers the boundary case, and a model that never sees a threshold view in training has no way to learn that a threshold is not a scene. The alternative was rejected for that reason, and the cost is recorded here rather than argued away: the validation score rests on one place per class and is therefore reported, and not used, as the selection score.
 
 Stored counts per place (original usable → kept):
 
@@ -214,13 +218,13 @@ The random seed is 42.
 | Id | Feature | Setting | Dimension |
 |---|---|---|---:|
 | F1 | HSV histogram | H 16 × S 16 × V 8. Whole frame plus a 2×2 grid. Each histogram L1-normalized, then concatenated. | 10240 |
-| F2 | HOG | 9 orientations, 16×16 cells, 2×2 blocks, L2-Hys, on gray. | 8100 |
-| F3 | LBP | Uniform pattern, P = 8, R = 1, 10 bins. Whole frame plus 2×2, each block L1-normalized. | 50 |
+| F2 | HOG | 9 orientations, 16×16 cells, 2×2 blocks, L2-Hys, on gray [1]. | 8100 |
+| F3 | LBP | Uniform pattern, P = 8, R = 1, 10 bins [2]. Whole frame plus 2×2, each block L1-normalized. | 50 |
 | F4 | HOG + LBP | F2 and F3 standardized separately on the training images, then concatenated. | 8150 |
-| F5 | Bag of words | SIFT, at most 500 keypoints. Mini-batch k-means, 256 words, fit on that fold’s training descriptors only. Word counts L1-normalized. An image with no keypoints becomes a zero histogram and is counted in the log. | 256 |
-| F6 | Bag of words + spatial pyramid | F5 on the whole frame, plus four histograms on a 2×2 grid. | 1280 |
+| F5 | Bag of words | SIFT [4] keypoints, at most 500, in a bag-of-words histogram [5]. Mini-batch k-means, 256 words, fit on that fold’s training descriptors only. Word counts L1-normalized. An image with no keypoints becomes a zero histogram and is counted in the log. | 256 |
+| F6 | Bag of words + spatial pyramid | F5 on the whole frame, plus four histograms on a 2×2 grid [6]. | 1280 |
 
-SIFT is `cv2.SIFT_create` from `opencv-contrib`. If that function is missing, the run stops. ORB is not a substitute. In the environment used for the 2026-10-14 run, SIFT was available.
+SIFT is `cv2.SIFT_create` from `opencv-contrib` [9]. If that function is missing, the run stops. ORB is not a substitute. In the environment used for the 2026-10-14 run, SIFT was available.
 
 The vocabulary is not stored across folds. A fold that is building a codebook never sees the held-out place.
 
@@ -231,7 +235,7 @@ The vocabulary is not stored across folds. A fold that is building a codebook ne
 | C1 | Linear SVM | `LinearSVC`, `C = 1`, standardized features |
 | C2 | Logistic regression | `C = 1`, `lbfgs`, standardized features |
 | C3 | k-NN | k = 5. Cosine distance on histogram features. Euclidean distance when the feature includes HOG. |
-| C4 | Random forest | 300 trees, `max_depth = 12`, `random_state = 42` |
+| C4 | Random forest | 300 trees, `max_depth = 12`, `random_state = 42` [3] |
 | C5 | Histogram gradient boosting | `max_depth = 6`, `random_state = 42` |
 | C6 | Multinomial naïve Bayes | `alpha = 1`, only for non-negative L1 histograms (F1, F3, F5, F6) |
 
@@ -257,7 +261,7 @@ On each fold the feature model (codebook, standardization, and PCA if any) is fi
 
 After Stage B, the winning pair is refit on all training images plus horizontal flips. It is saved with joblib. Validation is scored once for the report. The test set is scored once. Per-image test predictions were written to `outputs/task3/test_predictions.csv` on the machine that trained the model. That directory is gitignored; the numbers used here are the ones copied into the experiment note.
 
-Commands, from the repository root, with the environment recorded in the experiment note (`D:\Program Files\learn_torch\venv`, Python 3.12):
+Commands, from the repository root. The environment is the one recorded in the experiment note: Python 3.12 with the pins in `requirements.txt`. The path of the virtual environment is specific to the machine that trained the model and is not printed here.
 
 ```
 python -m src.task3.run_stage_a
@@ -278,7 +282,7 @@ joblib==1.5.3
 
 `opencv-contrib-python` is required. The non-contrib wheel has no SIFT, and the feature module exits rather than switching descriptors.
 
-The crop cache key includes the image size (`s256__filename`). `run_stage_a` and `run_stage_b` hash `splits.csv` and `src/task3/*.py` before reusing a results table. A mismatch stops the run unless `--force` is passed. The 2026-10-15 change to that key was not followed by a new training run. The tables in Section 4 are the 2026-10-14 run.
+The crop cache key includes the image size (`s256__filename`). `run_stage_a` and `run_stage_b` hash `splits.csv` and `src/task3/*.py`, write that fingerprint to `outputs/task3/run_stamp.json`, and refuse to reuse a results table when the fingerprint does not match or the stamp is absent, unless `--force` is passed. The source changed after the published run, so the check fires as designed and a rerun needs `--force`. The raw result tables and a note recording their provenance ship with the code archive, so every number in Section 4 can be checked without rerunning anything. The 2026-10-15 change to the cache key was not followed by a new training run. The tables in Section 4 are the 2026-10-14 run.
 
 Code layout: `src/task3/config.py`, `data.py`, `preprocess.py`, `features.py`, `models.py`, `cv.py`, `run_stage_a.py`, `run_stage_b.py`, `evaluate.py`. Dataset construction is `src/tools/build_dataset.py`. File names are resolved only in `data.py`, to find a path. `transform` receives arrays. The local window is `src/task5/app.py` and `src/task5/predict.py` (Section 6). It loads the saved pipeline and does not fit a new one.
 
@@ -286,7 +290,7 @@ Code layout: `src/task3/config.py`, `data.py`, `preprocess.py`, `features.py`, `
 
 ## 4. Experimental results
 
-Selection uses location-holdout balanced accuracy only. The validation column is display. Figures in this section are copied from `progress/task3_experiment.md` §8.
+Selection uses location-holdout balanced accuracy only. The validation column is display. The figures in this section are drawn by `docs/figures/plot_task4_locked.py` from the locked counts, and every number in the tables below is the value in the corresponding file under `outputs/task3/`.
 
 ### 4.1 Stage A: linear SVM, six features
 
@@ -322,11 +326,23 @@ C6 does not apply to F2 or F4. The winner is not a linear SVM, so the RBF row wa
 
 The locked pipeline is **F4 HOG+LBP + C4 random forest**.
 
-On the same F4 features, the linear SVM’s validation accuracy is 0.779 and the forest’s is 0.691. The forest is still the one selected, because its location-holdout balanced accuracy is higher (0.757 against 0.721). k-NN’s outside recall is higher (0.922 on F4) and its inside recall is 0.556. On fold 2, which holds out IN-04 and OUT-03, k-NN labels almost all of the held-out campus as outside. The forest’s balanced accuracy on that fold is 0.616, the highest of the five F4 classifiers. The 2026-10-15 review confirmed `ba_2 = 0.61625` in `stage_b.csv`.
+On the same F4 features, the linear SVM’s validation accuracy is 0.779 and the forest’s is 0.691. The forest is still the one selected, because its location-holdout balanced accuracy is higher (0.757 against 0.721). k-NN’s outside recall is higher (0.922 on F4) and its inside recall is 0.556. On fold 2, which holds out IN-04 and OUT-03, k-NN labels almost all of the held-out campus as outside. The forest’s balanced accuracy on that fold is 0.616, the highest of the five F4 classifiers.
+
+The five folds of the location holdout, balanced accuracy for the five F4 classifiers, are the evidence behind that mean. Fold 0 holds out IN-01 and OUT-05, fold 1 IN-02 and OUT-01, fold 2 IN-04 and OUT-03, fold 3 IN-06 and OUT-04, fold 4 IN-05 and OUT-08.
+
+| F4 classifier | fold 0 | fold 1 | fold 2 | fold 3 | fold 4 | mean |
+|---|---:|---:|---:|---:|---:|---:|
+| C1 linear SVM | 0.840 | 0.770 | 0.534 | 0.708 | 0.752 | 0.721 |
+| C2 logistic regression | 0.840 | 0.780 | 0.534 | 0.696 | 0.763 | 0.722 |
+| C3 k-NN, k=5 | 0.840 | 0.700 | 0.510 | 0.783 | 0.861 | 0.739 |
+| **C4 random forest** | 0.840 | 0.790 | **0.616** | 0.700 | 0.841 | **0.757** |
+| C5 histogram gradient boosting | 0.870 | 0.700 | 0.561 | 0.750 | 0.722 | 0.721 |
+
+The forest does not win every fold. It wins fold 1 and fold 4, ties the others, and is the only classifier that stays above 0.78 on fold 1 while also being the one that recovers most on fold 2. k-NN has the best single fold at 0.861 but the worst fold 2 at 0.510, which is the same collapse the validation column hides. These are the `ba_0` to `ba_4` columns of `stage_b.csv`, copied without rounding beyond three decimals.
 
 F4 logistic regression has a higher holdout inside recall than the forest (0.701 against 0.660) and a lower balanced accuracy (0.722 against 0.757). The written score is balanced accuracy. The test set’s later inside recall does not reopen that choice.
 
-F4 gradient boosting and F4 linear SVM both print as 0.721. The 2026-10-15 review checked the unrounded means in `stage_b.csv` and found the pair 0.72060 and 0.72089, which both print as 0.721. The review treated the displayed order as a tie caused by rounding. It does not change the winner. The review does not assign those two unrounded values to a classifier in the text used here, so this report does not either.
+F4 gradient boosting and F4 linear SVM both print as 0.721, which is a rounding artefact and not a tie. The unrounded means in `stage_b.csv` are 0.72060 for gradient boosting and 0.72089 for the linear SVM, so the SVM is the marginally stronger of the two. Neither reaches the forest at 0.757, so the winner is unchanged.
 
 The representation moves the score more than the classifier does. From color to HOG+LBP under the same linear SVM, location-holdout balanced accuracy goes from 0.538 to 0.721. On F4, the five classifiers span about 0.721 to 0.757.
 
@@ -348,9 +364,9 @@ Accuracy **0.691**. Balanced accuracy **0.710**.
 
 These three-decimal figures are the published rounding of the matrix: 47/68 = 0.691, outside recall 26/30 rounds to 0.867, inside recall 21/38 rounds to 0.553. Seventeen campus frames are called outside, and four harbourfront frames are called inside. Inside recall is already 0.553 on this easier pair. Section 2.6 is why 0.691 is not quoted below as generalization.
 
-![Validation confusion matrix](../docs/figures/task4_val_confusion_matrix.png)
+![Validation confusion matrix](docs/figures/task4_val_confusion_matrix.png)
 
-*Figure 2. Validation confusion matrix of the locked pipeline. Counts from the experiment note, Section 8.3. Not used to choose the model.*
+*Figure 2. Validation confusion matrix of the locked pipeline. Counts from the experiment note, its Section 8.3. Not used to choose the model.*
 
 ### 4.4 Test, one evaluation
 
@@ -370,11 +386,21 @@ Accuracy **0.594**. Balanced accuracy **0.660**.
 
 Working from the same cells: accuracy 41/69 rounds to 0.594; outside precision 26/53 rounds to 0.491; outside recall 26/27 rounds to 0.963; outside F1 is 0.650; inside precision 15/16 rounds to 0.938; inside recall 15/42 rounds to 0.357; inside F1 rounds to 0.517; balanced accuracy rounds to 0.660. The 2026-10-15 review recomputed the same matrix from the prediction CSV (outside 0.4906 / 0.9630 / 0.6500, inside 0.9375 / 0.3571 / 0.5172).
 
-![Test confusion matrix](../docs/figures/task4_test_confusion_matrix.png)
+![Test confusion matrix](docs/figures/task4_test_confusion_matrix.png)
 
 *Figure 3. Test confusion matrix. Same locked pipeline, evaluated once.*
 
-A classifier that always says outside scores 27/69 = 0.391 accuracy and 0.5 balanced accuracy on this test set. The locked model scores 0.594. The gain is 14 images: 15 correct inside predictions, minus the 1 outside image predicted inside. Of 69 predictions, 53 are outside. When the model does say inside, it is usually right (15 of 16). The error is missed campus scenes, not a flood of false campus predictions.
+Two constant classifiers frame this result, and one of them is better on accuracy.
+
+| Predictor | accuracy | balanced accuracy | outside recall | inside recall |
+|---|---:|---:|---:|---:|
+| Always outside | 27/69 = 0.391 | 0.500 | 1.000 | 0.000 |
+| Always inside | 42/69 = 0.609 | 0.500 | 0.000 | 1.000 |
+| **Locked pipeline** | 41/69 = **0.594** | **0.660** | 0.963 | 0.357 |
+
+The test split holds 42 inside images and 27 outside ones, because the split unit is the place and the two held-out inside places are larger than the two held-out outside places. A constant that says inside therefore scores 0.609, slightly above the model’s 0.594, and the honest statement is that on accuracy alone this model does not beat that constant. Accuracy is the wrong headline for a split with that composition. On balanced accuracy, which weights the two classes equally, the model is 0.160 above either constant. It keeps 0.963 outside recall where the always-inside constant has 0.000, and when it does say inside it is right 15 times out of 16. The error is missed campus scenes, not a flood of false campus predictions.
+
+The comparison that matters for the assignment is the third row against the first: the model finds 14 more inside images than a constant outside predictor, and gives up 1 outside image in exchange. It is a better detector of the inside class, which is the class an application has to get right.
 
 ---
 
@@ -406,7 +432,7 @@ The 2026-10-15 review split the test predictions by group. Each group has one la
 
 Check: 19+7+9+6 = 41, the numerator of 41/69. The 16 and 11 misses sum to the 27 false outsides. The single OUT-06 miss is the single false inside. OUT-07 cannot contain that false inside.
 
-![Test accuracy by location group](../docs/figures/task4_test_per_group.png)
+![Test accuracy by location group](docs/figures/task4_test_per_group.png)
 
 *Figure 4. Test accuracy of the four held-out places. The vertical line is the overall test accuracy 0.594.*
 
@@ -441,23 +467,33 @@ The assignment asks about background bias, lighting, similar places, and viewpoi
 |---|---|
 | Similar-looking places | Measured. OUT-06 against IN-03 (brick), OUT-07 against IN-07 (green / court). Outside is recognized. Inside is about one third correct. |
 | Background bias | The scene table was built so that 11 of 13 types exist in both classes. Test errors cluster by place. That does not support a story in which one background type produces all 27 misses. |
-| Lighting | Night shares on the 718 usable images are 10.1% inside and 13.6% outside. No color jitter was applied. The test CSV is not in this workspace, so night frames were not joined to predictions. A night-error rate is not reported. |
-| Viewpoint | Viewpoints vary inside each place by design. The error table has no viewpoint column. A viewpoint-error rate is not reported. |
+| Lighting | Night shares on the 718 usable images are 10.1% inside and 13.6% outside. No color jitter was applied. The prediction table carries no day/night field, and none of the 69 test images comes from a `night/` folder, so the test set contains no night frame at all. A night-error rate is reported as not applicable rather than estimated. |
+| Viewpoint | Viewpoints vary inside each place by design, and the error table has no viewpoint column, so no viewpoint-error rate is computed. The qualitative set does show that distance is not what separates the correct CMA frames from the missed ones: a close view of the patterned wall is correct and a wider view of the same wall is not, and a wide courtyard view is correct while another wide courtyard view is not. Section 5.4 reads those frames one by one. |
 | Road-frontage imbalance | 10 inside versus 57 outside in the usable pool. The test places are not that road set. The misses are not attributed to traffic. |
 
 This is the ceiling of HOG+LBP on a place it has not seen, under a protocol that refuses to train on that place. It is the result Task 4 asks for. It is not an unfinished grid search.
 
 ### 5.4 Qualitative examples
 
-Figures 2–4 are the quantitative figures. Figure 1 is the collection map. Figure 5 is the contact sheet of individual test predictions, and it is now in the draft.
+Figures 2–4 are the quantitative figures and Figure 1 is the collection map. Figure 5 is the contact sheet of individual test predictions, and it follows this discussion.
 
 The sheet was produced by `docs/figures/plot_task4_locked.py` from `outputs/task3/test_predictions.csv` and the photographs in `data/pictures/`. The script refuses to draw unless the prediction table still sums to 26, 1, 27, 15 and the four place rates still equal 19/20, 7/7, 9/25 and 6/17, so a figure can only ever be drawn from the locked predictions. `docs/figures/task4_example_manifest.csv` records which file sits in which cell.
 
 The thirteen frames were chosen by a rule fixed in advance, not by how they look: within each cell, in filename order — 2 correct OUT-06, 2 correct OUT-07, the single false inside (necessarily OUT-06), 2 missed IN-03, 2 missed IN-07, 2 correct IN-03, and 2 correct IN-07. A frame was never picked because it appeared to support the conclusion.
 
-The grid shows the two failure modes at once. The one false inside is `OUT-06_012_IMG_0892.jpg`, a glass entrance and a flight of steps at HKU, not the red-brick facade that dominates its group — the 10 OUT-06 facade frames are all correct. The missed inside frames are `IN-03_001_IMG_1444.jpg` and `IN-03_002_IMG_1445.jpg`, a brick rib wall filling the frame, and `IN-07_005_IMG_1431.jpg` and `IN-07_006_IMG_1432.jpg`, the CMA courtyard pulled back to include trees and seating. Against those, `IN-07_001_IMG_1427.jpg` and `IN-07_002_IMG_1428.jpg` are the same courtyard framed close on its patterned wall and doorway, and both are correct. The viewpoint, not the building, separates them.
+The grid shows the two failure modes at once. The one false inside is `OUT-06_012_IMG_0892.jpg`, a glass entrance and a flight of steps at HKU, not the red-brick facade that dominates its group — the 10 OUT-06 facade frames are all correct.
 
-The Chinese working record `progress/task4_evaluation.md` §5.1 carries the same eight frames with a scene-by-scene description of each one; the English captions here are deliberately terse so that the figure and the record cannot drift apart.
+The missed inside frames are `IN-03_001_IMG_1444.jpg` and `IN-03_002_IMG_1445.jpg`, where the brick rib wall of the library fills the frame, and three frames at the CMA courtyard: `IN-07_005_IMG_1431.jpg`, `IN-07_006_IMG_1432.jpg` and `IN-07_008_IMG_1434.jpg`. The two correct CMA frames are `IN-07_002_IMG_1428.jpg` and `IN-07_001_IMG_1427.jpg`.
+
+Distance does not separate them, because the correct and the missed frames sit at the same scale. `IN-07_002` is a close view of the patterned wall, the crest and the glass doors, and it is correct. `IN-07_005` is the same entrance pulled back, and it is missed. `IN-07_001` is the courtyard with its planting beds, and it is correct; `IN-07_008` is the same courtyard pulled back to take in the seating and the parasols, and it is missed. What the three missed frames have in common is not the camera distance but the red brick. `IN-07_005` gives the whole brick facade above the patterned wall, `IN-07_006` is a tree-lined walkway with the brick building behind it, and `IN-07_008` carries the seating, the parasols, the tree and the brick building together. The two correct frames give the campus-specific subject instead: the patterned wall and its entrance doors under open sky, and a courtyard of planting beds with no seating in it.
+
+That is the hard negative working against the model rather than for it. The Hong Kong University buildings were collected into the outside class precisely to stop the model from using brick as a campus cue, and OUT-06, a brick building, is 95% correct. On a campus building that is also brick, the same cue runs the other way: a handcrafted gradient and texture description has no channel for “this particular building”, so a campus frame that shows enough of the brick looks like the negative it was trained to reject. The library frames fail for the same reason, the rib wall being brick. The limitation is therefore not the viewpoint range, and not the class balance. It is that the representation has one strong material cue and no identity cue, and the material cue is the one thing the design deliberately taught the model to distrust.
+
+The Chinese working record `progress/task4_evaluation.md` §5.1 names eight earlier example photographs from `docs/figures/task4_examples.png`, a smaller grid drawn from the same prediction table before this one. Three of them — `OUT-06_012_IMG_0892.jpg`, `IN-03_001_IMG_1444.jpg` and `IN-07_002_IMG_1428.jpg` — are also in Figure 5; the other five are not, and four of the frames used here are described only in this report. The two grids are not the same set, so the record is not a caption source for this figure. Where they overlap they agree on the outcome of each frame, because both were read from the same prediction table.
+
+![Thirteen test photographs, one per selected cell of the confusion matrix](docs/figures/task4_example_grid.png)
+
+*Figure 5. Thirteen test photographs, in the order of the manifest: the filename of each frame, its location group, and whether the locked pipeline classified it correctly.*
 
 ### 5.5 The test numbers do not retune the model
 
@@ -467,7 +503,7 @@ Accuracy 0.594 and inside recall 0.357 are the score of the pipeline that was lo
 
 ## 6. Application (Task 5)
 
-The local program lets a user select one scene photograph, shows that photograph, and returns either “Inside PolyU main campus” or “Outside PolyU main campus”. It is a desktop window written with Tk from the Python standard library. Nothing was added to `requirements.txt`. Pillow, joblib, OpenCV, and scikit-learn are the Task 3 dependencies. The design and the checks in Section 6.4 are recorded in `progress/task5_app.md`. The same launch lines are in the root `README.md`.
+The local program lets a user select one scene photograph, shows that photograph, and returns either “Inside PolyU main campus” or “Outside PolyU main campus”. It is a desktop window written with Tk from the Python standard library. Nothing was added to `requirements.txt`. Pillow, joblib, OpenCV [9], scikit-image [8] and scikit-learn [7] are the Task 3 dependencies. The design and the checks in Section 6.4 are recorded in `progress/task5_app.md`. The same launch lines are in the root `README.md`.
 
 The program does not train and does not edit `splits.csv`. The classifier remains the locked HOG+LBP random forest in `models/task3_pipeline.joblib`. The test accuracy 0.594 and the other Section 4–5 figures are unchanged.
 
@@ -511,7 +547,7 @@ A line at the bottom of the window names `models/task3_pipeline.joblib` and stat
 4. `pipeline.predict_proba([cropped])` fills the two probabilities. If a future estimator had no `predict_proba`, the window would say so and would still show the label. This forest has the method.
 5. `pipeline.display_[label_id]` is the English sentence written when the pipeline was saved: `{0: "Outside PolyU main campus", 1: "Inside PolyU main campus"}`.
 
-`joblib.load` returns a scikit-learn `Pipeline` with two steps. `features` is `ImageFeatures(feature_id="F4")`, which is `HogLbp`. `clf` is `RandomForestClassifier` with 300 trees, `max_depth=12`, and `random_state=42`. `classes_` is `[0, 1]`.
+`joblib.load` returns a scikit-learn [7] `Pipeline` with two steps. `features` is `ImageFeatures(feature_id="F4")`, which is `HogLbp`. `clf` is `RandomForestClassifier` with 300 trees, `max_depth=12`, and `random_state=42`. `classes_` is `[0, 1]`.
 
 `HogLbp.transform` calls `resize_and_crop` again. When the image is already 256×256, that function returns the same array. The call written in the application is still `src.task3.preprocess.resize_and_crop`.
 
@@ -528,7 +564,9 @@ A line at the bottom of the window names `models/task3_pipeline.joblib` and stat
 - Noise, a 1×1 image, a very wide image, all black, all white, a grayscale JPEG, a PNG with an alpha channel, and a 3840×2400 JPEG each returned one of the two English sentences.
 - The window opened at about 880×585. After a file was chosen, the canvas showed the original, the thumbnail showed the crop, and the prediction text was one of the two sentences. `python -m src.task5.app --image <file>` and `python src/task5/app.py --image <file>` printed that same label and both probabilities.
 
-`data/pictures/` was not in that checkout, so the 69-image test split was not replayed through the window. The example figure on page 2 of the assignment PDF was cut at the midline only to confirm that the program returns a label and does not crash. Those two halves are not the test set, and they were not used to change the model.
+All 69 test images were replayed through the program’s own prediction path, `predict_rgb` in `src/task5/predict.py`, which is the function the window calls. The label it returned matched the locked prediction table on 69 of 69 images. That is the direct check that the application and the evaluation are one pipeline: the same `models/task3_pipeline.joblib`, the same `resize_and_crop`, the same pixels, and the same answer. The replay is reproduced by running `python -m src.task5.app --image <file>` over the 69 files listed in `outputs/task3/test_predictions.csv` and comparing the labels.
+
+The example figure on page 2 of the assignment PDF was also cut at the midline, to confirm that the program returns a label and does not crash on a scene it was not trained on. Those two halves are not the test set, and they were not used to change the model.
 
 | Half of the assignment example figure | Pixels | Program output | outside | inside |
 |---|---|---|---:|---:|
@@ -549,13 +587,13 @@ The geographic rules came first: main campus versus not, boundary frames dropped
 
 The learning program was designed as two locked stages rather than a search over every feature–classifier pair. Stage A compares six pixel features with one linear SVM. Stage B compares classifiers on the two winning features. The score is the mean balanced accuracy of five pre-written location-holdout folds. Validation accuracy is printed and ignored by the sort. The test set is applied once, after the pipeline is refit on all training images and saved.
 
-Testing of the data side is the check inside `build_dataset.py`: no group crosses a split, the two mutually visible West Kowloon groups stay together, and every split contains both classes. Testing of the numbers is the 2026-10-15 review, which matched the published tables to the result CSV files and recomputed the test confusion matrix from the per-image predictions. The commands and package pins are in Section 3.6.
+Testing of the data side is the check inside `build_dataset.py`: no group crosses a split, the two mutually visible West Kowloon groups stay together, and every split contains both classes. Testing of the numbers is a read-only review pass run on 2026-10-15 by a GenAI assistant, which matched the published tables to the result CSV files and recomputed the test confusion matrix from the per-image predictions. That pass did not re-run the three training commands, so its statements about feature dimensions are a reading of the code rather than a measurement, and its reading of a licence plate was wrong and had to be re-checked against the photograph. Section 7 treats that as a limitation of the assistant rather than as a test result. The commands and package pins are in Section 3.6.
 
-The desktop program is tested apart from that selection. `progress/task5_app.md` records that one array saved under `IN-99_inside_campus.jpg` and under `OUT-99_outside_campus.jpg` yields the same label and the same probabilities, that a second `resize_and_crop` on a 256×256 crop does not change the array, and that an unreadable file keeps the previous window label and makes `--image` exit with status 1. Those checks do not rescore the 69 test images.
+The desktop program is tested apart from that selection. `progress/task5_app.md` records that one array saved under `IN-99_inside_campus.jpg` and under `OUT-99_outside_campus.jpg` yields the same label and the same probabilities, that a second `resize_and_crop` on a 256×256 crop does not change the array, and that an unreadable file keeps the previous window label and makes `--image` exit with status 1. Those checks are about the interface. The replay of the 69 test images is recorded in Section 6.4.
 
 ### How do you ensure the robustness of the program in a real scenario?
 
-Robustness here means a new place, a renamed file, a change of lighting, and a lookalike building.
+Robustness here means a new place, a renamed file, a change of lighting, and a lookalike building. Four of those are measured rather than argued, and the first is the one that matters most.
 
 - Lookalike buildings are in the data. OUT-06 is the brick negative. The color histogram, which would have used that shortcut, scored worst on the location holdout (0.538) and was not selected.
 - Eleven of thirteen scene types occur in both classes, so a background such as “walkway” or “lawn” is not privately owned by one label.
@@ -564,6 +602,8 @@ Robustness here means a new place, a renamed file, a change of lighting, and a l
 - The classifier never sees the file name. Renaming a photograph cannot flip the prediction except by changing pixels. Section 6.4 records that check: the same pixels under an `IN-` name and an `OUT-` name keep the same label and the same probabilities.
 - Evaluation and the Task 5 window both call `resize_and_crop` and load `models/task3_pipeline.joblib`, so the reported test score is the score of the object the window loads.
 - The cache key includes the crop size, and a rerun stops when the split file or the training code has changed. That prevents a silent mix of old crops and new code.
+- The crop keeps the short side and centre-crops, so a portrait frame loses strips at the top and the bottom. The assignment’s own example figure is a 960×1080 portrait frame, and both of its halves were classified wrongly in Section 6.4. A portrait campus scene is a known weak case here, not an untested one.
+- The prediction was replayed over the whole test split through the program’s own path, and returned the locked label on 69 of 69 images. Robustness of the pipeline is therefore a measured property of the object the application loads, not an argument about two code paths that look similar.
 
 The measured limit is in Section 5. On two campus places the model had not seen, inside recall is 0.357, and 53 of 69 predictions are outside. A real “is this the main campus?” decision that must not miss campus scenes is not supported by that recall. More unseen campus places would be required before trusting the negative prediction. The present test groups stay held out.
 
@@ -580,12 +620,16 @@ The measured limit is in Section 5. On two campus places the model had not seen,
 | k-NN’s outside recall looks strong while its inside recall falls to 0.556. | Balanced accuracy is the score. The forest wins it without that collapse. |
 | A crop cache keyed only by file name would reuse a 256×256 image after a size change. | The key now includes the size. This was fixed after the published run and was not a reason to rerun selection. |
 | All seven inside manifests once shared one place name, which reads like a leaked group. | Each inside group now has its own place name. The 540-way split of filenames, groups, and labels was unchanged. |
-| Test inside recall is 0.357. | Recorded in Section 5. The pipeline was not retuned on the test set. |
+| Test inside recall is 0.357. | Recorded in Section 5. The pipeline was not retuned on the test set. The remedy is a new evaluation rather than a new fit: more inside places under the same boundary rules, one further held-out group, and the saved pipeline scored on it, as set out in Section 8. |
 | A name such as `IN-99` could be read as the class. | `predict_rgb` receives the RGB array only. The same pixels under `IN-99_inside_campus.jpg` and `OUT-99_outside_campus.jpg` return the same label and the same probabilities (Section 6.4). |
 
 ### How do you use GenAI to assist you in the implementation?
 
-Generative models drafted data scripts, Figure 1, the Task 3 training code, and the experiment notes. They did not take the photographs, assign places, or decide include versus exclude. Those decisions were made by looking at the frames. The generated training code was kept inside the written plan: pixels only, no neural network, no CNN features, and no use of file names as inputs. Where a generated suggestion broke that plan, it was rejected, as the next two answers record. The disclosure itself is part of the work. An earlier draft of the dataset note left this section as a placeholder; the 2026-10-15 revision replaced it with the checks below, and this report uses that revision.
+Generative models drafted the data scripts, the annotated campus map, the Task 3 training code, and the experiment note that fixes the comparison. The drafted files are `src/tools/build_dataset.py`, `src/tools/collapse_to_venues.py`, `src/tools/apply_naming.py`, `src/tools/make_contact_sheet.py`, the modules under `src/task3/`, `docs/figures/figure1_inside_locations_annotated.png`, and `progress/task3_experiment.md`. They did not take the photographs, assign places, or decide include versus exclude; those decisions were made by looking at the frames.
+
+Verification was reading that material back against the data, and it is named here so that it can be repeated. The review pass of 2026-10-15 confirmed that the sort key in `src/task3/cv.py` is the mean location-holdout balanced accuracy, that the published Stage A and Stage B tables match `outputs/task3/stage_a.csv` and `stage_b.csv` value for value, and that the test confusion matrix recomputes from `outputs/task3/test_predictions.csv`. Two of those checks now appear in this report with the numbers attached: the five folds of the location holdout in Section 4.2, and the resolved tie between F4 gradient boosting and the F4 linear SVM in the same section. The 69-image replay in Section 6.4 is a third, and the only one that was run after this report was written.
+
+The generated training code was kept inside the written plan: pixels only, no neural network, no CNN features, and no use of file names as inputs. Where a generated suggestion broke that plan, it was rejected, as the next two answers record. The plan itself was also drafted by the model, so writing it down before the run, and then checking the code against the written column, is part of what the human contributed. An earlier draft of the dataset note left this section as a placeholder; the 2026-10-15 revision replaced it with the checks below, and this report uses that revision.
 
 ### How does GenAI understand and solve the tasks?
 
@@ -607,11 +651,12 @@ Twenty-two frames that a cautious pass had marked for plate or face review were 
 
 The useful limit is that a generated pipeline will complete a standard recipe and will be wrong on facts that live only in the photographs or in a rule written for this campus.
 
-- Place ids, building names, and plate numbers have to be checked against the image and the manifest. Three of those checks above changed a generated string.
-- A generated substitution of ORB for SIFT would have made the experiment unreproducible relative to its own plan. The improvement is a hard stop, which is what the code does when SIFT is absent.
-- A generated comparison will surface whatever number is largest. Validation accuracy was largest for a feature that does not travel. The improvement is to freeze the selection column before looking, and to publish the other column so the disagreement can be seen. That is what Section 4 does.
-- A generated disclosure can be an empty heading. The assignment requires the assistance, the mistakes, and the correction to be written down. This section is that write-up. It is not a claim that the generated code was accepted unread.
-- The test set was scored after the choice was frozen. Using a generated suggestion to “improve” the 0.594 by refitting on IN-03 or IN-07 would break the holdout. That suggestion is not followed.
+- The assistant read a licence plate wrong twice before a person read it correctly. The generated note said `JF 0367`, a second visual pass said `UA 9364`, and the photograph read by hand says `WX 9304`. Two generated readings and one correct reading. The improvement is to treat any fact about image content that the assistant writes down as a claim to be checked against the file, not against the assistant’s second opinion.
+- Place ids and building names drift when the list underneath them changes: a generated note and the generated map still described 12 inside groups after the split had been collapsed to 7. The improvement is to regenerate the note from the split file rather than from the note, which is what the rewrite did.
+- A substitution of ORB for SIFT would have made the experiment unreproducible relative to its own plan. The improvement is a hard stop, which is what the code does when SIFT is absent.
+- A table of numbers invites a ranking, and validation accuracy was largest for the feature that does not travel. The safeguard adopted here is to freeze the selection column before the run and to publish the other column so the disagreement stays visible. That is what Section 4 does.
+- The declaration itself can be an empty heading. This section is the write-up: what was drafted, what was checked, what was wrong, and what was changed. It is not a claim that the generated code was accepted unread.
+- The test set is scored once. Refitting on IN-03 or IN-07 to raise the 0.594 would break the holdout, and no such fit was made. That rule was written into the plan before the run rather than derived from the result.
 
 The model-side limit in Section 5 is separate. It is a property of HOG+LBP on unseen places, measured on the locked pipeline. It is not repaired by another round of generation against the test score.
 
@@ -623,7 +668,9 @@ The protocol did what it was built to do. It refused the color shortcut, refused
 
 Those test numbers are acceptable as a measurement and poor as a campus detector. The representation has no channel for “this is PolyU” once color is set aside and the building has not been seen. Local gradients generalize only as far as the next façade looks like a training façade. The library and the CMA courtyard do not. The honest report of Task 4 is that limit, tied to the feature, with the test set left untouched.
 
-What would actually change the evidence is more inside places, collected under the same boundary rules, and one new held-out evaluation of this saved pipeline. Rewriting the current test score by training on it would not.
+What would actually change the evidence is more inside places, collected under the same boundary rules, and one new held-out evaluation of this saved pipeline. The route is concrete: add inside places so that a fifth inside group can be held out, leave the current IN-03 and IN-07 groups in the test set and never train on them, and score the new group with the pipeline saved in `models/task3_pipeline.joblib` rather than with a refit.
+
+Two measurements are worth making while that collection happens, and neither touches the locked model. The first is a colour-normalised variant of the same HOG and LBP, which would separate “brick looked like the negative” from “the negative was never learnable”; Section 5.4 argues for the first reading, and only that experiment can settle it. The second is a per-cell breakdown that also splits by scene class, because the misses concentrate on frames that show a building’s brick mass rather than its patterned wall, and the aggregate table cannot show that. Rewriting the current test score by training on it would not.
 
 ---
 

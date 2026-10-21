@@ -1,10 +1,14 @@
 # COMP4423 Assignment 2
 
-判断一张场景照片拍在 PolyU 主校区内（inside）还是校外（outside）。
+Classifies a scene photograph as inside the PolyU main campus (1) or outside it (0).
 
-环境：`D:\Program Files\learn_torch\venv`（Python 3.12）。依赖见 `requirements.txt`。其中必须安装 `opencv-contrib-python`，不要改成 `opencv-python`。
+## Environment
 
-在仓库根目录：
+Python 3.12 with the pins in `requirements.txt`. `opencv-contrib-python` is required: the non-contrib wheel has no SIFT, and the feature module stops rather than substituting another descriptor.
+
+## Training
+
+From the repository root:
 
 ```
 python -m src.task3.run_stage_a
@@ -12,28 +16,46 @@ python -m src.task3.run_stage_b
 python -m src.task3.evaluate
 ```
 
-第一条比较六种特征，第二条在胜出的特征上比较分类器，第三条在全部训练集上重拟合锁定的流水线，并只评估一次测试集。已有结果若与 `splits.csv` 或 `src/task3/` 的代码不一致，续跑会退出，确认后加 `--force`。
+The first command compares six pixel features under one linear SVM, the second compares classifiers on the two winning features, and the third refits the locked pipeline on all training images and evaluates the test set once. If the existing result tables disagree with `splits.csv` or with the code under `src/task3/`, a resumed run refuses to reuse them; after confirming the difference, pass `--force`.
 
-划分表是 `data/annotations/splits.csv`。逐类逐 split 的计数在 `data/annotations/dataset_summary.md`。采集与标注说明在 `progress/task1_dataset_overview.md`。特征、分类器和实测在 `progress/task3_experiment.md`。
+The split is `data/annotations/splits.csv`. Per-class and per-split counts are in `data/annotations/dataset_summary.md`. The collection and annotation notes are in `progress/task1_dataset_overview.md`. The features, the classifiers and the measured results are in `progress/task3_experiment.md`, and the test-set evaluation is in `progress/task4_evaluation.md`.
 
-锁定的模型是 `models/task3_pipeline.joblib`（HOG+LBP + 随机森林）。预测只使用像素，经 `src/task3/preprocess.py` 的 `resize_and_crop`。
+The locked model is `models/task3_pipeline.joblib` (HOG+LBP with a random forest). Prediction uses pixels only, through `resize_and_crop` in `src/task3/preprocess.py`.
 
-## Task 5 本地程序
+## Task 5 local program
 
-在仓库根目录打开选图窗口：
+Open the selection window from the repository root:
 
 ```
 python -m src.task5.app
 ```
 
-点 **Select image…**（或按 Ctrl+O），选一张场景照片。窗口左侧显示这张图，右侧给出 **Inside PolyU main campus** 或 **Outside PolyU main campus**，并画出两类概率。模型输入是同一张图的 256×256 中心裁剪。
+Press **Select image…** (or Ctrl+O) and choose a scene photograph. The left pane shows the photograph, the right pane prints **Inside PolyU main campus** or **Outside PolyU main campus**, and both class probabilities are drawn. The model input is the same 256×256 centre crop of that image.
 
-程序读取上面的 `task3_pipeline.joblib`，预处理调用 `resize_and_crop`。预测只用像素。文件名、文件夹、EXIF、GPS 不参与判别，也不会在这里重新训练。
+The program loads `models/task3_pipeline.joblib` and calls `resize_and_crop`. The prediction uses pixels only. File names, folder names, EXIF and GPS play no part in it, and nothing is retrained.
 
-没有图形界面时，用同一条流水线打印一张图：
+Without a desktop, the same pipeline prints a result for one image:
 
 ```
 python -m src.task5.app --image path\to\photo.jpg
 ```
 
-Windows 官方 Python 自带 Tk。只要窗口、不要控制台时，用 `pythonw -m src.task5.app`。Ubuntu 缺少 Tk 时安装 `python3-tk`。不新增依赖。设计和验证记录在 `progress/task5_app.md`。
+The official Windows Python build ships with Tk. Use `pythonw -m src.task5.app` for a window with no console. On Ubuntu, install `python3-tk` if Tk is missing. No extra dependency is required. The design and the recorded checks are in `progress/task5_app.md`.
+
+## Dataset
+
+The photographs are not in this archive. They are on Google Drive, and the link is in `DATASET_LINK.txt` and in the report. The folder is shared as "anyone with the link", so no sign-in is needed. The file names inside are the ones used throughout the code and the report.
+
+## What is in this archive
+
+```
+src/task3/          training code (features, classifiers, venue-holdout CV, evaluation)
+src/task5/          the local application
+src/tools/          dataset construction and the dataset check script
+models/             the locked pipeline
+data/annotations/   splits.csv, the per-class counts, and the source manifests
+outputs/task3/      the raw result tables behind the numbers in the report
+docs/figures/       the report figures
+progress/           the working records the report is written from
+plans/              the review record and the remediation list
+```
