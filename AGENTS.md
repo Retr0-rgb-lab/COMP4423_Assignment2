@@ -18,6 +18,7 @@ PolyU 主校区场景照片二分类：inside = 1，outside = 0。截止 2026-10
 |---|---|
 | Task 1–2 类别、采集、标注、划分 | `progress/task1_dataset_overview.md` |
 | Task 3 特征、分类器、实测 | `progress/task3_experiment.md`（第 8 节是 2026-10-14 的结果） |
+| Task 4 测试集评估与错例 | `progress/task4_evaluation.md` |
 | Task 1–3 审核与整改 | `plans/task1_3_review_2026-10-15.md` |
 | 数据脚本 | `src/tools/` |
 | 训练代码 | `src/task3/` |
