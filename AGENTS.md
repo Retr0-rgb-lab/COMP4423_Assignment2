@@ -22,11 +22,23 @@ PolyU 主校区场景照片二分类：inside = 1，outside = 0。截止 2026-10
 | Task 4 测试集评估与错例 | `progress/task4_evaluation.md` |
 | Task 5 本地选图程序 | `progress/task5_app.md`（代码在 `src/task5/`） |
 | Task 6 报告草稿 | `progress/task6_report_draft.md` |
+| 报告排版与出图 | `docs/make_report.py`、`docs/report_template.tex` |
 | Task 1–3 审核与整改 | `plans/task1_3_review_2026-10-15.md` |
 | 数据脚本 | `src/tools/` |
 | 训练代码 | `src/task3/` |
 
 当前锁定的模型是 HOG+LBP + 随机森林，见 `progress/task3_experiment.md` 第 8 节。测试集准确率 0.594、inside 召回 0.357，按地点组拆开是 OUT-06 0.950 / OUT-07 1.000 对 IN-03 0.360 / IN-07 0.353，原因分析见审核报告第 4 节。
+
+## 报告命令
+
+报告正文是 `progress/task6_report_draft.md`，PDF 由它生成，不手写第二份。在仓库根目录：
+
+```
+python docs/make_report.py
+pdflatex Assignment2_Report_24101322D_HUANG_Haoran.tex
+```
+
+改了 `progress/task6_report_draft.md` 之后要重跑这两条，PDF 才和正文一致。`docs/make_report.py` 里有三处后处理：中文招牌包进 CJK 环境、长文件名允许断行、手写题注合并进图题注。
 
 ## 训练命令
 
