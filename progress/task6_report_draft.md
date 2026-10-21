@@ -23,7 +23,7 @@ The practical question is whether a traditional classifier, reading pixels alone
 
 ### 1.2 Class definitions
 
-The assignment’s definitions are used without a local rewrite.
+The assignment’s definitions are used without a local rewrite [11].
 
 | Label | Definition used in this project |
 |---|---|
