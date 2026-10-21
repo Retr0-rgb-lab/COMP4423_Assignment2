@@ -71,6 +71,7 @@ outputs/task3/      the raw result tables behind the numbers in the report
 docs/figures/       the report figures
 docs/make_report.py the report build script
 docs/check_fold_claims.py  checks the per-fold claims against stage_b.csv
+docs/check_crossrefs.py    checks that every internal cross reference resolves
 progress/           the working records the report is written from
 plans/              the review record and the remediation list
 ```

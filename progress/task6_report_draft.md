@@ -366,7 +366,7 @@ These three-decimal figures are the published rounding of the matrix: 47/68 = 0.
 
 ![Validation confusion matrix](docs/figures/task4_val_confusion_matrix.png)
 
-*Figure 2. Validation confusion matrix of the locked pipeline. Counts from the experiment note, its Section 8.3. Not used to choose the model.*
+*Figure 2. Validation confusion matrix of the locked pipeline. Counts from the experiment note, section 8.3 of `progress/task3_experiment.md`. Not used to choose the model.*
 
 ### 4.4 Test, one evaluation
 
@@ -593,7 +593,7 @@ The desktop program is tested apart from that selection. `progress/task5_app.md`
 
 ### How do you ensure the robustness of the program in a real scenario?
 
-Robustness here means a new place, a renamed file, a change of lighting, and a lookalike building. Four of those are measured rather than argued, and the first is the one that matters most.
+Robustness here means a new place, a renamed file, a change of lighting, and a lookalike building. Three of those four are measured rather than argued, and the one that is not, a change of lighting, is the one the test set cannot cover: it holds no night frame at all, as Section 5.3 records.
 
 - Lookalike buildings are in the data. OUT-06 is the brick negative. The color histogram, which would have used that shortcut, scored worst on the location holdout (0.538) and was not selected.
 - Eleven of thirteen scene types occur in both classes, so a background such as “walkway” or “lawn” is not privately owned by one label.
