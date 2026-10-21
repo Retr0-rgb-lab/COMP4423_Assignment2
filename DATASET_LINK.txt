@@ -1,0 +1,18 @@
+COMP4423 Assignment 2 — photograph dataset link
+================================================
+
+Pelec: replace the single URL line at the bottom before you build the ZIP.
+Do not submit this instruction page as if it were a link.
+
+Assignment rule (COMP4423 2026/27 Semester 1, submission page):
+- Put this file inside Assignment2_Code_<学号>_<姓名>.zip
+- Put the same URL in the PDF report
+- Anyone with the link must be able to view and download the complete dataset
+- No sign-in, no password, no access request, and no extra permission
+- Open the link in a signed-out or private browser window and confirm the download
+- Keep the link available until grading is finished
+
+This file is a placeholder. It is not a dataset URL.
+Do not invent a link. A wrong or empty link means the photographs cannot be graded.
+
+DATASET_URL: <PASTE_A_REAL_PUBLIC_CLOUD_URL_HERE>
