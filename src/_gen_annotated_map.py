@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Task 1 交付物 Figure 1：在官方 Campus Map 鸟瞰图上标注 7 个 inside 地点组。
+"""Task 1 deliverable Figure 1: annotate the 7 inside location groups on the
+official Campus Map aerial view.
 
-底图：docs/figures/campus_map_base.png
-（由官方 3D Campus Map 截图裁出，1537×1336，不含图钉。）
-图钉坐标按图上的楼宇字母（A–Z、VA、VS、M、P、Q）逐区核对。
-张数为 status = include 的可用张数，不是入库封顶后的训练张数。
+Base image: docs/figures/campus_map_base.png
+(cropped out of a screenshot of the official 3D Campus Map, 1537×1336, without
+the pins.)
+The pin coordinates were checked area by area against the building letters on
+the map (A–Z, VA, VS, M, P, Q).
+The counts are the usable images with status = include, not the training
+counts after the per-group cap.
 """
 import os
 
@@ -20,7 +24,7 @@ def f(sz):
     return ImageFont.truetype(FONT, sz)
 
 
-# (编号, 场景, x, y, 可用张数) —— 坐标在 1537×1336 底图上
+# (number, scene, x, y, usable count) -- coordinates on the 1537×1336 base image
 PINS = [
     ('01', '走道（J 区 — VA 区）',     590,  860, 71),
     ('02', 'P/Q 区藻井走道',           940,  755, 62),

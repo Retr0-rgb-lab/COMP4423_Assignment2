@@ -1,28 +1,39 @@
 # -*- coding: utf-8 -*-
-"""数据集清洗与划分：按 Task 2 要求平衡类别、封顶组容量、按地点组划分。
+"""Dataset cleaning and splitting: balance the classes, cap the per-group
+capacity and split by location group, as Task 2 requires.
 
-依据 Assignment 2 PDF 的 Task 2 条目
-------------------------------------
-1. Location diversity —— 覆盖两类中的多个地点；同一庭院／建筑／地标的邻近
-   取景归为**同一个地点组**。
-2. Data split —— 在每个类别**内部按地点组**划分，约 60/20/20，每个 split 两类
-   都要有代表。
-3. Prevent leakage —— 同一场景的全部取景（含复访、连拍、视频帧、修饰副本）
-   必须留在同一组、同一 split；不得把一个场景的图随机拆到不同集合。
-   数据增强只在划分之后、只对训练集施加。
-4. 报告需给出每个类别、每个 split 的实际图片数与地点组数。
+Based on the Task 2 items of the Assignment 2 PDF
+-------------------------------------------------
+1. Location diversity -- cover several locations in both classes; neighbouring
+   shots of the same courtyard / building / landmark belong to **the same
+   location group**.
+2. Data split -- split **by location group within each class**, roughly
+   60/20/20, with both classes represented in every split.
+3. Prevent leakage -- all shots of the same scene (including repeat visits,
+   burst shots, video frames and retouched copies) must stay in the same group
+   and the same split; the photos of one scene must not be scattered at
+   random across different sets. Data augmentation is applied only after the
+   split, and only to the training set.
+4. The report has to give the actual number of images and the number of
+   location groups for every class and every split.
 
-清洗步骤
---------
-1. 只保留 status == include 的样本（review / exclude 一律不进数据集）
-2. **组容量封顶**：任何单一地点组不得超过 CAP 张，避免某个场所主导训练
-   或让某一 split 的指标等价于「这个场所的识别率」
-3. **类别平衡**：两类对齐到较小的一侧
-4. **按组划分**：组为不可分割单元，组内所有照片进同一个 split
+Cleaning steps
+--------------
+1. Keep only the samples with status == include (review / exclude never
+   enter the dataset)
+2. **Cap the group capacity**: no single location group may exceed CAP
+   images, so that no venue dominates the training set or turns the metric of
+   a split into "the recognition rate of that one venue"
+3. **Class balancing**: align the two classes to the smaller side
+4. **Split by group**: the group is an indivisible unit; all photos of a
+   group go into the same split
 
-组内抽稀采用等距取样而非取前 N 张，以保留原有的视点／距离跨度。
+Within a group the photos are thinned out by evenly spaced sampling instead of
+taking the first N, so that the original span of viewpoints / distances is
+preserved.
 
-确定性：抽样与划分都不使用随机数，重复运行结果完全一致。
+Deterministic: neither the sampling nor the splitting uses a random number,
+so repeated runs give exactly the same result.
 """
 import argparse
 import csv
@@ -35,20 +46,23 @@ ANNOTATIONS = os.path.join(ROOT, 'data', 'annotations')
 SPLIT_FILE = os.path.join(ANNOTATIONS, 'splits.csv')
 SUMMARY_FILE = os.path.join(ANNOTATIONS, 'dataset_summary.md')
 
-CAP = 50                  # 单个地点组上限
+CAP = 50                  # cap for a single location group
 RATIO = (0.6, 0.2, 0.2)  # train / val / test
 SPLITS = ('train', 'val', 'test')
 
-# 互见约束：下列组之间隔着一条路就能互相看到，属于 PDF 所说的
-# 「同一场景的邻近取景」，即便地点不同也不能分到不同 split，
-# 否则会构成泄漏。划分时把它们当作一个原子单元。
+# Mutually-visible constraint: the groups below can see each other across a
+# road, so they are the "neighbouring shots of the same scene" the PDF talks
+# about. Even though the venues differ they must not land in different
+# splits, otherwise that is leakage. The split treats them as one atomic
+# unit.
 KEEP_TOGETHER = [
-    ('OUT-05', 'OUT-08'),   # 西九 M+ 博物館 与 Art Park，隔路互相通视
+    ('OUT-05', 'OUT-08'),   # West Kowloon M+ Museum and Art Park, mutually visible across the road
 ]
 
 
 def even_sample(items, k):
-    """从 items 中等距取 k 个，保留原有的视点跨度。"""
+    """Take k items out of items at evenly spaced positions, preserving the
+    original span of viewpoints."""
     if k >= len(items):
         return list(items)
     if k <= 0:
@@ -59,15 +73,18 @@ def even_sample(items, k):
 
 
 def largest_remainder(n, ratio):
-    """按比例把 n 个单元分配到各 split（最大余数法），返回 [train, val, test]。"""
+    """Distribute n units over the splits by ratio (largest remainder
+    method); returns [train, val, test]."""
     raw = [n * r for r in ratio]
     base = [int(x) for x in raw]
     rest = n - sum(base)
-    # 余数按小数部分从大到小依次分配，每个 split 至多拿一次
+    # The remainder is handed out by descending fractional part, at most once
+    # per split
     order = sorted(range(len(raw)), key=lambda i: raw[i] - base[i], reverse=True)
     for i in order[:max(0, rest)]:
         base[i] += 1
-    # 每个 split 至少 1 个单元；超出总数时从最大的回收
+    # Every split keeps at least 1 unit; when that exceeds the total, take
+    # back from the largest one
     for i in range(len(base)):
         base[i] = max(1, base[i])
     while sum(base) > n and max(base) > 1:
@@ -76,9 +93,11 @@ def largest_remainder(n, ratio):
 
 
 def build_clusters(groups):
-    """把 KEEP_TOGETHER 里互相通视的组合并成原子单元。
+    """Merge the mutually-visible combinations of KEEP_TOGETHER into atomic
+    units.
 
-    返回 {单元代表: [group_id, ...]}，未受约束的组各自成单元。
+    Returns {unit representative: [group_id, ...]}; the groups without a
+    constraint each form their own unit.
     """
     parent = {g: g for g in groups}
 
@@ -101,19 +120,25 @@ def build_clusters(groups):
 
 
 def assign_groups(groups, ratio):
-    # groups: {group_id: [rows]}，按组容量排序
-    """把一个类别的地点组分配到各 split。
+    # groups: {group_id: [rows]}, sorted by group capacity
+    """Assign the location groups of one class to the splits.
 
-    组数少的时候（大类只有 5~9 个组），硬套 60/20/20 会让 val / test 只剩
-    1 个组，指标失去意义。策略是：
+    When there are few groups (the larger class has only 5~9), forcing a
+    60/20/20 split leaves val / test with a single group each and the metric
+    loses its meaning. The strategy is:
 
-    1. 互相通视的组先合并成原子单元（见 KEEP_TOGETHER），否则会泄漏
-    2. train 拿走配额内**最大的**那几个单元 —— 训练数据量最大
-    3. 剩下的单元在 val / test 之间轮流分配，且每轮选当前图片数少的一边，
-       使两者的图片数尽量接近
-    4. val / test 的组数不强行相等（组数不够时无法做到），但会尽量均衡
+    1. First merge the mutually-visible groups into atomic units (see
+       KEEP_TOGETHER), otherwise there is leakage
+    2. train takes the **largest** units within its quota -- the most
+       training data
+    3. The remaining units are handed out alternately between val / test, and
+       each round picks the side that currently holds fewer images, so that
+       the two stay as close as possible
+    4. The number of groups in val / test is not forced to be equal (it is
+       impossible when there are too few groups), but it is kept as balanced
+       as possible
 
-    返回 {group_id: split}
+    Returns {group_id: split}
     """
     clusters = build_clusters(sorted(groups))
     n = len(clusters)
@@ -158,14 +183,14 @@ def main():
     if not rows:
         sys.exit('没有可用的 manifest')
 
-    # ── 1. 只保留 include ────────────────────────────────────────────
+    # ── 1. Keep only include ─────────────────────────────────────────
     kept = [r for r in rows if r['status'] == 'include']
     dropped = {
         'exclude': sum(1 for r in rows if r['status'] == 'exclude'),
         'review': sum(1 for r in rows if r['status'] == 'review'),
     }
 
-    # ── 2. 组容量封顶（等距取样，保留视点跨度）───────────────────────
+    # ── 2. Cap the group capacity (evenly spaced sampling) ───────────
     by_group = defaultdict(list)
     for r in kept:
         by_group[r['group_id']].append(r)
@@ -174,7 +199,7 @@ def main():
         items.sort(key=lambda r: r['filename'])
         capped[gid] = even_sample(items, args.cap)
 
-    # ── 3. 类别平衡 ─────────────────────────────────────────────────
+    # ── 3. Class balancing ──────────────────────────────────────────
     by_class = defaultdict(lambda: defaultdict(list))
     meta = {}
     for gid, items in capped.items():
@@ -187,7 +212,8 @@ def main():
     def trim(cls):
         groups = by_class[cls]
         keep = {}
-        # 先按组数均分配额，再按组容量降序补齐到 target
+        # First share the quota evenly over the groups, then top up to the
+        # target in descending group capacity
         base = target // len(groups)
         for gid in sorted(groups, key=lambda g: (-len(groups[g]), g)):
             keep[gid] = even_sample(groups[gid], base)
@@ -203,14 +229,14 @@ def main():
 
     balanced = {c: trim(c) for c in by_class}
 
-    # ── 4. 按地点组划分（组为不可分割单元）──────────────────────────
+    # ── 4. Split by location group (indivisible unit) ───────────────
     split_of = {}
     for cls in sorted(balanced):
         groups = balanced[cls]
         for gid, s in assign_groups(groups, RATIO).items():
             split_of[gid] = s
 
-    # ── 5. 校验 ─────────────────────────────────────────────────────
+    # ── 5. Validation ───────────────────────────────────────────────
     errs = []
     for a, b in KEEP_TOGETHER:
         if a in split_of and b in split_of and split_of[a] != split_of[b]:
@@ -228,7 +254,7 @@ def main():
     if errs:
         sys.exit('校验失败：\n  ' + '\n  '.join(errs))
 
-    # ── 6. 输出 ─────────────────────────────────────────────────────
+    # ── 6. Output ───────────────────────────────────────────────────
     out = []
     for cls in sorted(balanced):
         for gid in sorted(balanced[cls]):
@@ -253,7 +279,7 @@ def main():
             w.writerows(out)
         write_summary(balanced, split_of, meta, by_group, dropped, args.cap)
 
-    # ── 报告 ────────────────────────────────────────────────────────
+    # ── Report ──────────────────────────────────────────────────────
     print(f'原始 {len(rows)} 张 → 剔除 exclude {dropped["exclude"]} 张、'
           f'review {dropped["review"]} 张 → 可用 {len(kept)} 张')
     print(f'单组上限 {args.cap} → 封顶后 {sum(len(v) for v in capped.values())} 张')

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""5 折地点组留出。选择分数是各折 balanced accuracy 的平均。"""
+"""5-fold venue holdout (location-group holdout). The selection score is the
+mean balanced accuracy over the folds."""
 import csv
 import hashlib
 import json
@@ -37,7 +38,8 @@ def preprocess_tag():
 
 
 def source_fingerprint():
-    """splits.csv 与 src/task3 源码的哈希。续跑对不上就拒绝复用旧结果。"""
+    """Hash of splits.csv and the src/task3 source code. A resumed run refuses
+    to reuse old results when the hash does not match."""
     digest = hashlib.sha256()
     digest.update(SPLITS_CSV.read_bytes())
     for path in sorted((ROOT / "src" / "task3").glob("*.py")):
@@ -56,12 +58,12 @@ def assert_resume_allowed(force):
         return current
     if not stamp_path.is_file():
         raise SystemExit(
-            "已有结果表但没有 run_stamp.json，拒绝续跑。确认后加 --force。"
+            "Result tables exist but run_stamp.json is missing, refusing to resume. Add --force once you have confirmed."
         )
     saved = json.loads(stamp_path.read_text(encoding="utf-8"))["fingerprint"]
     if saved != current:
         raise SystemExit(
-            "splits.csv 或 src/task3 代码与已有结果不一致，拒绝续跑。确认后加 --force。"
+            "splits.csv or the src/task3 code differs from the existing results, refusing to resume. Add --force once you have confirmed."
         )
     return current
 
@@ -90,7 +92,7 @@ def load_cropped(records):
             np.save(path, image)
         images.append(image)
         if i % 100 == 0 or i == len(records):
-            print(f"  读图 {i}/{len(records)}", flush=True)
+            print(f"  reading images {i}/{len(records)}", flush=True)
     return images
 
 
@@ -116,7 +118,8 @@ def _recalls(y_true, y_pred):
 
 
 def evaluate_config(records, feature_id, clf_id, with_val=True):
-    """返回一条配置的折分数和（可选）验证集准确率。"""
+    """Return the fold scores of one configuration and an optional validation
+    accuracy."""
     print(f"\n== {feature_id} {FEATURE_NAME[feature_id]} × {clf_id} {CLF_NAME[clf_id]} ==",
           flush=True)
     splits = by_split(records)
@@ -140,7 +143,7 @@ def evaluate_config(records, feature_id, clf_id, with_val=True):
         fold_out.append(rec_out)
         fold_in.append(rec_in)
         held_names = ",".join(fold["inside"] + fold["outside"])
-        print(f"  折{index} [{held_names}] BA={ba:.3f} "
+        print(f"  fold{index} [{held_names}] BA={ba:.3f} "
               f"out={rec_out:.3f} in={rec_in:.3f} "
               f"({time.perf_counter() - t0:.0f}s)", flush=True)
 
@@ -169,13 +172,13 @@ def evaluate_config(records, feature_id, clf_id, with_val=True):
         val_images = load_cropped(splits["val"])
         val_pred = pipe.predict(val_images)
         row["val_accuracy"] = float(accuracy_score(_labels(splits["val"]), val_pred))
-        print(f"  验证集准确率 {row['val_accuracy']:.3f} "
-              f"（不参与选择，{time.perf_counter() - t0:.0f}s）", flush=True)
+        print(f"  validation accuracy {row['val_accuracy']:.3f} "
+              f"(not used for selection, {time.perf_counter() - t0:.0f}s)", flush=True)
     return row
 
 
 def choose_features(rows, k=2):
-    """第一段：BA 降序，维度升序，编号升序。"""
+    """Stage one: BA descending, dimension ascending, id ascending."""
     order = {fid: i for i, fid in enumerate(FEATURE_ORDER)}
 
     def key(row):
@@ -185,7 +188,8 @@ def choose_features(rows, k=2):
 
 
 def choose_pipeline(rows):
-    """第二段：只在 role=candidate 里选。并列时按简单程度。"""
+    """Stage two: choose only among the role=candidate rows; ties are broken by
+    simplicity."""
     candidates = [
         row for row in rows
         if row.get("role", "candidate") in ("candidate", "selected")

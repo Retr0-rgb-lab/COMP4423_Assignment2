@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""从已有测试预测画混淆矩阵和例图。不训练。"""
+"""Draw the confusion matrix and the example figure from the existing test
+predictions. No training happens here."""
 import csv
 import os
 from pathlib import Path

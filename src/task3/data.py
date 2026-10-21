@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""读 splits.csv，把文件名解析成图片路径。路径和组号不进入特征。"""
+"""Read splits.csv and resolve every file name to an image path. Paths and
+group ids never enter the features."""
 import csv
 import os
 from collections import defaultdict
@@ -15,14 +16,14 @@ def _index_pictures(root):
         for name in names:
             if name.lower().endswith((".jpg", ".jpeg", ".png")):
                 if name in found:
-                    raise SystemExit(f"文件名重复，无法唯一解析: {name}")
+                    raise SystemExit(f"duplicate file name, cannot be resolved uniquely: {name}")
                 found[name] = os.path.join(dirpath, name)
     return found
 
 
 def load_index():
     if not SPLITS_CSV.is_file():
-        raise SystemExit(f"找不到划分表: {SPLITS_CSV}")
+        raise SystemExit(f"split table not found: {SPLITS_CSV}")
     paths = _index_pictures(PICTURES)
     records = []
     missing = []
@@ -40,16 +41,16 @@ def load_index():
                 "path": paths[name],
             })
     if missing:
-        raise SystemExit(f"{len(missing)} 张在 splits.csv 里但磁盘上没有，例如 {missing[:3]}")
+        raise SystemExit(f"{len(missing)} are listed in splits.csv but not on disk, for example {missing[:3]}")
     if len(records) != EXPECTED:
-        raise SystemExit(f"期望 {EXPECTED} 张，读到 {len(records)} 张")
+        raise SystemExit(f"expected {EXPECTED} images, read {len(records)}")
 
     split_of = defaultdict(set)
     for rec in records:
         split_of[rec["group_id"]].add(rec["split"])
     crossed = {g: s for g, s in split_of.items() if len(s) != 1}
     if crossed:
-        raise SystemExit(f"地点组跨 split: {crossed}")
+        raise SystemExit(f"location group spans several splits: {crossed}")
 
     train_groups = {r["group_id"] for r in records if r["split"] == "train"}
     needed = set()
@@ -58,7 +59,7 @@ def load_index():
         needed.update(fold["outside"])
     absent = needed - train_groups
     if absent:
-        raise SystemExit(f"留出折里的组不在训练集: {sorted(absent)}")
+        raise SystemExit(f"groups of the held-out fold are not in the training set: {sorted(absent)}")
     return records
 
 
@@ -70,7 +71,8 @@ def by_split(records):
 
 
 def partition_fold(records, fold):
-    """返回 (训练记录, 留出记录)，都只来自官方 train。"""
+    """Return (train records, held-out records), both taken only from the
+    official train split."""
     held_groups = set(fold["inside"]) | set(fold["outside"])
     train, held = [], []
     for rec in records:
@@ -82,8 +84,8 @@ def partition_fold(records, fold):
             train.append(rec)
     got = {r["group_id"] for r in held}
     if got != held_groups:
-        raise SystemExit(f"留出组不完整: 期望 {sorted(held_groups)}，得到 {sorted(got)}")
+        raise SystemExit(f"held-out groups are incomplete: expected {sorted(held_groups)}, got {sorted(got)}")
     labels = {r["y"] for r in held}
     if labels != {0, 1}:
-        raise SystemExit(f"留出折缺少类别: {labels}")
+        raise SystemExit(f"held-out fold misses a class: {labels}")
     return train, held

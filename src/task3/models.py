@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""分类器与最终 Pipeline。参数以 config 为准。"""
+"""Classifiers and the final Pipeline. Parameters follow config."""
 from sklearn.decomposition import PCA
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
@@ -53,7 +53,7 @@ def build_classifier(clf_id, feature_id):
         )
     if clf_id == "C6":
         if feature_id not in HIST_FEATURES:
-            raise ValueError(f"C6 只用于直方图特征，不能用于 {feature_id}")
+            raise ValueError(f"C6 is only for histogram features, it cannot be used with {feature_id}")
         return MultinomialNB(alpha=1.0)
     if clf_id == "C1-RBF":
         return SVC(kernel="rbf", C=1.0, gamma="scale", random_state=SEED)
@@ -65,7 +65,8 @@ def needs_scaler(clf_id):
 
 
 class CapPCA(BaseEstimator, TransformerMixin):
-    """PCA 到 100 维；特征本来就不到 100 维时降到现有维数。"""
+    """PCA down to 100 dimensions; when the features are already fewer than
+    100 dimensions, keep the current dimension count."""
 
     def __init__(self, n_components=PCA_DIM):
         self.n_components = n_components

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""选一张场景照片，显示原图，并给出 inside / outside。
+"""Pick a scene photo, show the original image, and report inside / outside.
 
-在仓库根目录启动::
+Start it from the repository root::
 
     python -m src.task5.app
 
-没有桌面时，同一条预处理和同一条 Pipeline 可以只打印结果::
+Without a desktop, the same preprocessing and the same Pipeline can just
+print the result::
 
     python -m src.task5.app --image path/to/photo.jpg
 """
@@ -15,7 +16,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
 
-# 既支持 python -m src.task5.app，也支持 python src/task5/app.py。
+# Supports both "python -m src.task5.app" and "python src/task5/app.py".
 _REPO = Path(__file__).resolve().parents[2]
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
@@ -50,7 +51,8 @@ _CLF_EN = {
 }
 
 def _image_filetypes():
-    # Windows 的 Tk 用分号分隔扩展名；Linux / macOS 用空格。
+    # Tk on Windows separates the extensions with semicolons; Linux / macOS
+    # use spaces.
     if sys.platform == "win32":
         patterns = "*.jpg;*.jpeg;*.png;*.bmp;*.tif;*.tiff;*.webp"
         jpeg = "*.jpg;*.jpeg"
@@ -283,7 +285,8 @@ class ClassifierApp:
         self.load_and_predict(path)
 
     def load_and_predict(self, path):
-        """``path`` 只用于读像素和显示文件名，不参与判别。"""
+        """``path`` is only used to read the pixels and to show the file name;
+        it never takes part in the decision."""
         try:
             rgb = load_rgb(path)
         except Exception as exc:

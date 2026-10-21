@@ -1,37 +1,44 @@
 # -*- coding: utf-8 -*-
-"""按地点组重命名照片，并同步 manifest。
+"""Rename the photos by location group and sync the manifest.
 
-命名规则
---------
-    data/pictures/<区域目录>/<group_id>_<seq:03d>_<原始文件名>
+Naming rule
+------------
+    data/pictures/<area dir>/<group_id>_<seq:03d>_<original file name>
 
-例：
+Examples:
     data/pictures/kowloon/OUT-05_001_IMG_0774.jpg
     data/pictures/Jordan/OUT-01_001_IMG_0796.jpg
     data/pictures/elements/OUT-11_001_IMG_0821.jpg
 
-为什么这样设计
+Why this design
+---------------
+- **group_id first**: the files sort by group, and when spot-checking the
+  samples of one group the listing is readable at a glance.
+- **seq in the middle**: the shooting order inside the group, also used for
+  in-group de-duplication and gap checks.
+- **the original file name is kept last**: IMG_xxxx is the original index
+  from the phone export and the only clue that traces back the original
+  batch and shooting order. The old name can always be recovered from the
+  new one.
+
+Important constraint (from the assignment PDF)
+------------------------------------------------
+The classifier may **only use image pixels**. File names and folder names
+are for manual auditing and group cross-checks only; they must never enter
+any feature or model input. The Task 5 application must not infer the class
+from the path either.
+
+Safe to re-run
 --------------
-- **group_id 在前**：按组排序、抽查某个组的样本时，目录一眼可辨。
-- **seq 在中**：组内拍摄顺序，同时用于组内去重与缺号检查。
-- **原始文件名保留在最后**：IMG_xxxx 是手机导出时的原始序号，是唯一能追回
-  原始批次与拍摄顺序的线索。任何时候都能从新名还原旧名。
+The script strips the existing prefix before renumbering, so it can be run
+repeatedly: every time the manifest of a new area is added, one more run
+finishes the naming and numbering of that area. Photos of the same group
+spread over several directories are merged into one continuous seq series.
 
-重要约束（来自作业 PDF）
-------------------------
-分类器**只能使用图像像素**。文件名与文件夹名仅供人工审计与分组核对，
-不得进入任何特征或模型输入。Task 5 的应用也不得从路径推断类别。
-
-重复执行是安全的
-----------------
-脚本先剥掉已有的前缀再重新编号，因此可以反复运行：每补一个新区域的
-manifest，重跑一次即可完成该区域的命名与编号。同一 group 跨目录的照片
-会合并成一条连续的 seq 序列。
-
-用法
-----
-    python src/tools/apply_naming.py            # 实际执行
-    python src/tools/apply_naming.py --dry-run  # 只打印将要做的改动
+Usage
+-----
+    python src/tools/apply_naming.py            # actually run
+    python src/tools/apply_naming.py --dry-run  # only print the planned changes
 """
 import argparse
 import csv
@@ -44,40 +51,43 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 PICTURES = os.path.join(ROOT, 'data', 'pictures')
 ANNOTATIONS = os.path.join(ROOT, 'data', 'annotations')
 
-# 已命名：OUT-05_001_IMG_0774.jpg  →  捕获 group / seq / 原始名
+# Already named: OUT-05_001_IMG_0774.jpg  ->  capture group / seq / original name
 NAMED = re.compile(r'^(?P<gid>(?:OUT|IN)-\d{2})_(?P<seq>\d{3})_(?P<orig>.+)$')
 IMG_EXT = ('.jpg', '.jpeg', '.png', '.heic', '.heif')
 
 
 def strip_prefix(name):
-    """剥掉已有的组前缀，返回原始文件名。"""
+    """Strip the existing group prefix and return the original file name."""
     m = NAMED.match(name)
     return m.group('orig') if m else name
 
 
 def area_dirs():
-    """递归索引 data/pictures 下所有叶子目录 → 目录的相对路径（小写）。
+    """Recursively index every leaf directory under data/pictures -> the
+    relative path of the directory (lower-cased).
 
-    目录结构是 `pictures/{inside,outside}/<场所名>/`，层级可能继续加深。
-    同一个场所名可能同时出现在 inside 与 outside 下（如 night），因此以
-    **相对路径**而非目录名作为键，避免互相覆盖。
+    The layout is `pictures/{inside,outside}/<venue name>/` and the nesting
+    may go deeper. The same venue name can appear under both inside and
+    outside (e.g. night), so the key is the **relative path** rather than the
+    directory name, to stop the two from overwriting each other.
     """
     index = {}
     for root, dirs, files in os.walk(PICTURES):
         dirs[:] = [d for d in dirs if not d.startswith('.')]
         if not any(f.lower().endswith(IMG_EXT) for f in files):
-            continue                      # 只登记真正装了图片的目录
+            continue                      # only register directories that really hold images
         key = os.path.relpath(root, PICTURES).replace(os.sep, '/').lower()
         index.setdefault(key, os.path.abspath(root))
     return index
 
 
 def manifest_files():
-    """递归找出全部 manifest，返回 (文件列表, {相对路径: 绝对路径})。
+    """Recursively find every manifest; returns (file list, {relative path:
+    absolute path}).
 
-    manifest 放在 data/annotations 下与照片镜像的层级里，
-    例如 data/annotations/outside/night_manifest.csv 对应
-    data/pictures/outside/night/。
+    The manifests sit under data/annotations in a hierarchy that mirrors the
+    photos, e.g. data/annotations/outside/night_manifest.csv corresponds to
+    data/pictures/outside/night/.
     """
     files, index = [], {}
     for root, dirs, names in os.walk(ANNOTATIONS):
@@ -94,11 +104,11 @@ def manifest_files():
 
 
 def load_manifests():
-    """读取全部 manifest，返回 (记录列表, 字段名, 文件列表)。"""
+    """Read all the manifests; returns (record list, field names, file list)."""
     records, fields = [], None
     files, index = manifest_files()
     if not files:
-        sys.exit(f'没有找到 manifest: {ANNOTATIONS}/**/*_manifest.csv')
+        sys.exit(f'no manifest found: {ANNOTATIONS}/**/*_manifest.csv')
 
     dirs = area_dirs()
     for path in files:
@@ -107,13 +117,14 @@ def load_manifests():
         key = stem if rel == '.' else f'{rel.replace(os.sep, "/")}/{stem}'
         area_dir = dirs.get(key.lower())
         if area_dir is None:
-            sys.exit(f'{path}: data/pictures/ 下找不到对应目录「{key}」')
+            sys.exit(f'{path}: no matching directory for "{key}" under data/pictures/')
         with open(path, encoding='utf-8-sig') as fh:
             reader = csv.DictReader(fh)
             if fields is None:
                 fields = reader.fieldnames
             for row in reader:
-                # _cur = 磁盘上的当前文件名；_old = 剥掉前缀后的原始名，仅用于排序
+                # _cur = current file name on disk; _old = original name after
+                # stripping the prefix, used for sorting only
                 row['_cur'] = row['filename']
                 row['_old'] = strip_prefix(row['filename'])
                 row['_dir'] = area_dir
@@ -124,13 +135,15 @@ def load_manifests():
 
 
 def assign_sequences(records):
-    """按 group_id 分组，组内按原始文件名排序，分配连续 seq。"""
+    """Group by group_id, sort within each group by original file name and
+    assign a continuous seq."""
     by_group = defaultdict(list)
     for r in records:
         by_group[r['group_id']].append(r)
 
     for gid in sorted(by_group):
-        # IMG_0764 这类定长数字文件名字典序即拍摄顺序
+        # For fixed-length numeric names such as IMG_0764 the lexicographic
+        # order is the shooting order
         for i, r in enumerate(sorted(by_group[gid], key=lambda x: x['_old']), 1):
             r['_new'] = f'{gid}_{i:03d}_{r["_old"]}'
 
@@ -138,13 +151,13 @@ def assign_sequences(records):
 
 
 def check(records, by_group):
-    """执行前的一致性检查，返回警告列表。"""
+    """Consistency checks run before the rename; returns a list of warnings."""
     warnings = []
 
-    # 1. 磁盘与 manifest 对齐
+    # 1. Disk and manifest agree
     for r in records:
         if not os.path.isfile(os.path.join(r['_dir'], r['_cur'])):
-            warnings.append(f'文件缺失: {r["_dir"]}/{r["_cur"]}（{r["_csv"]}）')
+            warnings.append(f'file missing: {r["_dir"]}/{r["_cur"]} ({r["_csv"]})')
 
     manifest_files = {(r['_dir'], r['_cur']) for r in records}
     for area in sorted(os.listdir(PICTURES)):
@@ -155,29 +168,29 @@ def check(records, by_group):
                     if f.lower().endswith(IMG_EXT)
                     and (area_dir, f) not in manifest_files]
         for f in unlisted:
-            warnings.append(f'未进 manifest: {area}/{f}')
+            warnings.append(f'not in the manifest: {area}/{f}')
 
-    # 2. 组内过小
+    # 2. Group too small
     for gid, rows in sorted(by_group.items()):
         usable = sum(1 for r in rows if r['status'] == 'include')
         if usable < 10:
-            warnings.append(f'{gid}: 可用样本仅 {usable} 张，不足以作为独立划分单元')
+            warnings.append(f'{gid}: only {usable} usable samples, too few to be an independent split unit')
 
     return warnings
 
 
 def apply(records, dry_run):
-    """两阶段改名，避免新旧名互相占用导致的冲突。"""
+    """Rename in two stages, to avoid clashes between the old and the new names."""
     todo = [r for r in records if r['_new'] != r['_cur']]
 
     if dry_run:
         for r in sorted(todo, key=lambda x: (x['_csv'], x['_old'])):
             print(f'  {r["_dir"]}/{r["_cur"]}  ->  {r["_new"]}')
-        print(f'\n{"[dry-run] " if dry_run else ""}共 {len(todo)} 个文件待改名')
+        print(f'\n{"[dry-run] " if dry_run else ""}{len(todo)} files to rename')
         return
 
     tmp = {}
-    for r in records:                                    # 阶段一：全部移到临时名
+    for r in records:                                    # stage one: move everything to a temporary name
         src = os.path.join(r['_dir'], r['_cur'])
         if not os.path.isfile(src):
             continue
@@ -188,7 +201,7 @@ def apply(records, dry_run):
         os.replace(src, dst)
         tmp[(r['_dir'], r['_cur'])] = dst
 
-    for r in records:                                    # 阶段二：落到最终名
+    for r in records:                                    # stage two: move to the final name
         src = tmp.get((r['_dir'], r['_cur']))
         if not src:
             continue
@@ -201,7 +214,7 @@ def apply(records, dry_run):
     if os.path.isdir(tmp_root) and not os.listdir(tmp_root):
         os.rmdir(tmp_root)
 
-    # 回写 manifest 的 filename 列
+    # Write the filename column back into the manifest
     by_csv = defaultdict(list)
     for r in records:
         by_csv[r['_csv']].append(r)
@@ -217,22 +230,22 @@ def apply(records, dry_run):
             w.writeheader()
             w.writerows(rows)
 
-    print(f'已改名并同步 {len(by_csv)} 个 manifest，共 {len(records)} 行')
+    print(f'renamed and synced {len(by_csv)} manifests, {len(records)} rows in total')
 
 
 def main():
-    ap = argparse.ArgumentParser(description='按地点组重命名照片并同步 manifest')
-    ap.add_argument('--dry-run', action='store_true', help='只预览改动')
+    ap = argparse.ArgumentParser(description='rename the photos by location group and sync the manifest')
+    ap.add_argument('--dry-run', action='store_true', help='only preview the changes')
     args = ap.parse_args()
 
     records, fields, files = load_manifests()
     by_group = assign_sequences(records)
 
-    print(f'manifest: {len(files)} 个 · 照片 {len(records)} 张 · 地点组 {len(by_group)} 个\n')
+    print(f'manifest: {len(files)} · photos {len(records)} · location groups {len(by_group)}\n')
 
     warnings = check(records, by_group)
     if warnings:
-        print('⚠ 检查结果')
+        print('⚠ check results')
         for w in warnings:
             print(f'  {w}')
         print()

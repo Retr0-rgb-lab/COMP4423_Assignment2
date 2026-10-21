@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
-"""画出 Task 4 的混淆矩阵和按地点组正确率。
+"""Draw the Task 4 confusion matrices and the per-location-group accuracy.
 
-数字来自已锁定的记录，不重新训练，也不读测试集来改模型：
+The numbers come from the locked records. The script does not retrain and does
+not read the test set to change the model:
 
-- 验证集 / 测试集混淆矩阵：progress/task3_experiment.md §8.3（2026-10-14）
-- 测试集按地点组正确数：plans/task1_3_review_2026-10-15.md §4
+- validation / test confusion matrices: progress/task3_experiment.md §8.3 (2026-10-14)
+- test set correct counts per location group: plans/task1_3_review_2026-10-15.md §4
 
-本脚本只把这些整数画成图，并核对它们彼此一致。
-若磁盘上有 outputs/task3/test_predictions.csv，再核对逐张预测是否
-仍等于这些整数；一致时写出示例文件名清单。图片在 data/pictures/
-里能按文件名找到时，才拼定性示例网格。找不到就不编文件名、不编图。
+This script only turns those integers into figures and checks that they agree
+with each other.
+If outputs/task3/test_predictions.csv is on disk, it also checks that the
+per-image predictions still match those integers; when they agree it writes the
+example file name list. The qualitative example grid is only assembled when the
+pictures can be found by file name under data/pictures/. When they cannot be
+found, no file name and no figure is invented.
 """
 from __future__ import annotations
 
@@ -25,17 +29,17 @@ OUT_DIR = Path(__file__).resolve().parent
 PRED_CSV = ROOT / "outputs" / "task3" / "test_predictions.csv"
 PICTURES = ROOT / "data" / "pictures"
 
-# §8.3 验证集。行是真实类，列是预测类，顺序为 outside, inside。
+# §8.3 validation set. Rows are the true class, columns the predicted class, in the order outside, inside.
 VAL_CM = ((26, 4), (17, 21))
 VAL_ACC_PUBLISHED = 0.691
 VAL_BA_PUBLISHED = 0.710
 
-# §8.3 测试集。
+# §8.3 test set.
 TEST_CM = ((26, 1), (27, 15))
 TEST_ACC_PUBLISHED = 0.594
 TEST_BA_PUBLISHED = 0.660
 
-# 审核报告 §4。correct / n。
+# Review report §4. correct / n.
 GROUP_ROWS = (
     ("OUT-06", "HKU Main Building", "outside", 19, 20, 0.950),
     ("OUT-07", "HKU campus green", "outside", 7, 7, 1.000),
@@ -43,13 +47,56 @@ GROUP_ROWS = (
     ("IN-07", "CMA courtyard", "inside", 6, 17, 0.353),
 )
 
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+# Font candidates: take the first TTF that exists, in this order. The locked
+# environment is Windows, but this script has to run on Linux / macOS too, so
+# do not hard-code a single path.
+_FONT_CANDIDATES = (
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
+    "C:/Windows/Fonts/arial.ttf",
+    "C:/Windows/Fonts/arialbd.ttf",
+    "C:/Windows/Fonts/segoeui.ttf",
+    "C:/Windows/Fonts/segoeuib.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/Library/Fonts/Arial.ttf",
+)
+
+
+def _resolve_font(bold):
+    """Return the first TTF path that exists; fall back to the font bundled with
+    matplotlib when none is found."""
+    candidates = _FONT_CANDIDATES
+    if bold:
+        candidates = tuple(p for p in candidates if "Bold" in p or "bd" in p.lower() or "b." in p.lower()) + tuple(
+            p for p in candidates if not ("Bold" in p or "bd" in p.lower() or "b." in p.lower())
+        )
+    for path in candidates:
+        if os.path.isfile(path):
+            return path
+    # Last fallback: the DejaVu font bundled with matplotlib, the same glyph set
+    # as the preferred fonts above.
+    try:
+        import matplotlib.font_manager as fm
+
+        packaged = fm.findfont(fm.FontProperties(family="DejaVu Sans"))
+        if os.path.isfile(packaged):
+            return packaged
+    except Exception:
+        pass
+    return None
 
 
 def _font(size, bold=False):
-    path = FONT_BOLD if bold else FONT
-    return ImageFont.truetype(path, size)
+    path = _resolve_font(bold)
+    if path is None:
+        return ImageFont.load_default()
+    try:
+        return ImageFont.truetype(path, size)
+    except OSError:
+        return ImageFont.load_default()
 
 
 def _check():
@@ -58,10 +105,10 @@ def _check():
     assert vt_in[0] + vt_in[1] == 38
     assert (vt_out[0] + vt_in[1]) / 68 == 47 / 68
     if abs((47 / 68) - VAL_ACC_PUBLISHED) > 0.0005:
-        raise SystemExit("验证集准确率与 §8.3 不一致")
+        raise SystemExit("validation accuracy does not match §8.3")
     val_ba = ((26 / 30) + (21 / 38)) / 2
     if abs(val_ba - VAL_BA_PUBLISHED) > 0.0005:
-        raise SystemExit("验证集 balanced accuracy 与 §8.3 不一致")
+        raise SystemExit("validation balanced accuracy does not match §8.3")
 
     tt_out, tt_in = TEST_CM
     assert tt_out[0] + tt_out[1] == 27
@@ -69,10 +116,10 @@ def _check():
     correct = tt_out[0] + tt_in[1]
     assert correct == 41
     if abs((41 / 69) - TEST_ACC_PUBLISHED) > 0.0005:
-        raise SystemExit("测试集准确率与 §8.3 不一致")
+        raise SystemExit("test accuracy does not match §8.3")
     test_ba = ((26 / 27) + (15 / 42)) / 2
     if abs(test_ba - TEST_BA_PUBLISHED) > 0.0005:
-        raise SystemExit("测试集 balanced accuracy 与 §8.3 不一致")
+        raise SystemExit("test balanced accuracy does not match §8.3")
 
     group_correct = 0
     group_n = 0
@@ -95,7 +142,7 @@ def _check():
 def _cell_color(value, scale_max, emphasize):
     t = value / scale_max
     if emphasize:
-        # 漏报校内：浅底到砖红。
+        # Missed inside: light background to brick red.
         r = int(255 - 40 * t)
         g = int(236 - 150 * t)
         b = int(230 - 150 * t)
@@ -126,7 +173,8 @@ def draw_confusion(cm, title, subtitle, footer, path):
     gap = 8 * scale
     headers = ("Predicted outside", "Predicted inside")
     row_names = ("True outside", "True inside")
-    # 测试集和验证集都是 inside 被判成 outside 的格子最大，标成强调色。
+    # In both the test set and the validation set the largest cell is inside
+    # predicted as outside, so that cell gets the emphasis colour.
     emphasize = {(1, 0)}
     scale_max = max(max(row) for row in cm)
 
@@ -266,8 +314,20 @@ def _cell(row):
     return "true_inside"
 
 
+def _cell_caption(row):
+    """Report-facing wording for one cell of the test confusion matrix."""
+    if row["y_true"] == 0 and row["y_pred"] == 0:
+        return "correct - outside"
+    if row["y_true"] == 0 and row["y_pred"] == 1:
+        return "wrong - predicted inside"
+    if row["y_true"] == 1 and row["y_pred"] == 0:
+        return "wrong - predicted outside"
+    return "correct - inside"
+
+
 def write_example_manifest(rows):
-    """文件名按字典序，方便以后对上同一张图。"""
+    """File names in lexicographic order, so the same image can be matched up
+    later."""
     buckets = {k: [] for k in ("true_outside", "false_inside", "false_outside", "true_inside")}
     per_group = {}
     for row in rows:
@@ -285,13 +345,13 @@ def write_example_manifest(rows):
     }
     if counts != expected:
         raise SystemExit(
-            f"test_predictions.csv 的混淆矩阵是 {counts}，锁定记录是 {expected}。"
-            "不写出示例清单，也不改锁定数字。"
+            f"the confusion matrix in test_predictions.csv is {counts}, the locked record is {expected}."
+            " No example list is written and the locked numbers are not changed."
         )
     for gid, _name, _kind, hit, n, _pub in GROUP_ROWS:
         got_n, got_hit = per_group.get(gid, (0, 0))
         if (got_n, got_hit) != (n, hit):
-            raise SystemExit(f"{gid} 在 CSV 里是 {got_hit}/{got_n}，锁定记录是 {hit}/{n}")
+            raise SystemExit(f"{gid} is {got_hit}/{got_n} in the CSV, the locked record is {hit}/{n}")
 
     manifest = OUT_DIR / "task4_example_manifest.csv"
     picks = []
@@ -303,7 +363,7 @@ def write_example_manifest(rows):
 
     picks.extend(take(buckets["true_outside"], "OUT-06", 2))
     picks.extend(take(buckets["true_outside"], "OUT-07", 2))
-    picks.extend(buckets["false_inside"])  # 只有 1 张，必是 OUT-06
+    picks.extend(buckets["false_inside"])  # only 1 image, so it must be OUT-06
     picks.extend(take(buckets["false_outside"], "IN-03", 2))
     picks.extend(take(buckets["false_outside"], "IN-07", 2))
     picks.extend(take(buckets["true_inside"], "IN-03", 2))
@@ -330,8 +390,8 @@ def write_example_grid(picks, pictures):
     missing = [row["filename"] for row in picks if row["filename"] not in pictures]
     if missing:
         print(
-            f"示例网格未生成：清单里 {len(missing)} 个文件名在 data/pictures/ 找不到，"
-            f"例如 {missing[:3]}"
+            f"example grid not generated: {len(missing)} file names in the list are missing from data/pictures/, "
+            f"for example {missing[:3]}"
         )
         return
     thumb = 180
@@ -353,7 +413,7 @@ def write_example_grid(picks, pictures):
         im = Image.open(pictures[row["filename"]]).convert("RGB")
         im.thumbnail((thumb, thumb))
         sheet.paste(im, (x, y))
-        caption = f"{row['group_id']} {_cell(row)}"
+        caption = f"{row['group_id']}  {_cell_caption(row)}"
         draw.text((x, y + thumb + 2), caption, fill="#1c1917", font=font)
     path = OUT_DIR / "task4_example_grid.png"
     sheet.save(path, "PNG")
@@ -363,16 +423,16 @@ def write_example_grid(picks, pictures):
 def try_examples():
     if not PRED_CSV.is_file():
         print(
-            "未生成定性示例：没有 outputs/task3/test_predictions.csv。"
-            "该文件在 .gitignore 里，本工作区也没有照片。"
-            "混淆矩阵图只用了进度文档里的整数，没有编造错例文件名。"
+            "no qualitative examples generated: outputs/task3/test_predictions.csv is missing."
+            " That file is listed in .gitignore, and this workspace has no photos either."
+            " The confusion matrix figures only use the integers from the progress record; no error-case file name was invented."
         )
         return
     rows = _load_predictions(PRED_CSV)
     picks = write_example_manifest(rows)
     pictures = _index_pictures(PICTURES)
     if not pictures:
-        print("有预测 CSV，但 data/pictures/ 为空，只写了文件名清单，没有拼图。")
+        print("There is a prediction CSV, but data/pictures/ is empty: only the file name list was written, no grid.")
         return
     write_example_grid(picks, pictures)
 

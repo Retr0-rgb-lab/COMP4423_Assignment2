@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
-"""把地点组从「细分组」收敛为「场所级」，并补上内部细分与场景类别两列。
+"""Collapse the location groups from "fine-grained groups" to "venue level",
+and add the sub-area and scene class columns.
 
-背景
-----
-作业要求按**地点组**划分 train/val/test。组切得越细，测试集的有效样本量
-越大，但组越细也越容易把同一处场所拆到不同 split，造成泄漏。
+Background
+----------
+The assignment requires train/val/test to be split by **location group**. The
+finer the groups are cut, the larger the effective sample size of the test
+set, but fine groups also make it easier to split one and the same physical
+place across different splits, which is leakage.
 
-本脚本采用保守口径：**一个物理场所 = 一个 group_id（划分单元）**，
-场所内部的不同场景改用 `sub_area` + `scene_class` 两列记录。
-这样划分单元一定是物理上一处确定的地方，不可能发生同一场景跨 split；
-而场所内部的多样性仍被完整保留，可在报告中做「场所 × 场景类别」交叉分析。
+This script takes the conservative reading: **one physical place = one
+group_id (split unit)**, and the different scenes inside a place are recorded
+in the `sub_area` + `scene_class` columns instead.
+Then the split unit is always one definite physical place, so the same scene
+can never straddle splits; the diversity inside a place is still fully kept
+and can be analysed as a "venue x scene class" cross-tabulation in the report.
 
-幂等：若 manifest 已含 `sub_area` 列则直接退出，可反复运行。
+Idempotent: if the manifest already has a `sub_area` column the script exits
+straight away, so it can be run again and again.
 """
 import csv
 import os
@@ -20,9 +26,10 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ANNOTATIONS = os.path.join(ROOT, 'data', 'annotations')
 
-# 细分组 → (场所级 group_id, 场所名, 场所内部细分)
-# inside 已在 data/annotations/inside/ 写成场所级，location_name 以那些 manifest 为准，
-# 不在这里用单一 sub_area 覆盖。
+# Fine-grained group -> (venue-level group_id, venue name, sub-area inside the venue)
+# "inside" is already written at venue level under data/annotations/inside/; the
+# location_name follows those manifests, and is not overwritten here with a
+# single sub_area.
 VENUE_MAP = {
     'OUT-01': ('OUT-01', '佐敦 Jordan',           '佐敦道街道段'),
     'OUT-02': ('OUT-01', '佐敦 Jordan',           '廟街夜市'),
@@ -36,7 +43,7 @@ VENUE_MAP = {
     'OUT-12': ('OUT-04', '圆方 Elements',         '曲面顶棚与开敞广场'),
 }
 
-# 受控场景词表，顺序即匹配优先级
+# Controlled scene vocabulary; the order is the matching priority
 SCENE_RULES = [
     ('室内空间', ('室内',)),
     ('城市远景', ('远景', '天际线', '远眺', '俯瞰', '仰视')),
@@ -55,7 +62,7 @@ SCENE_RULES = [
     ('铺装广场', ('广场', '铺装', '硬地', '平台', '砖路', '庭院', '广场')),
 ]
 
-# 关键词覆盖不到的少数几张，直接指定
+# The few shots the keywords cannot reach are assigned directly
 OVERRIDE = {
     'IMG_0812.jpg': '街市摊位', 'IMG_0813.jpg': '街市摊位', 'IMG_0814.jpg': '街市摊位',
     'IMG_0928.jpg': '建筑入口', 'IMG_0929.jpg': '建筑入口',
@@ -66,8 +73,10 @@ OVERRIDE = {
 HEADER = ['filename', 'class', 'group_id', 'location_name',
           'sub_area', 'scene_class', 'scene_type', 'status', 'notes']
 
-# 繁体 → 简体。校内标识多为繁体，词表以简体书写，先归一再匹配，
-# 免得同一栋楼因为写法不同落到「其他场景」。
+# Traditional -> simplified. Most campus signage is traditional while the
+# vocabulary is written in simplified, so normalise first and then match,
+# otherwise the same building would fall into "other scene" just because of
+# a different spelling.
 _TRAD2SIMP = str.maketrans({
     '樓': '楼', '綠': '绿', '樹': '树', '廣': '广', '鋪': '铺', '連': '连',
     '欄': '栏', '櫚': '榈', '網': '网', '圍': '围', '築': '筑', '磚': '砖',
@@ -109,9 +118,9 @@ def convert(path):
     for r in rows:
         gid = r['group_id']
         if gid not in VENUE_MAP:
-            sys.exit(f'{path}: 未登记的 group_id「{gid}」，请检查 VENUE_MAP')
+            sys.exit(f'{path}: unregistered group_id "{gid}", check VENUE_MAP')
         venue_id, venue_name, sub_area = VENUE_MAP[gid]
-        original = r['filename'].split('_')[-1]          # 剥掉命名脚本加的前缀
+        original = r['filename'].split('_')[-1]          # strip the prefix added by the naming script
         out.append([r['filename'], r['class'], venue_id, venue_name, sub_area,
                     classify(original, r['scene_type']), r['scene_type'],
                     r['status'], r['notes']])
@@ -127,20 +136,20 @@ def main():
     manifests = sorted(f for f in os.listdir(ANNOTATIONS)
                        if f.endswith('_manifest.csv'))
     if not manifests:
-        sys.exit(f'没有找到 manifest: {ANNOTATIONS}/*_manifest.csv')
+        sys.exit(f'no manifest found: {ANNOTATIONS}/*_manifest.csv')
 
     total = 0
     for mf in manifests:
         path = os.path.join(ANNOTATIONS, mf)
         if already_merged(path):
-            print(f'{mf:28} 已收敛为场所级，跳过')
+            print(f'{mf:28} already collapsed to venue level, skipping')
             continue
         n = convert(path)
         total += n
-        print(f'{mf:28} {n} 行已收敛')
+        print(f'{mf:28} {n} rows collapsed')
 
-    print(f'\n共处理 {total} 行。'
-          '接着运行 python3 src/tools/apply_naming.py 让 group_id 前缀与 CSV 一致。')
+    print(f'\n{total} rows processed in total. '
+          'Next run python3 src/tools/apply_naming.py so the group_id prefix matches the CSV.')
 
 
 if __name__ == '__main__':

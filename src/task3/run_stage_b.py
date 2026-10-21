@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""第二段：胜出的两种特征 × 分类器。线性 SVM 胜出时补一行 RBF。"""
+"""Stage two: the two winning feature sets x the classifiers. If the linear SVM
+wins, one extra RBF row is added."""
 import argparse
 import json
 
@@ -20,16 +21,16 @@ def main():
     import sys
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    parser = argparse.ArgumentParser(description="Task 3 第二段")
+    parser = argparse.ArgumentParser(description="Task 3 stage two")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
     stage_a = OUTPUT_DIR / "stage_a.csv"
     if not stage_a.is_file():
-        raise SystemExit("先运行 python -m src.task3.run_stage_a")
+        raise SystemExit("run python -m src.task3.run_stage_a first")
     top = choose_features(read_rows(stage_a), k=2)
     feature_ids = [row["feature_id"] for row in top]
-    print("第二段特征:", ", ".join(
+    print("stage two features:", ", ".join(
         f"{row['feature_id']} BA={row['ba_mean']:.3f}" for row in top), flush=True)
 
     assert_resume_allowed(args.force)
@@ -78,7 +79,7 @@ def main():
         json.dumps(selection, ensure_ascii=False, indent=2), encoding="utf-8",
     )
     write_run_stamp()
-    print(f"\n锁定 {winner['feature_id']} × {winner['clf_id']} "
+    print(f"\nlocked {winner['feature_id']} × {winner['clf_id']} "
           f"BA={winner['ba_mean']:.3f}", flush=True)
 
 

@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
-"""Contact sheet 生成器 —— 用于人工核对照片的地点组归属。
+"""Contact sheet generator -- used to check by hand which location group a
+photo belongs to.
 
-把一组照片铺成带序号的网格缩略图，肉眼扫一遍即可判断：
-  1. 这一批是不是同一个物理场景（决定 group_id 的切分）
-  2. 组内是否混入了边界位置、可识别人物等应当剔除的样本
+It lays a set of photos out as a numbered grid of thumbnails, so that one
+glance answers:
+  1. whether this batch is one and the same physical scene (which decides
+     the group_id split)
+  2. whether boundary positions, identifiable people and other samples that
+     should be dropped have slipped into the group
 
-纯人工辅助工具，不参与训练、不进入 pipeline。
+A purely manual aid: it takes no part in training and never enters the
+pipeline.
 
-用法
-----
-  # 整目录
-  python src/tools/make_contact_sheet.py <图片目录> <输出图片> [每行列数]
+Usage
+-----
+  # whole directory
+  python src/tools/make_contact_sheet.py <image dir> <output image> [columns]
 
-  # 只画清单里的文件（清单每行一个文件名，可用 # 注释）
-  python src/tools/make_contact_sheet.py <图片目录> <输出图片> 5 --list files.txt
+  # only the files named in a list file (one file name per line, # comments
+  # allowed)
+  python src/tools/make_contact_sheet.py <image dir> <output image> 5 --list files.txt
 """
 import argparse
 import os
@@ -37,7 +43,8 @@ def load_font(size):
 
 
 def read_list(path):
-    """读取文件清单，返回存在的文件名（保持清单顺序，便于对照拍摄顺序）。"""
+    """Read a list file and return the file names that exist (in list order,
+    so the shooting order stays comparable)."""
     names = []
     with open(path, encoding='utf-8') as fh:
         for line in fh:
@@ -98,26 +105,26 @@ def build(src_dir, files, cols, out_path, title):
 
 
 def main():
-    ap = argparse.ArgumentParser(description='生成 contact sheet')
+    ap = argparse.ArgumentParser(description='generate a contact sheet')
     ap.add_argument('src_dir')
     ap.add_argument('out_path')
     ap.add_argument('cols', nargs='?', type=int, default=5)
     ap.add_argument('--list', dest='list_file',
-                    help='文件清单路径，每行一个文件名')
+                    help='path to a list file with one file name per line')
     ap.add_argument('--title', default='')
     args = ap.parse_args()
 
     files = collect(args.src_dir, args.list_file)
     if not files:
-        raise SystemExit(f'没有可用的图片: {args.src_dir}')
+        raise SystemExit(f'no usable images: {args.src_dir}')
 
     title = args.title or (f'{os.path.basename(args.src_dir)} — '
-                           f'{len(files)} 张')
+                           f'{len(files)} images')
     errors = build(args.src_dir, files, args.cols, args.out_path, title)
 
-    print(f'saved {args.out_path} — {len(files)} 张')
+    print(f'saved {args.out_path} — {len(files)} images')
     for name, err in errors:
-        print(f'  [读取失败] {name}: {err}')
+        print(f'  [read failed] {name}: {err}')
 
 
 if __name__ == '__main__':

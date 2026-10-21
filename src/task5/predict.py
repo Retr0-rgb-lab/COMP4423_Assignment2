@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-"""对像素调用已锁定的 Pipeline。
+"""Call the locked Pipeline on pixels.
 
-文件名、文件夹、EXIF、GPS 不进这个模块。调用方只把 RGB 数组交进来。
-预处理必须用评估同一函数 ``resize_and_crop``：短边 256，再中心裁成 256×256。
-``HogLbp.transform`` 里还会再调一次；尺寸已经是 256×256 时该函数原样返回。
+File name, folder, EXIF and GPS never reach this module; the caller only
+hands in an RGB array. Preprocessing must use the same ``resize_and_crop``
+function as the evaluation: short side to 256, then a center crop to 256×256.
+``HogLbp.transform`` calls it once more; when the size is already 256×256 the
+function returns it unchanged.
 """
 from pathlib import Path
 
@@ -22,7 +24,7 @@ class Prediction:
 
 
 def load_pipeline(path=None):
-    """读 ``models/task3_pipeline.joblib``。不重新训练。"""
+    """Load ``models/task3_pipeline.joblib``. No retraining."""
     model_path = Path(path) if path is not None else MODEL_PATH
     if not model_path.is_file():
         raise FileNotFoundError(
@@ -38,7 +40,8 @@ def load_pipeline(path=None):
 
 
 def label_text(pipeline, label_id):
-    """优先用保存 Pipeline 时写上的 display_，否则用 config.DISPLAY。"""
+    """Prefer the display_ mapping stored with the saved Pipeline, else
+    config.DISPLAY."""
     saved = getattr(pipeline, "display_", None) or {}
     if label_id in saved:
         return str(saved[label_id])
@@ -48,9 +51,11 @@ def label_text(pipeline, label_id):
 
 
 def predict_rgb(pipeline, rgb):
-    """``rgb`` 是 H×W×3。返回官方标签、两类概率（若分类器提供）和裁剪图。"""
+    """``rgb`` is H×W×3. Returns the official label, the two class
+    probabilities (if the classifier provides them) and the cropped image."""
     cropped = resize_and_crop(rgb)
-    # Pipeline 吃的是图像列表。单个 ndarray 会被当成逐行迭代。
+    # The Pipeline expects a list of images; a bare ndarray would be
+    # iterated row by row.
     label_id = int(pipeline.predict([cropped])[0])
     return Prediction(
         label_id,
@@ -61,7 +66,8 @@ def predict_rgb(pipeline, rgb):
 
 
 def class_probabilities(pipeline, cropped):
-    """类 id → 概率。最终估计器没有 predict_proba 时返回空字典。"""
+    """Class id -> probability. Returns an empty dict when the final
+    estimator has no predict_proba."""
     predict_proba = getattr(pipeline, "predict_proba", None)
     if predict_proba is None:
         return {}

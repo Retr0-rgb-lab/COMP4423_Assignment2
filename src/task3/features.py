@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""手工特征。fit 只看训练图；BoW 词典不跨折复用。"""
+"""Hand-crafted features. fit only sees training images; the BoW codebook is
+never reused across folds."""
 import hashlib
 
 import cv2
@@ -33,7 +34,7 @@ def _sift():
     global _SIFT
     if _SIFT is None:
         if not hasattr(cv2, "SIFT_create"):
-            raise SystemExit("cv2.SIFT_create 不可用。停下来改计划，不用 ORB 替换。")
+            raise SystemExit("cv2.SIFT_create is not available. Stop and change the plan; do not substitute ORB.")
         _SIFT = cv2.SIFT_create(nfeatures=SIFT_NFEATURES)
     return _SIFT
 
@@ -136,7 +137,8 @@ def lbp_vec(rgb):
 
 
 def sift_cached(rgb):
-    """返回 (pts[N,2], desc[N,128])。没有关键点时 pts/desc 为空数组。"""
+    """Return (pts[N,2], desc[N,128]). With no keypoints, pts and desc are
+    empty arrays."""
     digest = _digest(rgb)
     folder = CACHE / "sift"
     path = folder / f"{digest}.npz"
@@ -170,7 +172,7 @@ def _word_hist(desc, kmeans):
 
 
 def _spatial_hists(pts, desc, kmeans):
-    """整图 + 2×2，各块单独 L1。"""
+    """Whole image plus 2x2 quadrants, each block L1-normalised separately."""
     global_hist = _word_hist(desc, kmeans)
     quads = [np.zeros(BOW_CLUSTERS, dtype=np.float64) for _ in range(4)]
     if len(desc):
@@ -208,7 +210,8 @@ class LbpFeat(_ImageFeature):
 
 
 class HogLbp(BaseEstimator, TransformerMixin):
-    """F2、F3 在训练集上各自标准化后再拼接。"""
+    """F2 and F3 are standardised separately on the training set and then
+    concatenated."""
 
     def fit(self, images, y=None):
         cropped = [resize_and_crop(im) for im in images]
@@ -244,11 +247,11 @@ class _BoWBase(BaseEstimator, TransformerMixin):
             else:
                 descs.append(desc)
         if not descs:
-            raise SystemExit("训练集没有提取到任何 SIFT 描述子")
+            raise SystemExit("no SIFT descriptor was extracted from the training set")
         stacked = np.concatenate(descs, axis=0)
         if len(stacked) < BOW_CLUSTERS:
             raise SystemExit(
-                f"描述子 {len(stacked)} 个，少于词典 {BOW_CLUSTERS}，无法建词典"
+                f"{len(stacked)} descriptors, fewer than the codebook size {BOW_CLUSTERS}, cannot build the codebook"
             )
         self.kmeans_ = MiniBatchKMeans(
             n_clusters=BOW_CLUSTERS,
@@ -269,7 +272,7 @@ class _BoWBase(BaseEstimator, TransformerMixin):
                 empty += 1
             out.append((pts, desc))
         if empty:
-            print(f"  SIFT 空图 {empty} 张，直方图记为 0")
+            print(f"  {empty} SIFT-empty images, the histogram is recorded as 0")
         return out
 
 
@@ -313,5 +316,5 @@ def assert_dims(sample_rgb):
     }
     for key, dim in got.items():
         if dim != FEATURE_DIM[key]:
-            raise SystemExit(f"{key} 维度是 {dim}，计划写的是 {FEATURE_DIM[key]}")
+            raise SystemExit(f"the dimension of {key} is {dim}, the plan says {FEATURE_DIM[key]}")
     return got

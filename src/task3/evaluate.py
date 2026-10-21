@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""在全部训练集上重拟合锁定的流水线，汇报验证集，测试集只评估一次。"""
+"""Refit the locked pipeline on the full training set, report the validation
+split, and evaluate the test split exactly once."""
 import csv
 import json
 
@@ -34,7 +35,7 @@ def main():
         winner = choose_pipeline(read_rows(OUTPUT_DIR / "stage_b.csv"))
         selection = {"feature_id": winner["feature_id"], "clf_id": winner["clf_id"]}
     feature_id, clf_id = selection["feature_id"], selection["clf_id"]
-    print(f"重拟合 {feature_id} × {clf_id}", flush=True)
+    print(f"refitting {feature_id} × {clf_id}", flush=True)
 
     records = load_index()
     pipe, splits = _fit_train(records, feature_id, clf_id)
@@ -42,7 +43,7 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(pipe, MODEL_PATH)
-    print(f"模型 {MODEL_PATH}", flush=True)
+    print(f"model {MODEL_PATH}", flush=True)
 
     for split_name in ("val", "test"):
         subset = splits[split_name]

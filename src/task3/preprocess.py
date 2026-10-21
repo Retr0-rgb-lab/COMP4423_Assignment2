@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""像素预处理。Task 5 只能调用这里，不能另写一套缩放。"""
+"""Pixel preprocessing. Task 5 must call this module and must not write its
+own resizing."""
 import numpy as np
 from PIL import Image
 
@@ -7,16 +8,18 @@ from src.task3.config import IMAGE_SIZE
 
 
 def load_rgb(path):
-    """读成 RGB uint8。不用 OpenCV 的 BGR，避免和界面读图不一致。"""
+    """Read as RGB uint8. OpenCV's BGR order is not used, so loading stays
+    consistent with the GUI."""
     with Image.open(path) as im:
         return np.asarray(im.convert("RGB"))
 
 
 def resize_and_crop(rgb):
-    """短边缩到 256，再中心裁成 256×256。已经是该尺寸时原样返回。"""
+    """Scale the short side to 256, then centre-crop to 256x256. Images that
+    are already at that size are returned unchanged."""
     rgb = np.asarray(rgb)
     if rgb.ndim != 3 or rgb.shape[2] != 3:
-        raise ValueError(f"期望 H×W×3 的 RGB，得到 {rgb.shape}")
+        raise ValueError(f"expected an H×W×3 RGB array, got {rgb.shape}")
     if rgb.dtype != np.uint8:
         rgb = np.clip(rgb, 0, 255).astype(np.uint8)
 
@@ -36,7 +39,7 @@ def resize_and_crop(rgb):
     x0 = (resized.shape[1] - IMAGE_SIZE) // 2
     out = resized[y0:y0 + IMAGE_SIZE, x0:x0 + IMAGE_SIZE]
     if out.shape != (IMAGE_SIZE, IMAGE_SIZE, 3):
-        raise RuntimeError(f"裁剪结果异常: {out.shape}")
+        raise RuntimeError(f"unexpected crop shape: {out.shape}")
     return np.ascontiguousarray(out)
 
 
