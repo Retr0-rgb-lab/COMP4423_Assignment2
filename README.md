@@ -3,6 +3,8 @@
 Classifies a scene photograph as inside the PolyU main campus (inside = 1) or
 outside it (outside = 0), from the pixels alone.
 
+The repository is at https://github.com/Retr0-rgb-lab/COMP4423_Assignment2
+
 The submitted report is `Assignment2_Report_24101322D_HUANG_Haoran.pdf` at the
 repository root; it documents the data, the features, the classifiers, the
 measured results and the known limitations. The report cannot be rebuilt from
