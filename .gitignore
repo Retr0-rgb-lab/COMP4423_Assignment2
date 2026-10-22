@@ -1,49 +1,83 @@
-# ---- 数据集：体积大，提交走网盘 + DATASET_LINK.txt，不入 git ----
-# 注意：这里必须写 data/* 而不是 data/。若写 data/，git 不会进入该目录，
-# 下面的 ! 反选规则将永远无法生效，标注 CSV 会一起被丢掉。
-# CSV 在 annotations 的子目录里：必须先反选子目录，再反选 **/*.csv。
-# 只反选 data/annotations/*.csv 不会递归，inside/ outside/ 下的源 manifest 会被丢掉。
+# ============================================================
+# 本仓库镜像提交件：报告 PDF + 代码源码 + 代码与报告真正需要的附属文件。
+# 过程记录、课程材料、报告构建链、自检脚本与数据集本体只在本地保留，
+# 不进版本库（报告 PDF 与代码包本体除外，见文末）。
+#
+# 写法约定：排除一个目录一律写成 "目录/*"，不写 "目录/"。
+# git 不会进入被排除的目录，一旦写成 "docs/" 或 "data/"，
+# 后面的 ! 反选规则会全部失效，必须先反选目录再反选文件。
+# ============================================================
+
+# ---- 过程记录与课程材料 ----
+progress/
+plans/
+AGENTS.md
+# docs/ 下只保留插图目录，报告构建链与自检脚本都是本地工具
+docs/*
+!docs/figures/
+
+# ---- 报告构建链与自检脚本（本地用，不随提交件发布） ----
+docs/make_report.py
+docs/report_template.tex
+docs/check_crossrefs.py
+docs/check_fold_claims.py
+docs/acceptance_check.py
+*.tex
+
+# ---- LaTeX 中间产物与提交用的压缩包 ----
+*.aux
+*.out
+*.toc
+*.lof
+*.lot
+*.log
+logs/
+Assignment2_Code_*.zip
+
+# ---- 数据集本体：走网盘，链接见 DATASET_LINK.txt ----
+# data/ 先整体排除，再反选 annotations/，否则 git 不会进入该目录，
+# 标注 CSV 会跟着一起被丢掉。
 data/*
 !data/annotations/
-data/annotations/**
-!data/annotations/**/
-!data/annotations/**/*.csv
-!data/annotations/**/*.md
-data/raw/
-data/curated/
-*.jpg
-*.jpeg
-*.png
-!docs/**/*.png
-*.heic
-*.heif
+# annotations/ 里只留 split、计数表和 manifest CSV；
+# review/ 是被剔除的照片，不随提交件发布。
+data/annotations/*
+!data/annotations/*.csv
+!data/annotations/*.md
+!data/annotations/inside/
+!data/annotations/outside/
 
-# ---- 模型产物：可由脚本重新生成 ----
+# ---- 模型产物：只保留锁定的那一条流水线 ----
+models/*
+!models/task3_pipeline.joblib
 *.pkl
-*.joblib
 *.sav
 *.h5
 *.npy
 *.npz
 *.onnx
-models/
-outputs/
-artifacts/
 
-# ---- 特征缓存 ----
+# ---- 训练结果表：报告引用的原始数据，随代码一起发布 ----
+# run_stamp.json 是断点续跑的指纹，不发布。
+outputs/*
+!outputs/task3/
+outputs/task3/run_stamp.json
+
+# ---- 照片不入库；仓库只保留报告插图 ----
+*.jpg
+*.jpeg
+*.heic
+*.heif
+*.png
+!docs/figures/*.png
+
+# ---- 特征缓存与运行目录 ----
 cache/
 *.cache
 features/
-
-# ---- 训练运行产物 ----
 runs/
 wandb/
 mlruns/
-logs/
-*.log
-
-# ---- 提交用的网盘链接（规格要求文件在 ZIP 内，单独留一份） ----
-# 注意：DATASET_LINK.txt 若已填好且确定提交，可按需 git add -f
 
 # ---- Python ----
 __pycache__/
@@ -66,8 +100,5 @@ Thumbs.db
 desktop.ini
 ~$*
 
-# LaTeX build products and the submission archive are outputs, not source.
-*.aux
-*.out
-*.toc
-Assignment2_Code_*.zip
+# ---- 提交件目录：报告 PDF 与代码包只放在本地，不进版本库 ----
+submission/

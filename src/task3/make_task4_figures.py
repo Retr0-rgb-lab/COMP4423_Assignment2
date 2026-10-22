@@ -3,7 +3,14 @@
 predictions. No training happens here."""
 import csv
 import os
+import sys
 from pathlib import Path
+
+# Allow both "python -m src.task3.make_task4_figures" and
+# "python src/task3/make_task4_figures.py" to find the src package.
+_REPO = Path(__file__).resolve().parents[2]
+if str(_REPO) not in sys.path:
+    sys.path.insert(0, str(_REPO))
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,14 +23,14 @@ PRED = ROOT / "outputs" / "task3" / "test_predictions.csv"
 OUT_DIR = ROOT / "docs" / "figures"
 
 EXAMPLES = [
-    ("OUT-06_001_IMG_0863.jpg", "OUT-06 判对\n校外红砖立面"),
-    ("OUT-06_012_IMG_0892.jpg", "OUT-06 判错\n校外台阶入口 → 校内"),
-    ("OUT-07_001_IMG_0934.jpg", "OUT-07 判对\n港大绿地"),
-    ("IN-03_016_IMG_1459.jpg", "IN-03 判对\n图书馆入口近景"),
-    ("IN-03_001_IMG_1444.jpg", "IN-03 判错\n砖墙近景 → 校外"),
-    ("IN-03_005_IMG_1448.jpg", "IN-03 判错\n庭院入口 → 校外"),
-    ("IN-07_002_IMG_1428.jpg", "IN-07 判对\nCMA 入口近景"),
-    ("IN-07_008_IMG_1434.jpg", "IN-07 判错\n同一庭院拉远 → 校外"),
+    ("OUT-06_001_IMG_0863.jpg", "OUT-06 correct\nred-brick facade"),
+    ("OUT-06_012_IMG_0892.jpg", "OUT-06 wrong\noutside steps -> inside"),
+    ("OUT-07_001_IMG_0934.jpg", "OUT-07 correct\nHKU green space"),
+    ("IN-03_016_IMG_1459.jpg", "IN-03 correct\nlibrary entrance"),
+    ("IN-03_001_IMG_1444.jpg", "IN-03 wrong\nbrick wall close-up -> outside"),
+    ("IN-03_005_IMG_1448.jpg", "IN-03 wrong\ncourtyard entrance -> outside"),
+    ("IN-07_002_IMG_1428.jpg", "IN-07 correct\nCMA entrance"),
+    ("IN-07_008_IMG_1434.jpg", "IN-07 wrong\nsame courtyard, wider -> outside"),
 ]
 
 
@@ -59,12 +66,12 @@ def confusion_figure(rows):
         matrix[int(row["y_true"]), int(row["y_pred"])] += 1
     fig, ax = plt.subplots(figsize=(4.2, 3.6))
     ax.imshow(matrix, cmap="Blues")
-    ax.set_xticks([0, 1], ["预测校外", "预测校内"])
-    ax.set_yticks([0, 1], ["实际校外", "实际校内"])
+    ax.set_xticks([0, 1], ["predicted outside", "predicted inside"])
+    ax.set_yticks([0, 1], ["actual outside", "actual inside"])
     for i in range(2):
         for j in range(2):
             ax.text(j, i, str(matrix[i, j]), ha="center", va="center", fontsize=16)
-    ax.set_title("测试集混淆矩阵  n=69")
+    ax.set_title("Test confusion matrix  n=69")
     fig.tight_layout()
     path = OUT_DIR / "task4_confusion.png"
     fig.savefig(path, dpi=140)

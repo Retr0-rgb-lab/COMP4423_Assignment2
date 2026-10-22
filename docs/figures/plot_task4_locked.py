@@ -425,7 +425,7 @@ def try_examples():
         print(
             "no qualitative examples generated: outputs/task3/test_predictions.csv is missing."
             " That file is listed in .gitignore, and this workspace has no photos either."
-            " The confusion matrix figures only use the integers from the progress record; no error-case file name was invented."
+            " The confusion matrix figures only use the integers from the locked result tables; no error-case file name was invented."
         )
         return
     rows = _load_predictions(PRED_CSV)
