@@ -146,7 +146,7 @@ ok("PDF 有标题元数据", "COMP4423" in _pdf_str(PDF.read_bytes()),
    _pdf_str(PDF.read_bytes())[:60])
 text = subprocess.run(["mutool", "draw", "-F", "txt", "-o", "-", str(PDF)],
                       capture_output=True, text=True).stdout
-for n in range(1, 6):
+for n in range(1, 7):
     ok(f"PDF 里有 Figure {n}. 题注", f"Figure {n}." in text)
 ok("PDF 文本层含姓名", "Huang Haoran" in text)
 ok("PDF 文本层含学号", "24101322D" in text)
@@ -167,6 +167,17 @@ ok("PDF 里有可点击的网盘链接", any(b"drive.google.com" in u for u in u
 ok("PDF 里嵌入了中文字型", any(b"/BaseFont" in b and b"gbsn" in b.lower()
    for b in blobs) or b"gbsn" in allb.lower())
 
+print("\n=== 6b. 报告正文无乱码 ===")
+# a word glued to a digit is the signature of a bad text substitution
+GLUE = re.compile(r"\b(place|section|figure|table|part|line|step|item|case|kind|sort|"
+                  r"mode|note|text|word|page|form|group|frame|row|column)\d")
+# strip inline code spans and link targets, so that file names such as
+# figure1_inside_locations_annotated.png are not read as garbled text
+prose = re.sub(r"`[^`]*`", " ", md)
+prose = re.sub(r"\]\([^)]*\)", "] ", prose)
+glue = sorted({m.group(0) for m in GLUE.finditer(prose)})
+ok("正文里没有粘连的词+数字", not glue, ", ".join(glue))
+
 print("\n=== 7. 代码包内容 ===")
 with zipfile.ZipFile(ZIP) as z:
     names = z.namelist()
@@ -176,8 +187,14 @@ required = ["models/task3_pipeline.joblib", "data/annotations/dataset_summary.md
             "progress/task4_evaluation.md", "progress/task1_dataset_overview.md",
             "plans/task1_3_review_2026-10-15.md", "docs/figures/task4_example_grid.png",
             "docs/figures/figure1_inside_locations_annotated.png",
+            "docs/figures/task5_application.png",
             "src/task3/features.py", "src/task5/app.py", "src/task5/predict.py",
-            "src/tools/build_dataset.py", "docs/make_report.py"]
+            "src/tools/build_dataset.py", "docs/make_report.py",
+            # the report promises these ship with the archive
+            "outputs/task3/stage_a.csv", "outputs/task3/stage_b.csv",
+            "outputs/task3/selection.json", "outputs/task3/val_metrics.json",
+            "outputs/task3/test_metrics.json", "outputs/task3/test_predictions.csv",
+            "outputs/task3/RESULTS_PROVENANCE.txt"]
 for rq in required:
     ok(f"包内含 {rq}", rq in names)
 ok("包内没有 pycache", not any("__pycache__" in n for n in names))
