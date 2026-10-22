@@ -10,7 +10,7 @@ import re
 import sys
 from pathlib import Path
 
-REPO = Path("/mnt/d/Program Files/learn_torch/python-cv/Assignment2")
+REPO = Path(__file__).resolve().parents[1]
 DOC = REPO / "progress/task6_report_draft.md"
 
 text = DOC.read_text(encoding="utf-8")

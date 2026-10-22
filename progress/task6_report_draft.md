@@ -69,7 +69,7 @@ Inside the group, variation is recorded in columns rather than new groups: `sub_
 
 Quotas in the collection note are within-group targets, not the final counts. Final counts are below.
 
-Both classes contain buildings, covered walkways, green space, and open paving. Eleven of the thirteen scene types appear on both sides of the label. The two types that appear only outside are deliberate: five indoor HKU corridor frames, so that “indoors” cannot become a synonym for inside, and nine market-stall frames from Temple Street, which have no campus counterpart.
+Both classes contain buildings, covered walkways, green space, and open paving. Eleven of the thirteen scene types appear on both sides of the label.The two types that appear only outside are deliberately placed there: the market stalls of Temple Street and the road frontage of the Jordan Road stretch, where heavy traffic would otherwise be a free cue. The stalls number nine, six of them on Temple Street itself and three on the Jordan Road stretch.
 
 Among the 718 usable photographs, before the per-group cap:
 
@@ -400,7 +400,7 @@ Two constant classifiers frame this result, and one of them is better on accurac
 
 The test split holds 42 inside images and 27 outside ones, because the split unit is the place and the two held-out inside places are larger than the two held-out outside places. A constant that says inside therefore scores 0.609, slightly above the model’s 0.594, and the honest statement is that on accuracy alone this model does not beat that constant. Accuracy is the wrong headline for a split with that composition. On balanced accuracy, which weights the two classes equally, the model is 0.160 above either constant. It keeps 0.963 outside recall where the always-inside constant has 0.000, and when it does say inside it is right 15 times out of 16. The error is missed campus scenes, not a flood of false campus predictions.
 
-The comparison that matters for the assignment is the third row against the first: the model finds 14 more inside images than a constant outside predictor, and gives up 1 outside image in exchange. It is a better detector of the inside class, which is the class an application has to get right.
+The comparison that matters for the assignment is the third row against the first: the model recognises 15 inside images that the constant calls outside, and gives up 1 outside image in exchange, a net gain of 14 correct answers. It is a better detector of the inside class, which is the class an application has to get right.
 
 ---
 
@@ -483,17 +483,17 @@ The thirteen frames were chosen by a rule fixed in advance, not by how they look
 
 The grid shows the two failure modes at once. The one false inside is `OUT-06_012_IMG_0892.jpg`, a glass entrance and a flight of steps at HKU, not the red-brick facade that dominates its group — the 10 OUT-06 facade frames are all correct.
 
-The missed inside frames are `IN-03_001_IMG_1444.jpg` and `IN-03_002_IMG_1445.jpg`, where the brick rib wall of the library fills the frame, and three frames at the CMA courtyard: `IN-07_005_IMG_1431.jpg`, `IN-07_006_IMG_1432.jpg` and `IN-07_008_IMG_1434.jpg`. The two correct CMA frames are `IN-07_002_IMG_1428.jpg` and `IN-07_001_IMG_1427.jpg`.
+The missed inside frames are `IN-03_001_IMG_1444.jpg` and `IN-03_002_IMG_1445.jpg`, where the brick rib wall of the library fills the frame, and two frames at the CMA courtyard, `IN-07_005_IMG_1431.jpg` and `IN-07_006_IMG_1432.jpg`. A third missed CMA frame, `IN-07_008_IMG_1434.jpg`, is not in the grid, because the sampling rule takes two missed IN-07 frames. The two correct CMA frames are `IN-07_002_IMG_1428.jpg` and `IN-07_001_IMG_1427.jpg`.
 
-Distance does not separate them, because the correct and the missed frames sit at the same scale. `IN-07_002` is a close view of the patterned wall, the crest and the glass doors, and it is correct. `IN-07_005` is the same entrance pulled back, and it is missed. `IN-07_001` is the courtyard with its planting beds, and it is correct; `IN-07_008` is the same courtyard pulled back to take in the seating and the parasols, and it is missed. What the three missed frames have in common is not the camera distance but the red brick. `IN-07_005` gives the whole brick facade above the patterned wall, `IN-07_006` is a tree-lined walkway with the brick building behind it, and `IN-07_008` carries the seating, the parasols, the tree and the brick building together. The two correct frames give the campus-specific subject instead: the patterned wall and its entrance doors under open sky, and a courtyard of planting beds with no seating in it.
+The crops are what the model sees, and no single cue separates the four CMA frames: every one of them contains the patterned wall, the PolyU crest and the brick building. What changes is the proportion. In `IN-07_002` the crop is mostly the patterned wall and the crest under open sky, and in `IN-07_001` it is mostly the planted courtyard, the tree and the white canopy, with the brick confined to a band at the top. In `IN-07_005` the same entrance is seen from further back, so the brick band across the top takes half the frame and the patterned wall is one panel on the right. In `IN-07_006` the café tables, the parasols and the tree come in and the brick building fills the upper frame. The library frames fail the same way: `IN-03_001` is almost entirely brick with a small café sign at the bottom.
 
-That is the hard negative working against the model rather than for it. The Hong Kong University buildings were collected into the outside class precisely to stop the model from using brick as a campus cue, and OUT-06, a brick building, is 95% correct. On a campus building that is also brick, the same cue runs the other way: a handcrafted gradient and texture description has no channel for “this particular building”, so a campus frame that shows enough of the brick looks like the negative it was trained to reject. The library frames fail for the same reason, the rib wall being brick. The limitation is therefore not the viewpoint range, and not the class balance. It is that the representation has one strong material cue and no identity cue, and the material cue is the one thing the design deliberately taught the model to distrust.
+So the cue that decides these frames is material and texture, and the material in question is the brick the model was taught to distrust. The Hong Kong University buildings were collected into the outside class precisely to stop the model from using brick as a campus cue, and OUT-06, a brick building, is 95% correct. But a handcrafted gradient and texture description has no channel for “this particular building”, so a crop that is mostly brick banding, glass and paving reads as the negative it was trained to reject, and the identity of the place cannot be recovered from what is left of it. The library frames fail for the same reason, the rib wall being brick. This is the hard negative working against the model rather than for it. The limitation is not the viewpoint range and not the class balance, it is that the representation has one strong material cue and no identity cue, and the material cue is the one thing the design deliberately taught the model to distrust.
 
 The Chinese working record `progress/task4_evaluation.md` §5.1 names eight earlier example photographs from `docs/figures/task4_examples.png`, a smaller grid drawn from the same prediction table before this one. Five of them — `OUT-06_001_IMG_0863.jpg`, `OUT-06_012_IMG_0892.jpg`, `OUT-07_001_IMG_0934.jpg`, `IN-03_001_IMG_1444.jpg` and `IN-07_002_IMG_1428.jpg` — are also in Figure 5; the other three are not, and eight of the thirteen frames used here are described only in this report. The two grids are not the same set, so the record is not a caption source for this figure. Where they overlap they agree on the outcome of each frame, because both were read from the same prediction table.
 
 ![Thirteen test photographs, one per selected cell of the confusion matrix](docs/figures/task4_example_grid.png)
 
-*Figure 5. Thirteen test photographs, in the order of the manifest: the filename of each frame, its location group, and whether the locked pipeline classified it correctly.*
+*Figure 5. Thirteen test photographs in the order of the manifest: each caption gives the location group and whether the locked pipeline classified that frame correctly. The file name of every frame is in `docs/figures/task4_example_manifest.csv`.*
 
 ### 5.5 The test numbers do not retune the model
 
@@ -504,6 +504,10 @@ Accuracy 0.594 and inside recall 0.357 are the score of the pipeline that was lo
 ## 6. Application (Task 5)
 
 The local program lets a user select one scene photograph, shows that photograph, and returns either “Inside PolyU main campus” or “Outside PolyU main campus”. It is a desktop window written with Tk from the Python standard library. Nothing was added to `requirements.txt`. Pillow, joblib, OpenCV [9], scikit-image [8] and scikit-learn [7] are the Task 3 dependencies. The design and the checks in Section 6.4 are recorded in `progress/task5_app.md`. The same launch lines are in the root `README.md`.
+
+![The Task 5 application applied to one photograph](docs/figures/task5_application.png)
+
+*Figure 6. The application applied to one photograph, drawn by the program’s own prediction path. The left panel is the selected file, the middle panel is the 256×256 centre crop the model receives, and the right panel is what the program returned: the sentence, the two class probabilities, and the note that the file name, folder, EXIF and GPS are not used. The photograph is `OUT-06_001_IMG_0863.jpg`, the Hong Kong University Main Building, one of the hard negatives, and the locked pipeline calls it outside with 0.745.*
 
 The program does not train and does not edit `splits.csv`. The classifier remains the locked HOG+LBP random forest in `models/task3_pipeline.joblib`. The test accuracy 0.594 and the other Section 4–5 figures are unchanged.
 
@@ -555,7 +559,7 @@ A line at the bottom of the window names `models/task3_pipeline.joblib` and stat
 
 ### 6.4 Checks recorded for the application
 
-`progress/task5_app.md` §4 records these checks on the installed `requirements.txt`. They do not refit the forest and they do not replace Section 4 or Section 5.
+`progress/task5_app.md` §4 records these checks on the installed `requirements.txt`, and its §5 records the replay of the whole test split. They do not refit the forest and they do not replace Section 4 or Section 5.
 
 - From open to label, one image takes about 0.1 seconds, including HOG+LBP, `predict`, and `predict_proba`.
 - Every crop is `(256, 256, 3)`. Calling `resize_and_crop` again on that crop leaves the array unchanged. Predicting the uncropped original returns the same label as cropping first.
@@ -625,7 +629,7 @@ The measured limit is in Section 5. On two campus places the model had not seen,
 
 ### How do you use GenAI to assist you in the implementation?
 
-Generative models drafted the data scripts, the annotated campus map, the Task 3 training code, and the experiment note that fixes the comparison. The drafted files are `src/tools/build_dataset.py`, `src/tools/collapse_to_venues.py`, `src/tools/apply_naming.py`, `src/tools/make_contact_sheet.py`, the modules under `src/task3/`, `docs/figures/figure1_inside_locations_annotated.png`, and `progress/task3_experiment.md`. They did not take the photographs, assign places, or decide include versus exclude; those decisions were made by looking at the frames.
+Generative models drafted the data scripts, the annotated campus map, the Task 3 training code, and the experiment note that fixes the comparison. The drafted files are `src/tools/build_dataset.py`, `src/tools/collapse_to_venues.py`, `src/tools/apply_naming.py`, `src/tools/make_contact_sheet.py`, `src/_gen_annotated_map.py`, the modules under `src/task3/`, `docs/figures/figure1_inside_locations_annotated.png`, and `progress/task3_experiment.md`. They did not take the photographs, assign places, or decide include versus exclude; those decisions were made by looking at the frames.
 
 Verification was reading that material back against the data, and it is named here so that it can be repeated. The review pass of 2026-10-15 confirmed that the sort key in `src/task3/cv.py` is the mean location-holdout balanced accuracy, that the published Stage A and Stage B tables match `outputs/task3/stage_a.csv` and `stage_b.csv` value for value, and that the test confusion matrix recomputes from `outputs/task3/test_predictions.csv`. Two of those checks now appear in this report with the numbers attached: the five folds of the location holdout in Section 4.2, and the resolved tie between F4 gradient boosting and the F4 linear SVM in the same section. The 69-image replay in Section 6.4 is a third, and the only one that was run after this report was written.
 
@@ -670,7 +674,7 @@ Those test numbers are acceptable as a measurement and poor as a campus detector
 
 What would actually change the evidence is more inside places, collected under the same boundary rules, and one new held-out evaluation of this saved pipeline. The route is concrete: add inside places so that a fifth inside group can be held out, leave the current IN-03 and IN-07 groups in the test set and never train on them, and score the new group with the pipeline saved in `models/task3_pipeline.joblib` rather than with a refit.
 
-Two measurements are worth making while that collection happens, and neither touches the locked model. The first is a colour-normalised variant of the same HOG and LBP, which would separate “brick looked like the negative” from “the negative was never learnable”; Section 5.4 argues for the first reading, and only that experiment can settle it. The second is a per-cell breakdown that also splits by scene class, because the misses concentrate on frames that show a building’s brick mass rather than its patterned wall, and the aggregate table cannot show that. Rewriting the current test score by training on it would not.
+Two measurements are worth making while that collection happens, and neither touches the locked model. The first is a colour-normalised variant of the same HOG and LBP, which would separate “the crop was mostly brick and paving” from “the negative was never learnable”, since Section 5.4 shows the misses clustering on frames whose crop is mostly brick banding, glass and paving rather than on a particular kind of place4 argues for the first reading, and only that experiment can settle it. The second is a per-cell breakdown that also splits by scene class, because the misses concentrate on frames that show a building’s brick mass rather than its patterned wall, and the aggregate table cannot show that. Rewriting the current test score by training on it would not.
 
 ---
 
@@ -699,3 +703,4 @@ Two measurements are worth making while that collection happens, and neither tou
 | 3 | `docs/figures/task4_test_confusion_matrix.png` | Test confusion matrix, one evaluation. |
 | 4 | `docs/figures/task4_test_per_group.png` | Test accuracy by place. |
 | 5 | `docs/figures/task4_example_grid.png` | Thirteen test photographs, one per selected cell, labelled with the place and the outcome. The file list is in `docs/figures/task4_example_manifest.csv`. |
+| 6 | `docs/figures/task5_application.png` | The Task 5 application applied to one photograph: the file, the 256×256 crop the model receives, and the label and probabilities it returned. |

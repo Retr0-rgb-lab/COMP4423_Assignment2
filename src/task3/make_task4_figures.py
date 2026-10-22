@@ -96,7 +96,7 @@ def main():
     paths = _index()
     missing = [name for name, _cap in EXAMPLES if name not in paths]
     if missing:
-        raise SystemExit(f"例图找不到: {missing}")
+        raise SystemExit(f"example photograph not found: {missing}")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     conf_path, matrix = confusion_figure(rows)
     ex_path = examples_figure(paths)

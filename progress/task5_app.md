@@ -99,3 +99,15 @@ Ubuntu 若提示没有 `_tkinter`，安装 `python3-tk`。Windows 官方安装�
 另外用噪声图、1×1、超宽图、全黑、全白、灰度 JPEG、带透明通道的 PNG，以及一张 3840×2400 的 JPEG 各跑了一次，都返回了上面两个英文标签之一。
 
 图形界面在桌面上打开，窗口大约 880×585。选图之后画布上有原图，小图上有裁剪，预测文字是上述英文句子。命令 `python -m src.task5.app --image <文件>` 和 `python src/task5/app.py --image <文件>` 都打印同一句标签和两类概率。
+
+## 5. 2026-10-21 补测：用测试集全量回放
+
+第 4 节写的检查是在没有 `data/pictures/` 的检出里做的，所以当时没有用原图回放测试集。照片齐了以后补做了一次。
+
+做法：对 `outputs/task3/test_predictions.csv` 里的 69 个文件，逐个调用 `src/task5/predict.py` 的 `predict_rgb`，也就是窗口调用的那个函数，用的是 `src/task3/preprocess.py` 的 `resize_and_crop` 和 `models/task3_pipeline.joblib`。
+
+结果：**69 张里 69 张的标签与锁定预测表一致，没有一处不符。**
+
+这条的意义是把「应用和评估是同一条流水线」从论证变成实测。Task 5 读的是同一个 joblib，走的是同一个 `resize_and_crop`，算的是同一个特征，得到的标签和评估表逐张相同。
+
+顺带生成 `docs/figures/task5_application.png`：用应用自己的预测路径处理一张真实照片，画出选中的文件、模型实际收到的 256×256 中心裁剪、程序返回的句子和两类概率。选的是 `OUT-06_001_IMG_0863.jpg`，港大主楼那张红砖难负样本，锁定流水线判 outside，概率 0.745。画法见 `src/task5/make_app_figure.py`。

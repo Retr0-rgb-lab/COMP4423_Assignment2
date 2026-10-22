@@ -32,18 +32,33 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path("/mnt/d/Program Files/learn_torch/python-cv/Assignment2")
+REPO = Path(__file__).resolve().parents[1]
 SRC = REPO / "progress" / "task6_report_draft.md"
 TEMPLATE = REPO / "docs" / "report_template.tex"
 OUT_TEX = REPO / "Assignment2_Report_24101322D_HUANG_Haoran.tex"
 # pandoc is not on PATH by default. Point PANDOC at the binary, or install
 # pandoc and set PANDOC = "pandoc".
+#
+# If it is not found, install it once with:
+#   python -m venv ~/.local/share/comp4423-tools/pandoc-venv
+#   ~/.local/share/comp4423-tools/pandoc-venv/bin/pip install pypandoc-binary
 PANDOC = os.environ.get("PANDOC", "pandoc")
 if not shutil.which(PANDOC):
-    for candidate in sorted(Path("/tmp/pdfenv").rglob("pandoc")):
-        if candidate.is_file() and os.access(candidate, os.X_OK):
-            PANDOC = str(candidate)
+    for root in (Path.home() / ".local/share/comp4423-tools/pandoc-venv",
+                 Path("/tmp/pdfenv")):
+        if not root.is_dir():
+            continue
+        for candidate in sorted(root.rglob("pandoc")):
+            if candidate.is_file() and os.access(candidate, os.X_OK):
+                PANDOC = str(candidate)
+                break
+        if shutil.which(PANDOC):
             break
+if not shutil.which(PANDOC) and not Path(PANDOC).is_file():
+    raise SystemExit(
+        "pandoc not found. Install it with:\n"
+        "  python -m venv ~/.local/share/comp4423-tools/pandoc-venv\n"
+        "  ~/.local/share/comp4423-tools/pandoc-venv/bin/pip install pypandoc-binary")
 
 CJK = r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]"
 

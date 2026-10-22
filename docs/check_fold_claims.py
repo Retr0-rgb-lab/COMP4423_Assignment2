@@ -8,7 +8,7 @@ import csv
 import re
 from pathlib import Path
 
-REPO = Path("/mnt/d/Program Files/learn_torch/python-cv/Assignment2")
+REPO = Path(__file__).resolve().parents[1]
 rows = {(r["feature_id"], r["clf_id"]): r
         for r in csv.DictReader(open(REPO / "outputs/task3/stage_b.csv", encoding="utf-8-sig"))}
 ba = {c: [float(rows[("F4", c)][f"ba_{i}"]) for i in range(5)]

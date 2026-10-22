@@ -55,6 +55,15 @@ python docs/make_report.py
 pdflatex Assignment2_Report_24101322D_HUANG_Haoran.tex
 ```
 
+pandoc is not on PATH by default. Install it once with
+
+```
+python -m venv ~/.local/share/comp4423-tools/pandoc-venv
+~/.local/share/comp4423-tools/pandoc-venv/bin/pip install pypandoc-binary
+```
+
+`docs/make_report.py` finds that installation on its own. The CJK support comes from `texlive-lang-chinese`; the report quotes two Chinese signs, and `CJKutf8` with the arphic `gbsn` type renders them.
+
 `docs/report_template.tex` holds the title page, the fonts and the page layout. The conversion script wraps the two Chinese signs in a CJK environment, lets long file names break inside table cells, and merges the hand written caption into the figure caption so that it is not printed twice.
 
 The Chinese working records under `progress/` are the source of the report. The report itself is in English.
@@ -69,9 +78,13 @@ models/             the locked pipeline
 data/annotations/   splits.csv, the per-class counts, and the source manifests
 outputs/task3/      the raw result tables behind the numbers in the report
 docs/figures/       the report figures
-docs/make_report.py the report build script
+docs/make_report.py      the report build script
 docs/check_fold_claims.py  checks the per-fold claims against stage_b.csv
 docs/check_crossrefs.py    checks that every internal cross reference resolves
+docs/acceptance_check.py   end-to-end check of the two submitted artefacts
+docs/*.pdf, docs/*.docx    the course documents the report is written against
 progress/           the working records the report is written from
 plans/              the review record and the remediation list
 ```
+
+`outputs/task3/` holds the raw result tables behind every number in the report, and `RESULTS_PROVENANCE.txt` records which run produced them and why a rerun needs `--force`.

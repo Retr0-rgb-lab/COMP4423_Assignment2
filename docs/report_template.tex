@@ -25,6 +25,10 @@
 % report's own cross references quote them ("Section 5.2"). LaTeX must
 % therefore not add a second number in front of them.
 \usepackage{titlesec}
+\usepackage{etoolbox}
+% A section heading must not be left alone at the foot of a page with its
+% table or text overleaf.
+\pretocmd{\section}{\Needspace{5\baselineskip}}{}{}
 \titleformat{\section}{\normalfont\large\bfseries}{}{0pt}{}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{}{0pt}{}
 \titleformat{\subsubsection}{\normalfont\small\bfseries}{}{0pt}{}
