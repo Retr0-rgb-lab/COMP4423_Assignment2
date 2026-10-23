@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Task 1 deliverable Figure 1: annotate the 7 inside location groups on the
-official Campus Map aerial view.
+"""Annotate the 7 inside location groups on the official Campus Map aerial
+view.
 
 Base image: docs/figures/campus_map_base.png
 (cropped out of a screenshot of the official 3D Campus Map, 1537x1336, without
-the pins.) The base image keeps the building letters of the real map; every
-word added by this script is in English, so the legend can be read without
-reading Chinese.
+the pins.) The base image keeps the building letters of the real map.
+
+Only the numbered pins are drawn on the map. The place names and the usable
+counts are set as a table in the report, not baked into the picture: the map
+is much wider than the printed column, so a sidebar legend would be scaled
+down to roughly 3pt and become unreadable, while a real table stays at body
+size and can be selected and searched.
+
 The pin coordinates were checked area by area against the building letters on
 the map (A-Z, VA, VS, M, P, Q).
 The counts are the usable images with status = include, not the training
@@ -43,7 +48,7 @@ def _pick_font():
             continue
         REGULAR, BOLD = regular, bold
         return
-    raise SystemExit("no usable TrueType font was found for the legend")
+    raise SystemExit("no usable TrueType font was found for the pin numbers")
 
 
 def f(sz, bold=False):
@@ -63,81 +68,35 @@ PINS = [
     ('07', 'CMA courtyard', 575, 1245, 17),
 ]
 TOTAL = sum(p[4] for p in PINS)
-LEG_W = 620
 
 map_im = Image.open(SRC).convert('RGB')
 W, H = map_im.size
-canvas = Image.new('RGB', (W + LEG_W, H), '#FFFFFF')
-canvas.paste(map_im, (0, 0))
+canvas = map_im.copy()
 d = ImageDraw.Draw(canvas, 'RGBA')
 
-R = 21
-for num, name, x, y, _ in PINS:
-    d.ellipse([x - R + 3, y - R + 5, x + R + 3, y + R + 5], fill=(0, 0, 0, 60))
-    d.ellipse([x - R, y - R, x + R, y + R], fill=(200, 30, 30, 235),
-              outline=(255, 255, 255, 255), width=4)
-    d.text((x, y), num, font=f(21), fill=(255, 255, 255, 255), anchor='mm')
+# The pins are drawn large enough to survive the reduction to column width.
+# The widest printed reduction is about 1:3.4, so a 34px number still lands
+# near 10px on the page.
+R = 34
+for num, _name, x, y, _n in PINS:
+    d.ellipse([x - R + 4, y - R + 6, x + R + 4, y + R + 6], fill=(0, 0, 0, 70))
+    d.ellipse([x - R, y - R, x + R, y + R], fill=(200, 30, 30, 240),
+              outline=(255, 255, 255, 255), width=5)
+    d.text((x, y), num, font=f(34, True), fill=(255, 255, 255, 255), anchor='mm')
 
-lx = W
-d.rectangle([lx, 0, W + LEG_W, H], fill=(255, 255, 255))
-d.line([(lx, 0), (lx, H)], fill=(225, 225, 225), width=2)
+# Trim the white margin the base image carries on the right, then pad all four
+# sides by the same amount. An uneven margin would make the picture look
+# shifted once LaTeX centres its bounding box.
+grey = canvas.convert('L')
+px = grey.load()
+cols = [x for x in range(W) if any(px[x, y] < 250 for y in range(0, H, 4))]
+rows = [y for y in range(H) if any(px[x, y] < 250 for x in range(0, W, 4))]
+box = (cols[0], rows[0], cols[-1] + 1, rows[-1] + 1)
+canvas = canvas.crop(box)
 
-y0 = 120
-d.text((lx + 34, y0), 'Figure 1 - inside location groups', font=f(24, True),
-       fill=(15, 15, 15))
-d.text((lx + 34, y0 + 42),
-       f'PolyU main campus (label = 1)  -  {len(PINS)} groups  -  {TOTAL} usable images',
-       font=f(15), fill=(95, 95, 95))
-d.line([(lx + 34, y0 + 76), (W + LEG_W - 34, y0 + 76)], fill=(215, 215, 215), width=2)
+PAD = 16
+padded = Image.new('RGB', (canvas.width + 2 * PAD, canvas.height + 2 * PAD), 'white')
+padded.paste(canvas, (PAD, PAD))
 
-ry = y0 + 100
-d.text((lx + 34, ry), 'No.', font=f(15), fill=(130, 130, 130))
-d.text((lx + 84, ry), 'Place', font=f(15), fill=(130, 130, 130))
-d.text((lx + LEG_W - 36, ry), 'Images', font=f(15), fill=(130, 130, 130), anchor='ra')
-ry += 26
-d.line([(lx + 34, ry), (W + LEG_W - 34, ry)], fill=(232, 232, 232), width=1)
-ry += 16
-
-for num, name, _, _, n in PINS:
-    d.ellipse([lx + 34, ry + 3, lx + 34 + 24, ry + 27], fill=(200, 30, 30, 235))
-    d.text((lx + 46, ry + 15), num, font=f(14, True), fill=(255, 255, 255), anchor='mm')
-    d.text((lx + 70, ry + 15), f'IN-{num}', font=f(14), fill=(150, 150, 150))
-    d.text((lx + 128, ry + 15), name, font=f(15), fill=(25, 25, 25), anchor='lm')
-    d.text((lx + LEG_W - 36, ry + 15), str(n), font=f(15),
-           fill=(25, 25, 25), anchor='rm')
-    ry += 42
-
-ry += 8
-d.line([(lx + 34, ry), (W + LEG_W - 34, ry)], fill=(232, 232, 232), width=1)
-ry += 24
-d.text((lx + 34, ry),
-       f'Total  {len(PINS)} groups  -  {TOTAL} usable images',
-       font=f(17, True), fill=(200, 30, 30))
-ry += 28
-d.text((lx + 34, ry), '(status = include; 50-image cap per group)',
-       font=f(13), fill=(150, 150, 150))
-ry += 50
-
-for line in [
-    'One physical place = one location group.',
-    'Viewpoint, distance, lighting and background vary',
-    'inside a group and do not create new groups.',
-    'Frames are scene-level and keep their surroundings;',
-    'no isolated objects are photographed.',
-]:
-    d.text((lx + 34, ry), line, font=f(14), fill=(90, 90, 90))
-    ry += 24
-
-ry += 18
-box_h = 122
-d.rectangle([lx + 34, ry, W + LEG_W - 34, ry + box_h], fill=(253, 246, 238))
-d.text((lx + 46, ry + 12), 'Excluded by the collection rules', font=f(14, True),
-       fill=(170, 70, 20))
-excluded = ['Gate thresholds  -  connecting bridges and corridors',
-            'Boundary locations  -  views across the boundary',
-            'Frames with identifiable people or personal information']
-for i, line in enumerate(excluded):
-    d.text((lx + 46, ry + 40 + i * 24), line, font=f(13), fill=(150, 95, 55))
-
-canvas.save(OUT, optimize=True)
-print('saved', OUT, canvas.size)
+padded.save(OUT, optimize=True)
+print('saved', OUT, padded.size, 'pins', len(PINS), 'usable', TOTAL)

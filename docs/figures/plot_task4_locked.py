@@ -154,6 +154,30 @@ def _cell_color(value, scale_max, emphasize):
     return (r, g, b)
 
 
+def _trim_white(img, pad=14):
+    """Crop the white margin around the drawn content and put an equal margin
+    back on all four sides.
+
+    The canvas is sized for the largest figure this script draws, so a
+    narrower one leaves a wide strip of white on the right. LaTeX centres the
+    whole file, margin included, and the drawn part then looks pushed to the
+    left of the text block. Cropping first makes the printed picture sit in
+    the middle of the column.
+    """
+    grey = img.convert("L")
+    px = grey.load()
+    w, h = grey.size
+    cols = [x for x in range(w) if any(px[x, y] < 250 for y in range(0, h, 3))]
+    rows = [y for y in range(h) if any(px[x, y] < 250 for x in range(0, w, 3))]
+    if not cols or not rows:
+        return img
+    box = (cols[0], rows[0], cols[-1] + 1, rows[-1] + 1)
+    cropped = img.crop(box)
+    out = Image.new("RGB", (cropped.width + 2 * pad, cropped.height + 2 * pad), "white")
+    out.paste(cropped, (pad, pad))
+    return out
+
+
 def draw_confusion(cm, title, subtitle, footer, path):
     scale = 2
     w, h = 920 * scale, 700 * scale
@@ -215,6 +239,7 @@ def draw_confusion(cm, title, subtitle, footer, path):
 
     draw.text((48 * scale, h - 70 * scale), footer, fill="#44403c", font=foot_f)
     img = img.resize((w // scale, h // scale), Image.Resampling.LANCZOS)
+    img = _trim_white(img)
     img.save(path, "PNG")
     print(f"wrote {path}")
 
@@ -276,6 +301,7 @@ def draw_groups(path):
     note = "Outside groups are above 0.95. Both unseen inside groups are near 0.36."
     draw.text((40 * scale, h - 48 * scale), note, fill="#44403c", font=small_f)
     img = img.resize((w // scale, h // scale), Image.Resampling.LANCZOS)
+    img = _trim_white(img)
     img.save(path, "PNG")
     print(f"wrote {path}")
 
@@ -425,7 +451,6 @@ def try_examples():
     if not PRED_CSV.is_file():
         print(
             "no qualitative examples generated: outputs/task3/test_predictions.csv is missing."
-            " That file is listed in .gitignore, and this workspace has no photos either."
             " The confusion matrix figures only use the integers from the locked result tables; no error-case file name was invented."
         )
         return
