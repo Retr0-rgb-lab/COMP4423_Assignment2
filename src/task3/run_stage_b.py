@@ -40,7 +40,12 @@ def main():
     done = set()
     if out.is_file() and not args.force:
         rows = read_rows(out)
-        done = {(r["feature_id"], r["clf_id"]) for r in rows if r["role"] == "candidate"}
+        # A row that is already there has already been evaluated, whichever
+        # role it carries. Leaving the selected row out of this set made a
+        # resumed run evaluate the locked configuration a second time and
+        # append a duplicate of it.
+        done = {(r["feature_id"], r["clf_id"]) for r in rows
+                if r["role"] in ("candidate", "selected")}
 
     for feature_id in feature_ids:
         for clf_id in CLF_ORDER:

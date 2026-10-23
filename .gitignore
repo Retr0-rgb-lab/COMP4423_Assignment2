@@ -58,10 +58,11 @@ models/*
 *.onnx
 
 # ---- 训练结果表：报告引用的原始数据，随代码一起发布 ----
-# run_stamp.json 是断点续跑的指纹，不发布。
+# run_stamp.json 要发布：它记的是「这批结果由哪份源码跑出来」。不带上它，
+# 评卷人按报告里的命令重跑会先撞上「run_stamp.json is missing, refusing to
+# resume」，而这份指纹本身只是 splits.csv 加 src/task3 的 sha256，没有别的信息。
 outputs/*
 !outputs/task3/
-outputs/task3/run_stamp.json
 
 # ---- 照片不入库；仓库只保留报告插图 ----
 *.jpg

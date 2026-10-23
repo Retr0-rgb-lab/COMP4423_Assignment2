@@ -16,21 +16,31 @@ dataset_summary.md     the per-class, per-split counts
 
 They were produced by the run of 2026-10-14.
 
-Two things changed in src/task3/ after that run, so a rerun correctly refuses
-to reuse these tables:
+Two things changed in src/task3/ after that run:
 
   2026-10-15  the crop cache key gained the image size (s256__filename)
   2026-10-21  comments and docstrings were translated to English; no
               executable statement was changed
 
-Because the source fingerprint no longer matches, run_stage_a and run_stage_b
-exit with
+Both commands were run again on 2026-10-23 from the code in this archive and
+rewrote stage_a.csv and stage_b.csv byte for byte. The replay is what the
+stamp file now records, so the fingerprint matches the shipped source and a
+rerun resumes instead of asking for --force. A resume no longer re-evaluates
+the locked configuration a second time: the already-evaluated row was excluded
+from the resume set, which used to append a duplicate of it.
 
-  "splits.csv or the src/task3 code differs from the existing results,
-   refusing to resume. Add --force once you have confirmed."
+evaluate.py was not rerun. test_metrics.json, test_predictions.csv and the
+numbers of Section 4.4 remain the single 2026-10-14 evaluation.
 
-That is the intended behaviour, not a fault. Pass --force only after reading
-the note above and confirming that a fresh run is what you want. The tables
-above are the ones the report quotes, and the report says so in Section 4.
+Because the replay rewrote them from the code in this archive, the fingerprint
+in run_stamp.json matches that code, and a plain
 
-No new training was run for this archive, and the test set was scored once.
+  python -m src.task3.run_stage_a
+  python -m src.task3.run_stage_b
+
+reuses the tables above instead of asking for --force. The guard still fires
+when splits.csv or src/task3 is edited after the stamp was written, which is
+what it is for: a stale table is never quoted as a fresh result.
+
+No new training run produced a different number, and the test set was scored
+once.
