@@ -56,13 +56,18 @@ python -m src.task5.app --image path\to\photo.jpg
 python docs/figures/plot_task4_locked.py
 ```
 
-`--force` is required for the two training stages. The result tables in
-`outputs/task3/` were produced by an earlier revision of `src/task3/`, so the
-source fingerprint of `splits.csv` plus `src/task3/*.py` no longer matches
-them, and a resumed run refuses to reuse the tables by design. `evaluate`
+The two training stages resume instead of recomputing. The result tables in
+`outputs/task3/` were written by this revision of `src/task3/`: `run_stage_a`
+and `run_stage_b` were run again on 2026-10-23 and reproduced `stage_a.csv` and
+`stage_b.csv` byte for byte, so the fingerprint in `outputs/task3/run_stamp.json`
+matches the code and the guard lets a rerun reuse the tables. Edit
+`splits.csv` or anything under `src/task3/` and the guard fires again, which is
+what it is for; pass `--force` only when a full recomputation is what you want.
+
+`evaluate` is the one command to leave alone. It scores the test set and
 overwrites the shipped model `models/task3_pipeline.joblib` and the metric
-tables in `outputs/task3/`, so run it only when a fresh model is what you
-want.
+tables in `outputs/task3/`. The test set was evaluated once, on 2026-10-14,
+and the numbers in the report are that evaluation.
 
 ## Dataset
 
