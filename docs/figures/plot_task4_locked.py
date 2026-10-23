@@ -4,8 +4,9 @@
 The numbers come from the locked records. The script does not retrain and does
 not read the test set to change the model:
 
-- validation / test confusion matrices: progress/task3_experiment.md §8.3 (2026-10-14)
-- test set correct counts per location group: plans/task1_3_review_2026-10-15.md §4
+- validation / test confusion matrices: outputs/task3/val_metrics.json and
+  outputs/task3/test_metrics.json (the run of 2026-10-14)
+- test set correct counts per location group: outputs/task3/test_predictions.csv
 
 This script only turns those integers into figures and checks that they agree
 with each other.
@@ -236,7 +237,7 @@ def draw_groups(path):
     )
     draw.text(
         (40 * scale, 90 * scale),
-        "Counts from the 2026-10-15 review, section 4. Overall test accuracy 0.594 is the vertical line.",
+        "Counts from outputs/task3/test_predictions.csv. Overall test accuracy 0.594 is the vertical line.",
         fill="#57534e", font=sub_f,
     )
 
@@ -442,7 +443,7 @@ def main():
     draw_confusion(
         TEST_CM,
         "Test confusion matrix",
-        "69 images. True class by row, predicted class by column. Source: task3 experiment section 8.3.",
+        "69 images. True class by row, predicted class by column. Source: outputs/task3/test_metrics.json.",
         "Accuracy 41/69, reported 0.594. Outside recall 26/27, reported 0.963. Inside recall 15/42, reported 0.357.",
         OUT_DIR / "task4_test_confusion_matrix.png",
     )

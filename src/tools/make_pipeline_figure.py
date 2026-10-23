@@ -112,7 +112,7 @@ def main():
     LX, LW = 0.30, 5.00
     top = FIG_H - 0.88
     a1 = box(ax, LX, top, LW, "Photographs",
-             ["540 images, 16 location groups",
+             ["540 images in the modelling set, 16 groups",
               "one physical place = one group_id"], C_DATA)
     a2 = box(ax, LX, a1[1] - GAP, LW, "Split by group, never by image",
              ["train 403   validation 68   test 69",
@@ -148,7 +148,9 @@ def main():
               "ranked by mean balanced accuracy"], C_PROTO)
     b2 = box(ax, RX, b1[1] - GAP, RW, "Stage B - which classifier?",
              ["5 classifiers (C1..C5) on the two",
-              "features that advanced, same folds"], C_PROTO)
+              "features that advanced, same folds",
+              "C6 applies to histograms only, so it",
+              "never reaches the two that advanced"], C_PROTO)
     b3 = box(ax, RX, b2[1] - GAP, RW, "Locked",
              ["F4 + C4, written down before the test",
               "set was touched; no search, one seed"], C_SAVE)
