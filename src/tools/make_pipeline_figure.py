@@ -156,8 +156,8 @@ def main():
              ["accuracy 0.594   balanced acc. 0.660",
               "inside recall 0.357"], C_TEST)
     b5 = box(ax, RX, b4[1] - GAP, RW, "Read it in Section 4",
-             ["two of the five folds are weak for all",
-              "classifiers; the margin is small"], C_PROTO)
+             ["fold 2 is weak for every classifier,",
+              "and the gap between the top rows is small"], C_PROTO)
 
     for a, b in ((b1, b2), (b2, b3), (b3, b4), (b4, b5)):
         arrow(ax, a, b)
