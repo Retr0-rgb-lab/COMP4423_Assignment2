@@ -1,22 +1,26 @@
 # ============================================================
-# 本仓库镜像提交件：报告 PDF + 代码源码 + 代码与报告真正需要的附属文件。
-# 过程记录、课程材料、报告构建链、自检脚本与数据集本体只在本地保留，
-# 不进版本库（报告 PDF 与代码包本体除外，见文末）。
+# This repository mirrors the submission: the report PDF, the source code,
+# and the auxiliary files the code and the report actually need. The process
+# notes, the course material, the report build chain, the self-check scripts
+# and the dataset itself are kept locally and are not committed (the report
+# PDF and the code archive are the exceptions, see the end of this file).
 #
-# 写法约定：排除一个目录一律写成 "目录/*"，不写 "目录/"。
-# git 不会进入被排除的目录，一旦写成 "docs/" 或 "data/"，
-# 后面的 ! 反选规则会全部失效，必须先反选目录再反选文件。
+# Naming rule: to exclude a directory, always write "dir/*", never "dir/".
+# git never descends into an excluded directory, so a rule written as "docs/"
+# or "data/" also kills every later ! re-include rule. Exclude the directory,
+# then re-include the files you want.
 # ============================================================
 
-# ---- 过程记录与课程材料 ----
+# ---- process notes and course material ----
 progress/
 plans/
 AGENTS.md
-# docs/ 下只保留插图目录，报告构建链与自检脚本都是本地工具
+# keep only the figure directory under docs/; the report build chain and the
+# self-check scripts are local tools
 docs/*
 !docs/figures/
 
-# ---- 报告构建链与自检脚本（本地用，不随提交件发布） ----
+# ---- report build chain and self-check scripts (local only, not shipped) ----
 docs/make_report.py
 docs/report_template.tex
 docs/check_crossrefs.py
@@ -24,7 +28,7 @@ docs/check_fold_claims.py
 docs/acceptance_check.py
 *.tex
 
-# ---- LaTeX 中间产物与提交用的压缩包 ----
+# ---- LaTeX intermediates and the archive built for submission ----
 *.aux
 *.out
 *.toc
@@ -34,20 +38,20 @@ docs/acceptance_check.py
 logs/
 Assignment2_Code_*.zip
 
-# ---- 数据集本体：走网盘，链接见 DATASET_LINK.txt ----
-# data/ 先整体排除，再反选 annotations/，否则 git 不会进入该目录，
-# 标注 CSV 会跟着一起被丢掉。
+# ---- the dataset itself: shipped through the cloud drive, see DATASET_LINK.txt ----
+# Exclude data/ as a whole first, then re-include annotations/; otherwise git
+# never enters the directory and the annotation CSVs are dropped with it.
 data/*
 !data/annotations/
-# annotations/ 里只留 split、计数表和 manifest CSV；
-# review/ 是被剔除的照片，不随提交件发布。
+# under annotations/ keep only the split file, the count summary and the
+# manifests; review/ holds the rejected photographs and is not shipped.
 data/annotations/*
 !data/annotations/*.csv
 !data/annotations/*.md
 !data/annotations/inside/
 !data/annotations/outside/
 
-# ---- 模型产物：只保留锁定的那一条流水线 ----
+# ---- model artefacts: only the one locked pipeline is kept ----
 models/*
 !models/task3_pipeline.joblib
 *.pkl
@@ -57,14 +61,15 @@ models/*
 *.npz
 *.onnx
 
-# ---- 训练结果表：报告引用的原始数据，随代码一起发布 ----
-# run_stamp.json 要发布：它记的是「这批结果由哪份源码跑出来」。不带上它，
-# 评卷人按报告里的命令重跑会先撞上「run_stamp.json is missing, refusing to
-# resume」，而这份指纹本身只是 splits.csv 加 src/task3 的 sha256，没有别的信息。
+# ---- result tables: the raw data the report quotes, shipped with the code ----
+# run_stamp.json must ship. It records which revision of the source produced
+# these tables; without it a reader who runs the commands in the report hits
+# "run_stamp.json is missing, refusing to resume" first. The fingerprint itself
+# is only a sha256 of splits.csv plus src/task3, and carries nothing else.
 outputs/*
 !outputs/task3/
 
-# ---- 照片不入库；仓库只保留报告插图 ----
+# ---- photographs are not committed; the repository keeps only report figures ----
 *.jpg
 *.jpeg
 *.heic
@@ -72,7 +77,7 @@ outputs/*
 *.png
 !docs/figures/*.png
 
-# ---- 特征缓存与运行目录 ----
+# ---- feature caches and run directories ----
 cache/
 *.cache
 features/
@@ -92,7 +97,7 @@ env/
 .ruff_cache/
 .ipynb_checkpoints/
 
-# ---- 编辑器 / 系统 ----
+# ---- editor and system files ----
 .vscode/
 .idea/
 *.swp
@@ -101,5 +106,5 @@ Thumbs.db
 desktop.ini
 ~$*
 
-# ---- 提交件目录：报告 PDF 与代码包只放在本地，不进版本库 ----
+# ---- submission directory: the report PDF and the archive stay local ----
 submission/

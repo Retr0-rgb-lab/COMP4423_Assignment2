@@ -1,4 +1,6 @@
-# Task 3 运行依赖。必须是 opencv-contrib-python，不能换成 opencv-python，否则没有 SIFT。
+# Runtime dependencies for Task 3. opencv-contrib-python is required: the
+# plain opencv-python wheel has no SIFT, and the feature module exits rather
+# than switching to a different descriptor.
 numpy==2.4.3
 Pillow==12.1.1
 opencv-contrib-python==5.0.0.93

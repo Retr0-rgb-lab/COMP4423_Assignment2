@@ -46,12 +46,12 @@ FOLDS = (
 
 FEATURE_ORDER = ("F1", "F2", "F3", "F4", "F5", "F6")
 FEATURE_NAME = {
-    "F1": "颜色直方图",
+    "F1": "HSV histogram",
     "F2": "HOG",
     "F3": "LBP",
     "F4": "HOG+LBP",
     "F5": "BoW",
-    "F6": "BoW+空间金字塔",
+    "F6": "BoW + spatial pyramid",
 }
 # Ties go to the smaller dimension; if still tied, take the earlier id in the table.
 FEATURE_DIM = {
@@ -66,13 +66,13 @@ HIST_FEATURES = frozenset({"F1", "F3", "F5", "F6"})
 
 CLF_ORDER = ("C1", "C2", "C3", "C4", "C5", "C6")
 CLF_NAME = {
-    "C1": "线性 SVM",
-    "C2": "逻辑回归",
+    "C1": "linear SVM",
+    "C2": "logistic regression",
     "C3": "k-NN",
-    "C4": "随机森林",
-    "C5": "直方图梯度提升",
-    "C6": "多项式朴素贝叶斯",
-    "C1-RBF": "RBF SVM（PCA 100）",
+    "C4": "random forest",
+    "C5": "histogram gradient boosting",
+    "C6": "multinomial naive Bayes",
+    "C1-RBF": "RBF SVM (PCA 100)",
 }
 # On tied scores, take the simpler classifier.
 CLF_SIMPLICITY = ("C2", "C1", "C6", "C3", "C4", "C5")
