@@ -25,22 +25,22 @@
 
 | group_id | place | class | annotated | kept | split |
 |---|---|---|---:|---:|---|
-| OUT-01 | 佐敦 Jordan | outside | 82 | 50 | train |
-| OUT-02 | 港大 HKU | outside | 57 | 50 | train |
-| OUT-03 | 九龙公园 Kowloon Park | outside | 72 | 32 | train |
-| OUT-04 | 圆方 Elements | outside | 62 | 30 | train |
-| OUT-05 | 西九文化區 West Kowloon | outside | 21 | 21 | train |
-| OUT-06 | 港大 HKU – Main Building | outside | 20 | 20 | test |
-| OUT-07 | 港大 HKU – 校园绿地 | outside | 7 | 7 | test |
-| OUT-08 | 西九文化區 – Art Park | outside | 38 | 30 | train |
-| OUT-09 | 西九文化區 – 維港海濱 | outside | 53 | 30 | val |
-| IN-01 | PolyU 走道（J 區 — VA 區） | inside | 71 | 50 | train |
-| IN-02 | PolyU P/Q 區藻井走道 | inside | 62 | 50 | train |
-| IN-03 | PolyU 大學圖書館與中央平台 | inside | 25 | 25 | test |
-| IN-04 | PolyU FSCH / VS 區 / 泳池 | inside | 53 | 50 | train |
-| IN-05 | PolyU 校門與主入口 | inside | 38 | 38 | val |
-| IN-06 | PolyU 樓群庭院與 A 座入口 | inside | 40 | 40 | train |
-| IN-07 | PolyU CMA BUILDING 庭院 | inside | 17 | 17 | test |
+| OUT-01 | Jordan | outside | 82 | 50 | train |
+| OUT-02 | HKU | outside | 57 | 50 | train |
+| OUT-03 | Kowloon Park | outside | 72 | 32 | train |
+| OUT-04 | Elements | outside | 62 | 30 | train |
+| OUT-05 | West Kowloon | outside | 21 | 21 | train |
+| OUT-06 | HKU - Main Building | outside | 20 | 20 | test |
+| OUT-07 | HKU - campus green | outside | 7 | 7 | test |
+| OUT-08 | West Kowloon - Art Park | outside | 38 | 30 | train |
+| OUT-09 | West Kowloon - harbourfront | outside | 53 | 30 | val |
+| IN-01 | PolyU walkway (J block to VA block) | inside | 71 | 50 | train |
+| IN-02 | PolyU P/Q coffered walkway | inside | 62 | 50 | train |
+| IN-03 | PolyU University Library and central podium | inside | 25 | 25 | test |
+| IN-04 | PolyU FSCH / VS block / swimming pool | inside | 53 | 50 | train |
+| IN-05 | PolyU campus gate and main entrance | inside | 38 | 38 | val |
+| IN-06 | PolyU building courtyard and Block A entrance | inside | 40 | 40 | train |
+| IN-07 | PolyU CMA Building courtyard | inside | 17 | 17 | test |
 
 ## Totals
 

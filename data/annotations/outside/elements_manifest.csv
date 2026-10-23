@@ -1,63 +1,63 @@
 ﻿filename,class,group_id,location_name,sub_area,scene_class,scene_type,status,notes
-OUT-04_001_IMG_0821.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,建筑立面,圆方塔楼与树丛广场,include,
-OUT-04_002_IMG_0822.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,建筑立面,玻璃幕墙塔楼与橙色裙楼,include,现代建筑 对 IN-03 / IN-05 有混淆价值
-OUT-04_003_IMG_0823.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,施工围挡,施工围挡与承建商横幅,include,工地为临时场景 —— 数据集耐久性风险 建议报告披露；已逐張核對 無可辨識車牌／人臉 判定可用
-OUT-04_004_IMG_0824.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,建筑立面,橙色体块与玻璃塔楼,include,
-OUT-04_005_IMG_0825.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,施工围挡,旧住宅楼与橙色施工围板,include,
-OUT-04_006_IMG_0826.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,城市远景,圆方综合体与下方广场俯瞰,include,人物为远景小尺寸
-OUT-04_007_IMG_0827.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,道路界面,高架道路与巴士车流,include,对 IN-08 校内车行道有混淆价值
-OUT-04_008_IMG_0828.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,曲面顶棚步道与城市远景,include,曲面肋拱顶棚为本区域地标 —— 与 0829 / 0838 同物
-OUT-04_009_IMG_0829.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,廊架连廊,曲面肋拱顶棚结构近景,include,
-OUT-04_010_IMG_0830.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,廊架连廊,广场与雨棚台阶,include,
-OUT-04_011_IMG_0831.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,开敞广场与有盖步道,include,
-OUT-04_012_IMG_0832.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,铺装广场与绿篱,include,开阔铺装 对 IN-02 有混淆价值
-OUT-04_013_IMG_0833.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,建筑立面,广场与低层机构建筑,include,
-OUT-04_014_IMG_0834.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,建筑立面,广场与远处住宅塔楼,include,人物为远景小尺寸
-OUT-04_015_IMG_0835.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,坡道台阶,台阶坡道与绿化,include,对 IN-10 坡道台阶有混淆价值
-OUT-04_016_IMG_0836.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,建筑立面,高层住宅塔楼日落,include,地面信息稀少 接近孤立物体 —— 需确认是否满足 scene-level 要求；已逐張核對 無可辨識車牌／人臉 判定可用
-OUT-04_017_IMG_0837.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,廊架连廊,橙色裙楼与雨棚,include,
-OUT-04_018_IMG_0838.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,廊架连廊,曲面顶棚与草地,include,与 0829 为同一顶棚
-OUT-04_019_IMG_0840.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,施工围挡,圆方综合体与工地吊机,include,工地为临时场景；已逐張核對 無可辨識車牌／人臉 判定可用
-OUT-04_020_IMG_0841.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,城市远景,圆方远景与施工区,include,工地为临时场景；已逐張核對 無可辨識車牌／人臉 判定可用
-OUT-04_021_IMG_0844.jpg,0,OUT-04,圆方 Elements,圆方及周边建筑,建筑立面,现代玻璃塔楼黄昏,include,地面信息稀少 接近孤立物体 —— 需确认是否满足 scene-level 要求；已逐張核對 無可辨識車牌／人臉 判定可用
-OUT-04_022_IMG_0845.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,坡道台阶,台阶与观赏草,include,
-OUT-04_023_IMG_1030.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,廊架连廊,曲面顶棚与铺装广场,include,
-OUT-04_024_IMG_1031.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,廊架连廊,曲面顶棚与铺装广场,include,
-OUT-04_025_IMG_1032.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,廊架连廊,曲面顶棚与铺装广场,include,
-OUT-04_026_IMG_1033.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,石墙园景与标牌,include,石墙上有标牌 —— 需放大确认是否为可读地点标识
-OUT-04_027_IMG_1034.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,铺装广场与绿篱,include,
-OUT-04_028_IMG_1035.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,铺装广场与绿篱,include,
-OUT-04_029_IMG_1036.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,铺装广场与绿树,include,
-OUT-04_030_IMG_1037.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,铺装广场,铺装广场与行人,include,
-OUT-04_031_IMG_1038.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,石墙与支护树木园径,include,
-OUT-04_032_IMG_1039.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,石墙与支护树木园径,include,
-OUT-04_033_IMG_1040.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,石墙步道与城市远景,include,
-OUT-04_034_IMG_1041.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,石墙步道与城市远景,include,
-OUT-04_035_IMG_1042.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,石墙步道与城市远景,include,
-OUT-04_036_IMG_1043.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,高层住宅与石墙步道,include,
-OUT-04_037_IMG_1044.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,高层住宅与石墙步道,include,
-OUT-04_038_IMG_1045.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,石墙步道与支护树木,include,
-OUT-04_039_IMG_1046.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,石墙步道与支护树木,include,
-OUT-04_040_IMG_1047.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,石墙步道与棕榈,include,
-OUT-04_041_IMG_1048.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,石墙与灌木夕照,include,
-OUT-04_042_IMG_1049.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,开敞平台与城市天际线,include,
-OUT-04_043_IMG_1050.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,开敞平台与城市天际线,include,
-OUT-04_044_IMG_1051.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,长椅与草地夕照,include,
-OUT-04_045_IMG_1052.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,石墙标牌与草地,include,石墙上有标牌 —— 需放大确认是否为可读地点标识
-OUT-04_046_IMG_1053.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,铺装平台与草坪,include,
-OUT-04_047_IMG_1054.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,铺装平台与草坪,include,
-OUT-04_048_IMG_1055.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,长椅铺装与草坪,include,
-OUT-04_049_IMG_1056.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,长椅铺装与草坪,include,
-OUT-04_050_IMG_1057.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,石墙步道与疏散指示,include,
-OUT-04_051_IMG_1058.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,草坪与城市天际线逆光,include,夕阳逆光 曝光偏暗
-OUT-04_052_IMG_1059.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,城市远景,草坪与城市天际线逆光,include,夕阳逆光 曝光偏暗
-OUT-04_053_IMG_1060.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,草坪逆光与灯柱,include,夕阳逆光 曝光偏暗
-OUT-04_054_IMG_1061.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,草坪逆光与灯柱,include,夕阳逆光 曝光偏暗
-OUT-04_055_IMG_1062.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,长椅与草坪,include,
-OUT-04_056_IMG_1063.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,长椅与草坪,include,
-OUT-04_057_IMG_1064.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,绿地,石墙与树木,include,
-OUT-04_058_IMG_1065.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,铺装步道与石墙,include,
-OUT-04_059_IMG_1066.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,铺装步道与石墙,include,
-OUT-04_060_IMG_1067.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,林荫步道,铺装步道与石墙,include,
-OUT-04_061_IMG_1068.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,建筑立面,长椅草坪与玻璃塔楼逆光,include,夕阳逆光 曝光偏暗
-OUT-04_062_IMG_1069.jpg,0,OUT-04,圆方 Elements,曲面顶棚与开敞广场,建筑立面,长椅草坪与玻璃塔楼逆光,include,夕阳逆光 曝光偏暗
+OUT-04_001_IMG_0821.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Building façade,Elements tower and tree-lined plaza,include,
+OUT-04_002_IMG_0822.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Building façade,Glass curtain-wall tower and orange podium,include,"Modern building, confusable with IN-03 and IN-05"
+OUT-04_003_IMG_0823.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Construction hoarding,Construction hoarding and contractor banners,include,"The construction site is a temporary scene, a durability risk for the dataset that the report should disclose. Checked frame by frame: no readable plate and no identifiable face, so it is usable"
+OUT-04_004_IMG_0824.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Building façade,Orange volume and glass tower,include,
+OUT-04_005_IMG_0825.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Construction hoarding,Old housing block and orange construction hoarding,include,
+OUT-04_006_IMG_0826.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Urban distance view,"Elements complex and the plaza below, from above",include,People appear only small in the distance
+OUT-04_007_IMG_0827.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Road frontage,Flyover and bus traffic,include,Confusable with the IN-08 campus roadway
+OUT-04_008_IMG_0828.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,Curved-canopy walkway and urban distance view,include,The curved ribbed canopy is the landmark of this area; the same structure as 0829 and 0838
+OUT-04_009_IMG_0829.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Covered walkway,Close view of the curved ribbed canopy structure,include,
+OUT-04_010_IMG_0830.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Covered walkway,Plaza and canopy steps,include,
+OUT-04_011_IMG_0831.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Open plaza and covered walkway,include,
+OUT-04_012_IMG_0832.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved plaza and hedge,include,"Open paving, confusable with IN-02"
+OUT-04_013_IMG_0833.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Building façade,Plaza and a low institutional building,include,
+OUT-04_014_IMG_0834.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Building façade,Plaza and distant residential towers,include,People appear only small in the distance
+OUT-04_015_IMG_0835.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Ramp or steps,"Steps, ramp and planting",include,Confusable with the IN-10 ramp and steps
+OUT-04_016_IMG_0836.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Building façade,High-rise residential tower at sunset,include,"Very little ground context, close to an isolated object; still to be confirmed that it meets the scene-level requirement. Checked frame by frame: no readable plate and no identifiable face, so it is usable"
+OUT-04_017_IMG_0837.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Covered walkway,Orange podium and canopy,include,
+OUT-04_018_IMG_0838.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Covered walkway,Curved canopy and grass,include,The same canopy as 0829
+OUT-04_019_IMG_0840.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Construction hoarding,Elements complex and a site crane,include,"The construction site is a temporary scene. Checked frame by frame: no readable plate and no identifiable face, so it is usable"
+OUT-04_020_IMG_0841.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Urban distance view,Elements in the distance and the construction area,include,"The construction site is a temporary scene. Checked frame by frame: no readable plate and no identifiable face, so it is usable"
+OUT-04_021_IMG_0844.jpg,0,OUT-04,Elements,Elements and the surrounding buildings,Building façade,Modern glass tower at dusk,include,"Very little ground context, close to an isolated object; still to be confirmed that it meets the scene-level requirement. Checked frame by frame: no readable plate and no identifiable face, so it is usable"
+OUT-04_022_IMG_0845.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Ramp or steps,Steps and ornamental grasses,include,
+OUT-04_023_IMG_1030.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Covered walkway,Curved canopy and paved plaza,include,
+OUT-04_024_IMG_1031.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Covered walkway,Curved canopy and paved plaza,include,
+OUT-04_025_IMG_1032.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Covered walkway,Curved canopy and paved plaza,include,
+OUT-04_026_IMG_1033.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Stone-wall garden and signage,include,A plaque on the stone wall; zoom in to confirm whether it is a readable place marker
+OUT-04_027_IMG_1034.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved plaza and hedge,include,
+OUT-04_028_IMG_1035.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved plaza and hedge,include,
+OUT-04_029_IMG_1036.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved plaza and trees,include,
+OUT-04_030_IMG_1037.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Paved plaza,Paved plaza and pedestrians,include,
+OUT-04_031_IMG_1038.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Stone wall and propped trees along a garden path,include,
+OUT-04_032_IMG_1039.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Stone wall and propped trees along a garden path,include,
+OUT-04_033_IMG_1040.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,Stone-wall path and urban distance view,include,
+OUT-04_034_IMG_1041.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,Stone-wall path and urban distance view,include,
+OUT-04_035_IMG_1042.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,Stone-wall path and urban distance view,include,
+OUT-04_036_IMG_1043.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,High-rise housing and stone-wall path,include,
+OUT-04_037_IMG_1044.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,High-rise housing and stone-wall path,include,
+OUT-04_038_IMG_1045.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Stone-wall path and propped trees,include,
+OUT-04_039_IMG_1046.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Stone-wall path and propped trees,include,
+OUT-04_040_IMG_1047.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Stone-wall path and palms,include,
+OUT-04_041_IMG_1048.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Stone wall and shrubs at sunset,include,
+OUT-04_042_IMG_1049.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,Open terrace and city skyline,include,
+OUT-04_043_IMG_1050.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,Open terrace and city skyline,include,
+OUT-04_044_IMG_1051.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Benches and grass at sunset,include,
+OUT-04_045_IMG_1052.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Stone-wall signage and grass,include,A plaque on the stone wall; zoom in to confirm whether it is a readable place marker
+OUT-04_046_IMG_1053.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved terrace and lawn,include,
+OUT-04_047_IMG_1054.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved terrace and lawn,include,
+OUT-04_048_IMG_1055.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved area with benches and lawn,include,
+OUT-04_049_IMG_1056.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Paved area with benches and lawn,include,
+OUT-04_050_IMG_1057.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Stone-wall path and evacuation sign,include,
+OUT-04_051_IMG_1058.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,"Lawn and city skyline, backlit",include,"Backlit at sunset, slightly underexposed"
+OUT-04_052_IMG_1059.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Urban distance view,"Lawn and city skyline, backlit",include,"Backlit at sunset, slightly underexposed"
+OUT-04_053_IMG_1060.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Backlit lawn and lamp posts,include,"Backlit at sunset, slightly underexposed"
+OUT-04_054_IMG_1061.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Backlit lawn and lamp posts,include,"Backlit at sunset, slightly underexposed"
+OUT-04_055_IMG_1062.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Benches and lawn,include,
+OUT-04_056_IMG_1063.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Benches and lawn,include,
+OUT-04_057_IMG_1064.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Green space,Stone wall and trees,include,
+OUT-04_058_IMG_1065.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Paved path and stone wall,include,
+OUT-04_059_IMG_1066.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Paved path and stone wall,include,
+OUT-04_060_IMG_1067.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Tree-lined path,Paved path and stone wall,include,
+OUT-04_061_IMG_1068.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Building façade,"Benches, lawn and a glass tower, backlit",include,"Backlit at sunset, slightly underexposed"
+OUT-04_062_IMG_1069.jpg,0,OUT-04,Elements,Curved canopy and open plaza,Building façade,"Benches, lawn and a glass tower, backlit",include,"Backlit at sunset, slightly underexposed"
