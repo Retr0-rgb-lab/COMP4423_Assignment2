@@ -2,7 +2,7 @@ Provenance of the files in this directory
 =========================================
 
 These are the raw artefacts behind every number in the report. They are
-included so that its tables can be checked without rerunning anything.
+included so that its tables can be checked directly.
 
 stage_a.csv            6 feature rows, fixed linear SVM, 5 place-holdout folds
 stage_a_nb.csv         the same folds under the supplementary naive Bayes pass,

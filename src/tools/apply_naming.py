@@ -6,9 +6,9 @@ Naming rule
     data/pictures/<area dir>/<group_id>_<seq:03d>_<original file name>
 
 Examples:
-    data/pictures/kowloon/OUT-05_001_IMG_0774.jpg
+    data/pictures/kowloon/OUT-03_001_IMG_0764.jpg
     data/pictures/Jordan/OUT-01_001_IMG_0796.jpg
-    data/pictures/elements/OUT-11_001_IMG_0821.jpg
+    data/pictures/elements/OUT-04_001_IMG_0821.jpg
 
 Why this design
 ---------------

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Repair the location groups that were found to straddle two places.
 
-The 2026-10-27 photo-level re-check showed that three location groups were
-not one place:
+The 2026-10-27 photo-level re-check showed three grouping errors across
+four location groups:
 
 - ``IN-05`` mixed the main-entrance forecourt with the Shaw Amenities /
   Innovation Tower plaza (which is ``IN-01``) and with the University
