@@ -21,8 +21,8 @@ Why this design
   batch and shooting order. The old name can always be recovered from the
   new one.
 
-Important constraint (from the assignment PDF)
-------------------------------------------------
+Important constraint
+-------------------
 The classifier may **only use image pixels**. File names and folder names
 are for manual auditing and group cross-checks only; they must never enter
 any feature or model input. The Task 5 application must not infer the class

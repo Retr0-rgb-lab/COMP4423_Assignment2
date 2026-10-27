@@ -51,8 +51,7 @@ RATIO = (0.6, 0.2, 0.2)  # train / val / test
 SPLITS = ('train', 'val', 'test')
 
 # Mutually-visible constraint: the groups below can see each other across a
-# road, so they are the "neighbouring shots of the same scene" the PDF talks
-# about. Even though the
+# road, so they are neighbouring shots of the same scene. Even though the
 # venues differ they must not land in different splits, otherwise that is
 # leakage. The split treats them as one atomic unit.
 KEEP_TOGETHER = [

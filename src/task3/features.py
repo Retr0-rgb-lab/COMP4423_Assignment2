@@ -35,13 +35,13 @@ def _sift():
 
     The detector is kept in a module global, so every image reuses the same
     instance. It raises SystemExit when the OpenCV build has no SIFT
-    support, because the plan forbids substituting another keypoint
+    support, because the experiment protocol forbids substituting another keypoint
     detector.
     """
     global _SIFT
     if _SIFT is None:
         if not hasattr(cv2, "SIFT_create"):
-            raise SystemExit("cv2.SIFT_create is not available. Stop and change the plan; do not substitute ORB.")
+            raise SystemExit("cv2.SIFT_create is not available. Stop and revise the experiment; do not substitute ORB.")
         _SIFT = cv2.SIFT_create(nfeatures=SIFT_NFEATURES)
     return _SIFT
 
@@ -443,7 +443,7 @@ def build(feature_id):
 
 
 def assert_dims(sample_rgb):
-    """Check the feature dimensions against the plan and return them.
+    """Check the feature dimensions against the protocol and return them.
 
     Returns the dimension of F1, F2 and F3 for one sample image; a mismatch
     with FEATURE_DIM raises SystemExit.
@@ -456,5 +456,5 @@ def assert_dims(sample_rgb):
     }
     for key, dim in got.items():
         if dim != FEATURE_DIM[key]:
-            raise SystemExit(f"the dimension of {key} is {dim}, the plan says {FEATURE_DIM[key]}")
+            raise SystemExit(f"the dimension of {key} is {dim}, the protocol says {FEATURE_DIM[key]}")
     return got

@@ -31,7 +31,7 @@ src/task5/           the desktop application that classifies one photograph
 src/tools/           dataset construction and the dataset check tools
 models/              the locked pipeline (HOG+LBP with a random forest)
 data/annotations/    the split table, the per-class counts and the source manifests
-outputs/task3/       the raw result tables behind every number in the report
+outputs/task3/       the raw result tables of the locked run
 docs/figures/        the report figures and the script that draws them
 ```
 
@@ -59,8 +59,10 @@ python docs/figures/plot_task4_locked.py
 The two training stages resume instead of recomputing. The result tables in
 `outputs/task3/` were written by this revision of `src/task3/`: `run_stage_a`
 and `run_stage_b` were run again on 2026-10-23 and reproduced `stage_a.csv` and
-`stage_b.csv` byte for byte, so the fingerprint in `outputs/task3/run_stamp.json`
-matches the code and the guard lets a rerun reuse the tables. Edit
+`stage_b.csv` value for value, so the fingerprint in `outputs/task3/run_stamp.json`
+matches the code and the guard lets a rerun reuse the tables. The feature and
+classifier display names in those tables were translated to English afterwards;
+no numeric column changed. Edit
 `splits.csv` or anything under `src/task3/` and the guard fires again, which is
 what it is for; pass `--force` only when a full recomputation is what you want.
 

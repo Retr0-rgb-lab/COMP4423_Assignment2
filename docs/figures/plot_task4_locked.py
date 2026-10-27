@@ -114,10 +114,10 @@ def _check():
     assert vt_in[0] + vt_in[1] == 38
     assert (vt_out[0] + vt_in[1]) / 68 == 47 / 68
     if abs((47 / 68) - VAL_ACC_PUBLISHED) > 0.0005:
-        raise SystemExit("validation accuracy does not match §8.3")
+        raise SystemExit("validation accuracy does not match the published number")
     val_ba = ((26 / 30) + (21 / 38)) / 2
     if abs(val_ba - VAL_BA_PUBLISHED) > 0.0005:
-        raise SystemExit("validation balanced accuracy does not match §8.3")
+        raise SystemExit("validation balanced accuracy does not match the published number")
 
     tt_out, tt_in = TEST_CM
     assert tt_out[0] + tt_out[1] == 27
@@ -125,10 +125,10 @@ def _check():
     correct = tt_out[0] + tt_in[1]
     assert correct == 41
     if abs((41 / 69) - TEST_ACC_PUBLISHED) > 0.0005:
-        raise SystemExit("test accuracy does not match §8.3")
+        raise SystemExit("test accuracy does not match the published number")
     test_ba = ((26 / 27) + (15 / 42)) / 2
     if abs(test_ba - TEST_BA_PUBLISHED) > 0.0005:
-        raise SystemExit("test balanced accuracy does not match §8.3")
+        raise SystemExit("test balanced accuracy does not match the published number")
 
     group_correct = 0
     group_n = 0
@@ -285,7 +285,7 @@ def draw_groups(path):
     )
     draw.text(
         (40 * scale, 90 * scale),
-        "Counts from outputs/task3/test_predictions.csv. Overall test accuracy 0.594 is the vertical line.",
+        "Counts from the single locked test evaluation. Overall test accuracy 0.594 is the vertical line.",
         fill="#57534e", font=sub_f,
     )
 
@@ -400,7 +400,7 @@ def write_example_manifest(rows):
     }
     if counts != expected:
         raise SystemExit(
-            f"the confusion matrix in test_predictions.csv is {counts}, the locked record is {expected}."
+            f"the confusion matrix in the prediction table is {counts}, the locked record is {expected}."
             " No example list is written and the locked numbers are not changed."
         )
     for gid, _name, _kind, hit, n, _pub in GROUP_ROWS:
@@ -467,7 +467,7 @@ def write_example_grid(picks, pictures):
     sheet = Image.new("RGB", (w, h), "white")
     draw = ImageDraw.Draw(sheet)
     font = _font(12)
-    draw.text((pad, 8), "Test examples from test_predictions.csv (filename order within each cell)", fill="#1c1917", font=font)
+    draw.text((pad, 8), "Test examples from the locked per-image predictions (filename order within each cell)", fill="#1c1917", font=font)
     for i, row in enumerate(picks):
         r, c = divmod(i, cols)
         x = pad + c * (thumb + pad)
@@ -487,7 +487,7 @@ def try_examples():
     predictions and the photographs are available."""
     if not PRED_CSV.is_file():
         print(
-            "no qualitative examples generated: outputs/task3/test_predictions.csv is missing."
+            "no qualitative examples generated: the per-image test predictions are missing."
             " The confusion matrix figures only use the integers from the locked result tables; no error-case file name was invented."
         )
         return
@@ -507,7 +507,7 @@ def main():
     draw_confusion(
         TEST_CM,
         "Test confusion matrix",
-        "69 images. True class by row, predicted class by column. Source: outputs/task3/test_metrics.json.",
+        "69 images. True class by row, predicted class by column. Source: the single locked test evaluation.",
         "Accuracy 41/69, reported 0.594. Outside recall 26/27, reported 0.963. Inside recall 15/42, reported 0.357.",
         OUT_DIR / "task4_test_confusion_matrix.png",
     )
