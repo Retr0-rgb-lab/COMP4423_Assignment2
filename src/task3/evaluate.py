@@ -14,6 +14,12 @@ from src.task3.models import make_pipeline
 
 
 def _fit_train(records, feature_id, clf_id):
+    """Fit the given configuration on the training split.
+
+    Returns the fitted pipeline and the records grouped by split. The pipeline
+    carries the display names of the two classes, so the saved model can name
+    them without reading the folder layout.
+    """
     splits = by_split(records)
     images = load_cropped(splits["train"])
     labels = [rec["y"] for rec in splits["train"]]
@@ -25,6 +31,13 @@ def _fit_train(records, feature_id, clf_id):
 
 
 def main():
+    """Refit the locked configuration, save the model and score both splits.
+
+    The configuration comes from `selection.json`, or from the winner of
+    `stage_b.csv` when that file is missing. The model is written to
+    `models/task3_pipeline.joblib`, the metrics of a split to
+    `<split>_metrics.json` and the test predictions to `test_predictions.csv`.
+    """
     import sys
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")

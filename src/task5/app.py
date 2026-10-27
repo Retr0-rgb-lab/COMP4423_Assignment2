@@ -51,6 +51,7 @@ _CLF_EN = {
 }
 
 def _image_filetypes():
+    """Return the file patterns offered by the image file chooser."""
     # Tk on Windows separates the extensions with semicolons; Linux / macOS
     # use spaces.
     if sys.platform == "win32":
@@ -68,6 +69,11 @@ def _image_filetypes():
 
 
 def _enable_windows_dpi():
+    """Make the process DPI-aware on Windows so the window is not scaled down.
+
+    Other platforms are left alone, and a failure is ignored because the
+    window still works at the default scale.
+    """
     if sys.platform != "win32":
         return
     try:
@@ -82,11 +88,22 @@ def _enable_windows_dpi():
 
 
 def _font_family(root):
+    """Return the family name of the default Tk font.
+
+    The ``root`` argument is not used: the name is read from the named font
+    ``TkDefaultFont`` in the Tk font database.
+    """
     import tkinter.font as tkfont
     return tkfont.nametofont("TkDefaultFont").cget("family")
 
 
 def _initial_dir():
+    """Return the directory in which the file chooser opens.
+
+    The dataset picture folder is preferred, so the user starts next to the
+    photographs; the home directory is the fallback when the dataset is
+    absent.
+    """
     pictures = ROOT / "data" / "pictures"
     if pictures.is_dir():
         return pictures
@@ -94,6 +111,12 @@ def _initial_dir():
 
 
 def model_summary(pipeline):
+    """Return a one-line summary of the pipeline as 'feature + classifier'.
+
+    Both names are read from the attributes that the Task 3 pipeline stores.
+    The English name of the classifier code is preferred over the stored name,
+    because the stored name is written in lower case.
+    """
     feature = getattr(pipeline, "feature_name_", "features")
     clf_id = getattr(pipeline, "clf_id_", "")
     clf = _CLF_EN.get(clf_id) or getattr(pipeline, "clf_name_", "classifier")
@@ -101,7 +124,14 @@ def model_summary(pipeline):
 
 
 class _ProbRow:
+    """Show one class in the probability panel: its name, its value and a bar."""
+
     def __init__(self, parent, title, color, font, bold_font):
+        """Build one probability row inside ``parent``.
+
+        The class name is shown on the left, the percentage on the right and a
+        proportional bar underneath.
+        """
         self.font = font
         self.bold_font = bold_font
         self.color = color
@@ -122,6 +152,11 @@ class _ProbRow:
         self.bar = tk.Frame(self.track, bg=color, width=0, height=8)
 
     def set(self, probability, chosen):
+        """Show a probability as a percentage and as a bar of that width.
+
+        The row is drawn in bold and in the class colour when ``chosen`` is
+        true. A probability of None clears the value and hides the bar.
+        """
         font = self.bold_font if chosen else self.font
         self.name.configure(font=font, fg=self.color if chosen else INK)
         self.value_label.configure(font=font, fg=self.color if chosen else MUTED)
@@ -134,7 +169,14 @@ class _ProbRow:
 
 
 class ClassifierApp:
+    """Show the classifier window: a preview, the prediction and the model input."""
+
     def __init__(self, root, pipeline):
+        """Build the interface inside ``root`` for the given saved pipeline.
+
+        Every font is derived from the default Tk font, so the window keeps
+        the look of the platform it runs on.
+        """
         self.root = root
         self.pipeline = pipeline
         self._photo = None
@@ -149,6 +191,11 @@ class ClassifierApp:
         self._build()
 
     def _build(self):
+        """Lay out the window and create every widget it shows.
+
+        The left card holds the preview canvas, the right card the prediction,
+        the probability bars and the crop that the model receives.
+        """
         root = self.root
         root.title("PolyU Main Campus Classifier")
         root.configure(bg=BG)
@@ -265,6 +312,7 @@ class ClassifierApp:
         ).pack(fill="x", pady=(2, 0))
 
     def _draw_placeholder(self):
+        """Draw the placeholder message on the empty preview canvas."""
         self.canvas.delete("all")
         self.canvas.create_text(
             PREVIEW_W // 2, PREVIEW_H // 2,
@@ -273,6 +321,12 @@ class ClassifierApp:
         )
 
     def choose_image(self):
+        """Open the file chooser and predict the photograph that is picked.
+
+        The Select image button and the Control-O shortcut both call this.
+        The dialog opens in the folder of the previous choice, and the dialog
+        is dismissed without a change when nothing is selected.
+        """
         path = filedialog.askopenfilename(
             parent=self.root,
             title="Select a scene photograph",
@@ -285,8 +339,12 @@ class ClassifierApp:
         self.load_and_predict(path)
 
     def load_and_predict(self, path):
-        """``path`` is only used to read the pixels and to show the file name;
-        it never takes part in the decision."""
+        """Read the photograph, predict its class and show the result in the
+        window.
+
+        The path is only used to read the pixels and to show the file name; it
+        never takes part in the decision. A file that cannot be read as an image
+        is reported in a message box and nothing else happens."""
         try:
             rgb = load_rgb(path)
         except Exception as exc:
@@ -310,6 +368,11 @@ class ClassifierApp:
         self._show_prediction(prediction)
 
     def _show_rgb(self, rgb):
+        """Show the original photograph on the preview canvas.
+
+        The image is scaled down to fit the canvas, and its original pixel
+        size is written under the preview.
+        """
         height, width = rgb.shape[:2]
         self.size_var.set(f"Original {width}×{height} px")
         image = Image.fromarray(rgb)
@@ -319,6 +382,12 @@ class ClassifierApp:
         self.canvas.create_image(PREVIEW_W // 2, PREVIEW_H // 2, image=self._photo)
 
     def _show_prediction(self, prediction):
+        """Show the prediction: the label, the class probabilities and the crop.
+
+        The label and the accent bar take the colour of the predicted class.
+        When the classifier reports no probabilities, a note replaces the two
+        probability rows.
+        """
         self.result_var.set(prediction.text)
         color = INSIDE if prediction.label_id == 1 else OUTSIDE if prediction.label_id == 0 else INK
         self.result_label.configure(fg=color)
@@ -343,6 +412,12 @@ class ClassifierApp:
 
 
 def _cli(path):
+    """Print the prediction for one photograph and return the exit status.
+
+    The label and the class probabilities go to standard output. The status
+    is 1 when the photograph cannot be read or the model fails, and the
+    reason is written to standard error.
+    """
     try:
         pipeline = load_pipeline()
         rgb = load_rgb(path)
@@ -359,6 +434,11 @@ def _cli(path):
 
 
 def _gui():
+    """Open the classifier window and run the Tk event loop.
+
+    The status is 1 when no window can be opened, which usually means that
+    the program runs without a desktop, or when the saved model is missing.
+    """
     _enable_windows_dpi()
     try:
         root = tk.Tk()
@@ -379,6 +459,11 @@ def _gui():
 
 
 def main(argv=None):
+    """Run the command line interface or the window, depending on the options.
+
+    With --image FILE the prediction is printed and no window is opened;
+    otherwise the window is shown.
+    """
     parser = argparse.ArgumentParser(
         description="Local inside/outside classifier for PolyU main campus photos.",
     )

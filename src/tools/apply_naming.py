@@ -234,6 +234,12 @@ def apply(records, dry_run):
 
 
 def main():
+    """Rename the photos by location group and sync the manifests.
+
+    Prints the check warnings first, then renames the files and writes the
+    new file names back into the manifest; with `--dry-run` the planned
+    renames are printed and nothing on disk is touched.
+    """
     ap = argparse.ArgumentParser(description='rename the photos by location group and sync the manifest')
     ap.add_argument('--dry-run', action='store_true', help='only preview the changes')
     args = ap.parse_args()

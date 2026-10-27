@@ -35,6 +35,10 @@ EXAMPLES = [
 
 
 def _font():
+    """Register the Chinese font with matplotlib and return its family name.
+
+    Returns None when no candidate file is present, in which case matplotlib
+    keeps its own default font."""
     candidates = [
         "/home/peleclic/.local/share/fonts/msyh.ttc",
         r"C:\Windows\Fonts\msyh.ttc",
@@ -48,6 +52,7 @@ def _font():
 
 
 def _index():
+    """Map every photograph file name under the pictures directory to its path."""
     found = {}
     for dirpath, _dirs, names in os.walk(PICTURES):
         for name in names:
@@ -56,11 +61,16 @@ def _index():
 
 
 def _load_pred():
+    """Read the locked test predictions and return the rows as dictionaries."""
     with open(PRED, encoding="utf-8") as fh:
         return list(csv.DictReader(fh))
 
 
 def confusion_figure(rows):
+    """Draw the test confusion matrix and return the path and the counts.
+
+    The counts are recomputed from the prediction rows, so the figure and the
+    locked metrics cannot drift apart."""
     matrix = np.zeros((2, 2), dtype=int)
     for row in rows:
         matrix[int(row["y_true"]), int(row["y_pred"])] += 1
@@ -80,6 +90,7 @@ def confusion_figure(rows):
 
 
 def examples_figure(paths):
+    """Draw the grid of example photographs and return the path it was written to."""
     fig, axes = plt.subplots(2, 4, figsize=(12.5, 7.2))
     for ax, (name, caption) in zip(axes.ravel(), EXAMPLES):
         image = Image.open(paths[name]).convert("RGB")
@@ -95,6 +106,7 @@ def examples_figure(paths):
 
 
 def main():
+    """Draw both figures and print the confusion matrix that was drawn."""
     name = _font()
     if name:
         plt.rcParams["font.family"] = name

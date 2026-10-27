@@ -34,6 +34,11 @@ OUT = ROOT / "docs" / "figures" / "task5_application.png"
 
 
 def font(size, bold=False):
+    """Return a matplotlib font property for the first available sans-serif family.
+
+    DejaVu Sans, Liberation Sans and Arial are tried in that order, and the
+    default font is used when none of them is installed.
+    """
     for name in ("DejaVu Sans", "Liberation Sans", "Arial"):
         try:
             path = font_manager.findfont(font_manager.FontProperties(family=name), fallback_to_default=False)
@@ -44,6 +49,14 @@ def font(size, bold=False):
 
 
 def main():
+    """Draw the Task 5 figure and save it as docs/figures/task5_application.png.
+
+    The three panels show the photograph, the 256x256 crop that the model
+    receives and the prediction returned by the shipped prediction path. The
+    photograph is cropped with ``resize_and_crop`` first, and the crop is
+    passed to ``predict_rgb``, which leaves an already 256x256 image
+    unchanged.
+    """
     index = {p.name: p for p in PICTURES.rglob("*") if p.is_file()}
     if TARGET not in index:
         raise SystemExit(f"photograph not found: {TARGET}")

@@ -52,9 +52,9 @@ SPLITS = ('train', 'val', 'test')
 
 # Mutually-visible constraint: the groups below can see each other across a
 # road, so they are the "neighbouring shots of the same scene" the PDF talks
-# about. Even though the venues differ they must not land in different
-# splits, otherwise that is leakage. The split treats them as one atomic
-# unit.
+# about. Even though the
+# venues differ they must not land in different splits, otherwise that is
+# leakage. The split treats them as one atomic unit.
 KEEP_TOGETHER = [
     ('OUT-05', 'OUT-08'),   # West Kowloon M+ Museum and Art Park, mutually visible across the road
 ]
@@ -102,6 +102,7 @@ def build_clusters(groups):
     parent = {g: g for g in groups}
 
     def find(x):
+        """Return the root of the unit that x belongs to, compressing the path."""
         while parent[x] != x:
             parent[x] = parent[parent[x]]
             x = parent[x]
@@ -163,6 +164,11 @@ def assign_groups(groups, ratio):
 
 
 def load_rows():
+    """Read every annotation manifest under data/annotations.
+
+    Returns one dict row per photograph, taken from all the files that end
+    in `_manifest.csv` inside the annotation tree.
+    """
     rows = []
     for root, dirs, names in os.walk(ANNOTATIONS):
         dirs[:] = [d for d in dirs if not d.startswith('.')]
@@ -174,6 +180,15 @@ def load_rows():
 
 
 def main():
+    """Clean the dataset and write the split table and the summary.
+
+    Keeps the rows marked `include`, caps every location group, balances the
+    two classes and splits by group, then writes `data/annotations/splits.csv`
+    and `data/annotations/dataset_summary.md`. The `--cap` option overrides
+    the per-group cap and `--dry-run` prints the report without writing a
+    file. Exits with a message when no manifest is found or when the
+    validation checks fail.
+    """
     ap = argparse.ArgumentParser(description='Clean the dataset and split it by location group')
     ap.add_argument('--cap', type=int, default=CAP, help='maximum images kept per location group')
     ap.add_argument('--dry-run', action='store_true')
@@ -210,6 +225,12 @@ def main():
     target = min(totals.values()) if totals else 0
 
     def trim(cls):
+        """Reduce one class to the number of images of the smaller class.
+
+        The quota is first shared evenly over the location groups and then
+        topped up group by group in descending group capacity, so that every
+        venue keeps a share and the larger venues give up the most.
+        """
         groups = by_class[cls]
         keep = {}
         # First share the quota evenly over the groups, then top up to the
@@ -302,7 +323,13 @@ def main():
 
 
 def write_summary(balanced, split_of, meta, by_group, dropped, cap):
+    """Write the cleaning report to data/annotations/dataset_summary.md.
+
+    The file lists the cleaning rules, the image and group counts of every
+    class and split, the per-group detail and the totals.
+    """
     def cls_of(c):
+        """Return the display name of a class code, "outside" or "inside"."""
         return {'0': 'outside', '1': 'inside'}.get(c, c)
 
     L = ['# Dataset cleaning and split result', '',

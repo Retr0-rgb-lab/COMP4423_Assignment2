@@ -36,6 +36,11 @@ FONT_PATH = '/home/peleclic/.local/share/fonts/msyh.ttc'
 
 
 def load_font(size):
+    """Return a font of the given size, falling back to the default bitmap font.
+
+    The bundled CJK font is used whenever it can be loaded, so that labels
+    containing Chinese characters are rendered instead of dropped.
+    """
     try:
         return ImageFont.truetype(FONT_PATH, size)
     except Exception:
@@ -55,6 +60,12 @@ def read_list(path):
 
 
 def collect(src_dir, list_file):
+    """Return the file names to place on the contact sheet.
+
+    With a list file the names are taken from it in the given order and the
+    ones that do not exist are dropped; without one every image of the
+    directory is taken in sorted order.
+    """
     if list_file:
         names = read_list(list_file)
         return [n for n in names
@@ -64,6 +75,12 @@ def collect(src_dir, list_file):
 
 
 def build(src_dir, files, cols, out_path, title):
+    """Draw the numbered grid of thumbnails and save it as an image file.
+
+    Returns the list of (file name, error) pairs of the photographs that
+    could not be read; the file is still written, with a grey cell and the
+    error message in place of the missing thumbnail.
+    """
     rows = (len(files) + cols - 1) // cols if files else 1
     width = cols * (CELL_W + PAD) + PAD
     height = HEADER_H + PAD + rows * (CELL_H + LABEL_H + PAD) + PAD
@@ -105,6 +122,12 @@ def build(src_dir, files, cols, out_path, title):
 
 
 def main():
+    """Generate a contact sheet of the photographs in a directory.
+
+    Writes the image to the given path and prints the number of images on
+    the sheet together with the files that could not be read. Exits when the
+    directory holds no usable image.
+    """
     ap = argparse.ArgumentParser(description='generate a contact sheet')
     ap.add_argument('src_dir')
     ap.add_argument('out_path')

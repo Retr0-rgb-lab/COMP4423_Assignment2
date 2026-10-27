@@ -18,6 +18,12 @@ from src.task3.preprocess import load_rgb, resize_and_crop
 
 
 def run_check(records):
+    """Check the data and the feature dimensions without running the search.
+
+    The first record is cropped to confirm the feature dimensions and the SIFT
+    keypoints, then one inside and one outside image are fitted with F3 x C1
+    to give a smoke prediction.
+    """
     sample = resize_and_crop(load_rgb(records[0]["path"]))
     dims = assert_dims(sample)
     _pts, desc = sift_cached(sample)
@@ -37,6 +43,7 @@ def run_check(records):
 
 
 def _utf8():
+    """Switch the standard streams to UTF-8 so that non-ASCII text prints safely."""
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if hasattr(sys.stderr, "reconfigure"):
@@ -44,6 +51,12 @@ def _utf8():
 
 
 def main():
+    """Run stage one: the linear SVM over the six feature sets.
+
+    Configurations that are already in `stage_a.csv` are skipped unless
+    `--force` is given. The two best feature sets are printed for stage two
+    and the run stamp is written at the end.
+    """
     _utf8()
     parser = argparse.ArgumentParser(description="Task 3 stage one")
     parser.add_argument("--check", action="store_true", help="only check the data and the feature dimensions")

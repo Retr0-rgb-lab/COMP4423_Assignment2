@@ -55,6 +55,11 @@ GAP = 0.20
 
 
 def _font(size, bold=False):
+    """Return the font properties of a sans-serif family at the given size.
+
+    The first of DejaVu Sans, Liberation Sans and Arial that is installed
+    wins; when none of them is found the matplotlib default is used.
+    """
     for name in ("DejaVu Sans", "Liberation Sans", "Arial"):
         try:
             path = font_manager.findfont(
@@ -94,6 +99,12 @@ def arrow(ax, a, b):
 
 
 def main():
+    """Draw the pipeline figure and write it to docs/figures/pipeline.png.
+
+    Panel A shows the path from the photographs to the application, panel B
+    the model-selection protocol and the single point where the test set
+    enters.
+    """
     fig = plt.figure(figsize=(FIG_W, FIG_H), dpi=200)
     fig.patch.set_facecolor("white")
     ax = fig.add_axes([0, 0, 1, 1])

@@ -35,6 +35,7 @@ OUT = OUTPUT_DIR / "stage_a_nb.csv"
 
 
 def _utf8():
+    """Switch stdout and stderr to UTF-8 so that CJK output is not lost."""
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if hasattr(sys.stderr, "reconfigure"):
@@ -42,6 +43,13 @@ def _utf8():
 
 
 def main():
+    """Evaluate the naive Bayes classifier on the four histogram features.
+
+    The rows are written to outputs/task3/stage_a_nb.csv; the rows that are
+    already in the table are kept unless `--force` is given, and the file is
+    rewritten after every new row. Only the training and the validation
+    split are read, the test set is never touched.
+    """
     _utf8()
     parser = argparse.ArgumentParser(
         description="Evaluate the naive Bayes classifier on the histogram features")

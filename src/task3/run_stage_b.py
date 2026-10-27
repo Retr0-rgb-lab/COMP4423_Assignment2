@@ -18,6 +18,11 @@ from src.task3.data import load_index
 
 
 def main():
+    """Run stage two: the two winning feature sets against every classifier.
+
+    The linear SVM winner is followed by one RBF control row. The final table,
+    `selection.json` and the run stamp are written at the end.
+    """
     import sys
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")

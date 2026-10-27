@@ -11,6 +11,11 @@ EXPECTED = 540
 
 
 def _index_pictures(root):
+    """Return a mapping from image file name to path below `root`.
+
+    A name that occurs twice cannot be resolved uniquely, so the walk stops
+    with SystemExit in that case.
+    """
     found = {}
     for dirpath, _dirs, names in os.walk(root):
         for name in names:
@@ -22,6 +27,14 @@ def _index_pictures(root):
 
 
 def load_index():
+    """Return the records of `splits.csv` with every file name resolved to a path.
+
+    The file name only locates the image; neither it nor the group id ever
+    reaches the features. Raises SystemExit when the table is missing, a
+    listed image is not on disk, the row count is not the expected one, a
+    location group spans several splits, or a held-out fold group is not in
+    the training split.
+    """
     if not SPLITS_CSV.is_file():
         raise SystemExit(f"split table not found: {SPLITS_CSV}")
     paths = _index_pictures(PICTURES)
@@ -64,6 +77,7 @@ def load_index():
 
 
 def by_split(records):
+    """Return the records grouped by split, under the keys train, val and test."""
     out = {"train": [], "val": [], "test": []}
     for rec in records:
         out[rec["split"]].append(rec)

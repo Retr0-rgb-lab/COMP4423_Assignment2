@@ -40,6 +40,8 @@ FONT_CANDIDATES = [
 
 
 def _pick_font():
+    """Load the first available TrueType font pair and remember it for the
+    rest of the run."""
     global REGULAR, BOLD
     for regular, bold in FONT_CANDIDATES:
         try:
@@ -52,6 +54,7 @@ def _pick_font():
 
 
 def f(sz, bold=False):
+    """Return the chosen font at the given pixel size."""
     if REGULAR is None:
         _pick_font()
     return ImageFont.truetype(BOLD if bold else REGULAR, sz)

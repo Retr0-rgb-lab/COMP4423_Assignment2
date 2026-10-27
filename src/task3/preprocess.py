@@ -44,4 +44,5 @@ def resize_and_crop(rgb):
 
 
 def horizontal_flip(rgb):
+    """Mirror the image left to right and return it as a contiguous array."""
     return np.ascontiguousarray(np.fliplr(rgb))

@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 """Draw the Task 4 confusion matrices and the per-location-group accuracy.
 
-The numbers come from the locked records. The script does not retrain and does
-not read the test set to change the model:
+The figures are drawn from the locked counts written into this module, so a
+figure can only ever show the single locked evaluation of 2026-10-14. The
+script does not retrain and does not read the test set to change the model:
 
-- validation / test confusion matrices: outputs/task3/val_metrics.json and
-  outputs/task3/test_metrics.json (the run of 2026-10-14)
-- test set correct counts per location group: outputs/task3/test_predictions.csv
+- the validation and test confusion matrices are the locked cells of that
+  evaluation;
+- the per-location-group figures are the locked correct / n of the same run.
 
-This script only turns those integers into figures and checks that they agree
-with each other.
-If outputs/task3/test_predictions.csv is on disk, it also checks that the
-per-image predictions still match those integers; when they agree it writes the
-example file name list. The qualitative example grid is only assembled when the
-pictures can be found by file name under data/pictures/. When they cannot be
-found, no file name and no figure is invented.
+When the shipped result tables are on disk, the script also checks that the
+per-image predictions still reproduce those counts; when they agree it writes
+the example file name list. The qualitative example grid is only assembled
+when the pictures can be found by file name under data/pictures/. When they
+cannot be found, no file name and no figure is invented.
 """
 from __future__ import annotations
 
@@ -30,17 +29,18 @@ OUT_DIR = Path(__file__).resolve().parent
 PRED_CSV = ROOT / "outputs" / "task3" / "test_predictions.csv"
 PICTURES = ROOT / "data" / "pictures"
 
-# §8.3 validation set. Rows are the true class, columns the predicted class, in the order outside, inside.
+# Locked validation split. Rows are the true class, columns the predicted
+# class, in the order outside, inside.
 VAL_CM = ((26, 4), (17, 21))
 VAL_ACC_PUBLISHED = 0.691
 VAL_BA_PUBLISHED = 0.710
 
-# §8.3 test set.
+# Locked test split.
 TEST_CM = ((26, 1), (27, 15))
 TEST_ACC_PUBLISHED = 0.594
 TEST_BA_PUBLISHED = 0.660
 
-# Review report §4. correct / n.
+# Locked test split, split by location group: correct / n.
 GROUP_ROWS = (
     ("OUT-06", "HKU Main Building", "outside", 19, 20, 0.950),
     ("OUT-07", "HKU campus green", "outside", 7, 7, 1.000),
@@ -91,6 +91,8 @@ def _resolve_font(bold):
 
 
 def _font(size, bold=False):
+    """Return a PIL font of the requested size, or the built-in default
+    when no usable TrueType file is found."""
     path = _resolve_font(bold)
     if path is None:
         return ImageFont.load_default()
@@ -101,6 +103,12 @@ def _font(size, bold=False):
 
 
 def _check():
+    """Check the hard-coded matrices and group counts against the published
+    numbers.
+
+    Every count is recomputed from the matrices and compared with the value
+    the report prints, so a figure can never disagree with the text. The
+    function raises SystemExit when a number does not match."""
     vt_out, vt_in = VAL_CM
     assert vt_out[0] + vt_out[1] == 30
     assert vt_in[0] + vt_in[1] == 38
@@ -141,6 +149,11 @@ def _check():
 
 
 def _cell_color(value, scale_max, emphasize):
+    """Return the fill colour of one matrix cell.
+
+    The colour darkens with the count relative to the largest cell of the
+    matrix. The emphasised cell is the missed-inside one, which is shaded
+    towards brick red instead of blue."""
     t = value / scale_max
     if emphasize:
         # Missed inside: light background to brick red.
@@ -179,6 +192,12 @@ def _trim_white(img, pad=14):
 
 
 def draw_confusion(cm, title, subtitle, footer, path):
+    """Draw one confusion matrix as a PNG.
+
+    The matrix holds two rows of counts, the true class by row and the
+    predicted class by column, in the order outside then inside. The title
+    and the subtitle are drawn at the top left, the footer with the published
+    numbers along the bottom, and the PNG is written to `path`."""
     scale = 2
     w, h = 920 * scale, 700 * scale
     img = Image.new("RGB", (w, h), "white")
@@ -245,6 +264,10 @@ def draw_confusion(cm, title, subtitle, footer, path):
 
 
 def draw_groups(path):
+    """Draw the test accuracy of each held-out location group as a PNG.
+
+    The vertical line is the overall test accuracy, so a bar is read against
+    the score of the whole test set."""
     scale = 2
     w, h = 980 * scale, 560 * scale
     img = Image.new("RGB", (w, h), "white")
@@ -307,6 +330,7 @@ def draw_groups(path):
 
 
 def _index_pictures(root: Path):
+    """Map every image file name under `root` to the path it was found at."""
     found = {}
     if not root.is_dir():
         return found
@@ -318,6 +342,8 @@ def _index_pictures(root: Path):
 
 
 def _load_predictions(path: Path):
+    """Read the locked prediction CSV and return its rows as dictionaries
+    with the two labels as integers."""
     with open(path, encoding="utf-8", newline="") as fh:
         rows = list(csv.DictReader(fh))
     parsed = []
@@ -332,6 +358,8 @@ def _load_predictions(path: Path):
 
 
 def _cell(row):
+    """Return the name of the confusion-matrix cell one prediction row falls
+    into: true_outside, false_inside, false_outside or true_inside."""
     if row["y_true"] == 0 and row["y_pred"] == 0:
         return "true_outside"
     if row["y_true"] == 0 and row["y_pred"] == 1:
@@ -384,6 +412,8 @@ def write_example_manifest(rows):
     picks = []
 
     def take(bucket, group_id, k):
+        """Return the first `k` rows of one bucket that belong to one group,
+        in file name order."""
         chosen = [r for r in bucket if r["group_id"] == group_id]
         chosen.sort(key=lambda r: r["filename"])
         return chosen[:k]
@@ -414,6 +444,11 @@ def write_example_manifest(rows):
 
 
 def write_example_grid(picks, pictures):
+    """Draw the contact sheet of the selected test photographs.
+
+    Nothing is drawn when a file name of the list cannot be found under
+    data/pictures/: a missing picture is reported, never replaced by a
+    substitute."""
     missing = [row["filename"] for row in picks if row["filename"] not in pictures]
     if missing:
         print(
@@ -448,6 +483,8 @@ def write_example_grid(picks, pictures):
 
 
 def try_examples():
+    """Write the example manifest and the contact sheet when both the locked
+    predictions and the photographs are available."""
     if not PRED_CSV.is_file():
         print(
             "no qualitative examples generated: outputs/task3/test_predictions.csv is missing."
@@ -464,6 +501,8 @@ def try_examples():
 
 
 def main():
+    """Draw every figure of the Task 4 report and check the numbers behind
+    them."""
     _check()
     draw_confusion(
         TEST_CM,

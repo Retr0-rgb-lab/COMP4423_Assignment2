@@ -76,11 +76,16 @@ OVERRIDE = {
 HEADER = ['filename', 'class', 'group_id', 'location_name',
           'sub_area', 'scene_class', 'scene_type', 'status', 'notes']
 
-# Traditional -> simplified. Most campus signage is traditional while the
-# vocabulary is written in simplified, so normalise first and then match,
-# otherwise the same building would fall into "other scene" just because of
-# a different spelling.
+# The keyword tables above are written in English, and the scene types they
+# match against were translated to English, so the two are compared directly
+# and no spelling normalisation is needed any more.
 def classify(filename, scene_type):
+    """Return the controlled scene class of one photograph.
+
+    The OVERRIDE table has priority; otherwise the keywords of SCENE_RULES
+    are matched against the lower-cased scene type in the order of the
+    rules, and a photograph that matches no rule becomes "Other scene".
+    """
     if filename in OVERRIDE:
         return OVERRIDE[filename]
     text = scene_type.lower()
@@ -91,11 +96,19 @@ def classify(filename, scene_type):
 
 
 def already_merged(path):
+    """Return True when the manifest already carries a `sub_area` column."""
     with open(path, encoding='utf-8-sig') as fh:
         return 'sub_area' in (csv.DictReader(fh).fieldnames or [])
 
 
 def convert(path):
+    """Collapse one manifest to venue level and rewrite it in place.
+
+    Every row gets the venue-level group_id, the venue name and the sub-area
+    from VENUE_MAP, plus a controlled scene_class, and the file is rewritten
+    with the columns of HEADER. Returns the number of rows written and exits
+    when a group_id is missing from VENUE_MAP.
+    """
     with open(path, encoding='utf-8-sig') as fh:
         rows = list(csv.DictReader(fh))
 
@@ -118,6 +131,12 @@ def convert(path):
 
 
 def main():
+    """Collapse every manifest under data/annotations that is not collapsed yet.
+
+    A manifest that already carries a `sub_area` column is skipped, so the
+    script can be run again and again. Exits with a message when no manifest
+    is found or when a group_id is missing from VENUE_MAP.
+    """
     manifests = sorted(f for f in os.listdir(ANNOTATIONS)
                        if f.endswith('_manifest.csv'))
     if not manifests:

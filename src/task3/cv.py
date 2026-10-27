@@ -34,6 +34,11 @@ from src.task3.preprocess import horizontal_flip, load_rgb, resize_and_crop
 
 
 def preprocess_tag():
+    """Return the tag that names the current preprocessing, e.g. "s256".
+
+    The tag is part of every cached crop file name and of the run stamp, so a
+    changed image size cannot be mistaken for an old crop.
+    """
     return f"s{IMAGE_SIZE}"
 
 
@@ -51,6 +56,13 @@ def source_fingerprint():
 
 
 def assert_resume_allowed(force):
+    """Refuse to reuse stored results whose fingerprint no longer matches.
+
+    Returns the current source fingerprint. Raises SystemExit when result
+    tables exist but `run_stamp.json` is missing or records another
+    fingerprint; `force` skips that check, and so does the absence of
+    result tables.
+    """
     stamp_path = OUTPUT_DIR / "run_stamp.json"
     current = source_fingerprint()
     has_table = (OUTPUT_DIR / "stage_a.csv").is_file() or (OUTPUT_DIR / "stage_b.csv").is_file()
@@ -69,6 +81,10 @@ def assert_resume_allowed(force):
 
 
 def write_run_stamp():
+    """Write the current fingerprint and preprocessing tag to `run_stamp.json`.
+
+    The stamp is what a later resumed run compares its own fingerprint with.
+    """
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     payload = {
         "fingerprint": source_fingerprint(),
@@ -80,6 +96,13 @@ def write_run_stamp():
 
 
 def load_cropped(records):
+    """Return the cropped RGB array of every record, using the on-disk cache.
+
+    A crop is cached as `<preprocess tag>__<file name>.npy` below
+    `cache/task3/crop` and is recomputed when the file is missing or does not
+    have the expected 256x256x3 shape. Returns a list of uint8 arrays in the
+    order of `records`.
+    """
     from src.task3.config import CACHE
     folder = CACHE / "crop"
     folder.mkdir(parents=True, exist_ok=True)
@@ -97,6 +120,11 @@ def load_cropped(records):
 
 
 def augment(images, labels):
+    """Return the training images and labels, doubled by a horizontal flip.
+
+    The flip is skipped when `AUG_HFLIP` is false. Returns a list of images
+    and an int32 label array of the same length.
+    """
     if not AUG_HFLIP:
         return list(images), np.asarray(labels, dtype=np.int32)
     out_x, out_y = [], []
@@ -109,10 +137,12 @@ def augment(images, labels):
 
 
 def _labels(records):
+    """Return the int32 label array of the given records."""
     return np.asarray([rec["y"] for rec in records], dtype=np.int32)
 
 
 def _recalls(y_true, y_pred):
+    """Return the (outside recall, inside recall) pair for the labels 0 and 1."""
     rec = recall_score(y_true, y_pred, labels=[0, 1], average=None, zero_division=0)
     return float(rec[0]), float(rec[1])
 
@@ -182,6 +212,7 @@ def choose_features(rows, k=2):
     order = {fid: i for i, fid in enumerate(FEATURE_ORDER)}
 
     def key(row):
+        """Return the sort key: score descending, dimension ascending, id order."""
         return (-row["ba_mean"], row["dim"], order[row["feature_id"]])
 
     return sorted(rows, key=key)[:k]
@@ -197,6 +228,7 @@ def choose_pipeline(rows):
     simplicity = {cid: i for i, cid in enumerate(CLF_SIMPLICITY)}
 
     def key(row):
+        """Return the sort key: score descending, then simplicity."""
         return (-row["ba_mean"], simplicity.get(row["clf_id"], 99))
 
     return sorted(candidates, key=key)[0]
@@ -210,6 +242,10 @@ FIELDNAMES = (
 
 
 def write_rows(path, rows):
+    """Write the rows to `path` as CSV, one row per configuration.
+
+    The columns are fixed by `FIELDNAMES`; keys outside it are dropped.
+    """
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=FIELDNAMES, extrasaction="ignore")
@@ -219,6 +255,7 @@ def write_rows(path, rows):
 
 
 def read_rows(path):
+    """Read the CSV table at `path` and cast the numeric columns to int or float."""
     with open(path, encoding="utf-8", newline="") as fh:
         rows = []
         for row in csv.DictReader(fh):
@@ -234,6 +271,11 @@ def read_rows(path):
 
 
 def classification_report(y_true, y_pred):
+    """Return the accuracy, the balanced accuracy and the per-class scores.
+
+    The confusion matrix is a 2x2 list ordered as outside (0) and inside (1);
+    every per-class entry carries precision, recall, f1 and support.
+    """
     precision, recall, f1, support = precision_recall_fscore_support(
         y_true, y_pred, labels=[0, 1], zero_division=0,
     )
