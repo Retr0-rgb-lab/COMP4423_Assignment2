@@ -19,9 +19,8 @@ How to use it
 -------------
 1. Open the link above. The folder is shared as "anyone with the link", so
    no Google sign-in, password, or access request is required.
-   Each part is larger than 100 MB, so Google shows a "Google Drive can't
-   scan this file for viruses" page with a "Download anyway" button.
-   That button needs no account and no permission: click it for each part.
+   If Google shows a "Google Drive can't scan this file for viruses" page,
+   choose "Download anyway"; no account is needed.
 2. Download all 27 parts into one directory. Keep the names as they are.
 3. Join the 27 parts into a single archive, in numeric order:
 

@@ -7,13 +7,13 @@ not one place:
 - ``IN-05`` mixed the main-entrance forecourt with the Shaw Amenities /
   Innovation Tower plaza (which is ``IN-01``) and with the University
   Library and University Gallery courtyard (which is ``IN-03``);
-- ``IN-01`` held two frames of the Library complex;
+- ``IN-01`` held six frames of the Library complex;
 - ``OUT-08`` and ``OUT-09`` both photographed the FREESPACE building at
   Art Park, which is a train-group and a validation-group frame of the same
   scene.
 
 A location group has to be one place, otherwise the same scene sits on both
-sides of a split and the test numbers are optimistic. This tool rewrites the
+sides of a split and the test numbers carry a risk of optimism. This tool rewrites the
 ``group_id`` of the affected rows in the annotation manifests. The split
 itself is not touched here: ``build_dataset.py`` re-derives
 ``data/annotations/splits.csv`` and the group assignment from the manifests,

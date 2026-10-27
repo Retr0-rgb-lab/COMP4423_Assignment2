@@ -13,7 +13,8 @@ selection.json         the feature and classifier that were locked
 val_metrics.json       validation confusion matrix and per-class metrics
 test_metrics.json      test confusion matrix and per-class metrics
 test_predictions.csv   one row per test image: filename, group_id, y_true, y_pred
-dataset_summary.md     the per-class, per-split counts
+../data/annotations/dataset_summary.md
+                       the per-class, per-split counts (kept outside this directory)
 
 All of them come from one run on 2026-10-27, on the 534-image split that the
 location repair described in Section 2.7 of the report produced. The three
