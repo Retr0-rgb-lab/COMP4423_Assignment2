@@ -123,10 +123,10 @@ def main():
     LX, LW = 0.30, 5.00
     top = FIG_H - 0.88
     a1 = box(ax, LX, top, LW, "Photographs",
-             ["540 images in the modelling set, 16 groups",
+             ["534 images in the modelling set, 16 groups",
               "one physical place = one group_id"], C_DATA)
     a2 = box(ax, LX, a1[1] - GAP, LW, "Split by group, never by image",
-             ["train 403   validation 68   test 69",
+             ["train 405   validation 69   test 60",
               "a place belongs to exactly one split",
               "validation is shown, never used to pick"], C_DATA)
     a3 = box(ax, LX, a2[1] - GAP, LW, "resize_and_crop  (preprocess.py)",
@@ -134,13 +134,12 @@ def main():
               "256 x 256, uint8, RGB",
               "horizontal flip on training images only"], C_PREP)
     a4 = box(ax, LX, a3[1] - GAP, LW, "Gray crop",
-             ["HOG  (F2)    8100 values",
-              "LBP  (F3)      50 values"], C_FEAT)
-    a5 = box(ax, LX, a4[1] - GAP, LW, "Standardize each, concatenate",
-             ["F4 = HOG + LBP = 8150 values"], C_FEAT)
+             ["HOG  (F2)    8100 values"], C_FEAT)
+    a5 = box(ax, LX, a4[1] - GAP, LW, "Standardize the block",
+             ["F2 = HOG = 8100 values"], C_FEAT)
     a6 = box(ax, LX, a5[1] - GAP, LW, "Random forest  (C4)",
              ["300 trees, max depth 12, seed 42"], C_MODEL)
-    a7 = box(ax, LX, a6[1] - GAP, LW, "Refit on all 403 training images",
+    a7 = box(ax, LX, a6[1] - GAP, LW, "Refit on all 405 training images",
              ["saved to models/task3_pipeline.joblib"], C_SAVE)
     a8 = box(ax, LX, a7[1] - GAP, LW, "Application  (src/task5/app.py)",
              ["select an image; same crop, same features",
@@ -163,14 +162,15 @@ def main():
               "C6 applies to histograms only, so it",
               "never reaches the two that advanced"], C_PROTO)
     b3 = box(ax, RX, b2[1] - GAP, RW, "Locked",
-             ["F4 + C4, written down before the test",
+             ["F2 + C4, written down before the test",
               "set was touched; no search, one seed"], C_SAVE)
     b4 = box(ax, RX, b3[1] - GAP, RW, "Test set scored once",
-             ["accuracy 0.594   balanced acc. 0.660",
-              "inside recall 0.357"], C_TEST)
+             ["accuracy 0.733   balanced acc. 0.754",
+              "inside recall 0.545"], C_TEST)
     b5 = box(ax, RX, b4[1] - GAP, RW, "Read it in Section 4",
-             ["fold 2 is weak for every classifier,",
-              "and the gap between the top rows is small"], C_PROTO)
+             ["fold 2 and fold 3 are weak for every",
+              "classifier, and the gap between the top",
+              "rows is small"], C_PROTO)
 
     for a, b in ((b1, b2), (b2, b3), (b3, b4), (b4, b5)):
         arrow(ax, a, b)

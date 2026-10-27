@@ -2,7 +2,7 @@
 """Draw the Task 4 confusion matrices and the per-location-group accuracy.
 
 The figures are drawn from the locked counts written into this module, so a
-figure can only ever show the single locked evaluation of 2026-10-14. The
+figure can only ever show the single locked evaluation of 2026-10-27. The
 script does not retrain and does not read the test set to change the model:
 
 - the validation and test confusion matrices are the locked cells of that
@@ -31,21 +31,21 @@ PICTURES = ROOT / "data" / "pictures"
 
 # Locked validation split. Rows are the true class, columns the predicted
 # class, in the order outside, inside.
-VAL_CM = ((26, 4), (17, 21))
-VAL_ACC_PUBLISHED = 0.691
-VAL_BA_PUBLISHED = 0.710
+VAL_CM = ((23, 6), (9, 31))
+VAL_ACC_PUBLISHED = 0.783
+VAL_BA_PUBLISHED = 0.784
 
 # Locked test split.
-TEST_CM = ((26, 1), (27, 15))
-TEST_ACC_PUBLISHED = 0.594
-TEST_BA_PUBLISHED = 0.660
+TEST_CM = ((26, 1), (15, 18))
+TEST_ACC_PUBLISHED = 0.733
+TEST_BA_PUBLISHED = 0.754
 
 # Locked test split, split by location group: correct / n.
 GROUP_ROWS = (
     ("OUT-06", "HKU Main Building", "outside", 19, 20, 0.950),
     ("OUT-07", "HKU campus green", "outside", 7, 7, 1.000),
-    ("IN-03", "Library and central podium", "inside", 9, 25, 0.360),
-    ("IN-07", "CMA courtyard", "inside", 6, 17, 0.353),
+    ("IN-05", "Main entrance forecourt", "inside", 13, 16, 0.812),
+    ("IN-07", "CMA courtyard", "inside", 5, 17, 0.294),
 )
 
 # Font candidates: take the first TTF that exists, in this order. The locked
@@ -110,23 +110,23 @@ def _check():
     the report prints, so a figure can never disagree with the text. The
     function raises SystemExit when a number does not match."""
     vt_out, vt_in = VAL_CM
-    assert vt_out[0] + vt_out[1] == 30
-    assert vt_in[0] + vt_in[1] == 38
-    assert (vt_out[0] + vt_in[1]) / 68 == 47 / 68
-    if abs((47 / 68) - VAL_ACC_PUBLISHED) > 0.0005:
+    assert vt_out[0] + vt_out[1] == 29
+    assert vt_in[0] + vt_in[1] == 40
+    assert (vt_out[0] + vt_in[1]) / 69 == 54 / 69
+    if abs((54 / 69) - VAL_ACC_PUBLISHED) > 0.0005:
         raise SystemExit("validation accuracy does not match the published number")
-    val_ba = ((26 / 30) + (21 / 38)) / 2
+    val_ba = ((23 / 29) + (31 / 40)) / 2
     if abs(val_ba - VAL_BA_PUBLISHED) > 0.0005:
         raise SystemExit("validation balanced accuracy does not match the published number")
 
     tt_out, tt_in = TEST_CM
     assert tt_out[0] + tt_out[1] == 27
-    assert tt_in[0] + tt_in[1] == 42
+    assert tt_in[0] + tt_in[1] == 33
     correct = tt_out[0] + tt_in[1]
-    assert correct == 41
-    if abs((41 / 69) - TEST_ACC_PUBLISHED) > 0.0005:
+    assert correct == 44
+    if abs((44 / 60) - TEST_ACC_PUBLISHED) > 0.0005:
         raise SystemExit("test accuracy does not match the published number")
-    test_ba = ((26 / 27) + (15 / 42)) / 2
+    test_ba = ((26 / 27) + (18 / 33)) / 2
     if abs(test_ba - TEST_BA_PUBLISHED) > 0.0005:
         raise SystemExit("test balanced accuracy does not match the published number")
 
@@ -142,9 +142,9 @@ def _check():
             fp += n - hit
         else:
             fn += n - hit
-    assert group_n == 69
-    assert group_correct == 41
-    assert fp == 1 and fn == 27
+    assert group_n == 60
+    assert group_correct == 44
+    assert fp == 1 and fn == 15
     assert tt_out[1] == fp and tt_in[0] == fn
 
 
@@ -280,12 +280,12 @@ def draw_groups(path):
     draw.text((40 * scale, 24 * scale), "Test accuracy by location group", fill="#1c1917", font=title_f)
     draw.text(
         (40 * scale, 66 * scale),
-        "Locked HOG+LBP + random forest, one test evaluation (2026-10-14).",
+        "Locked HOG + random forest, one test evaluation (2026-10-27).",
         fill="#57534e", font=sub_f,
     )
     draw.text(
         (40 * scale, 90 * scale),
-        "Counts from the single locked test evaluation. Overall test accuracy 0.594 is the vertical line.",
+        "Counts from the single locked test evaluation. Overall test accuracy 0.733 is the vertical line.",
         fill="#57534e", font=sub_f,
     )
 
@@ -319,9 +319,9 @@ def draw_groups(path):
 
     acc_x = left + int((right - left) * TEST_ACC_PUBLISHED)
     draw.line((acc_x, top - 16 * scale, acc_x, axis_y), fill="#b45309", width=2 * scale)
-    draw.text((acc_x + 6 * scale, top - 36 * scale), "0.594", fill="#b45309", font=small_f)
+    draw.text((acc_x + 6 * scale, top - 36 * scale), "0.733", fill="#b45309", font=small_f)
 
-    note = "Outside groups are above 0.95. Both unseen inside groups are near 0.36."
+    note = "Outside groups are above 0.95. The forecourt is 0.812, the CMA courtyard 0.294."
     draw.text((40 * scale, h - 48 * scale), note, fill="#44403c", font=small_f)
     img = img.resize((w // scale, h // scale), Image.Resampling.LANCZOS)
     img = _trim_white(img)
@@ -393,10 +393,10 @@ def write_example_manifest(rows):
 
     counts = {k: len(v) for k, v in buckets.items()}
     expected = {
-        "true_outside": 26,
-        "false_inside": 1,
-        "false_outside": 27,
-        "true_inside": 15,
+        "true_outside": TEST_CM[0][0],
+        "false_inside": TEST_CM[0][1],
+        "false_outside": TEST_CM[1][0],
+        "true_inside": TEST_CM[1][1],
     }
     if counts != expected:
         raise SystemExit(
@@ -421,9 +421,9 @@ def write_example_manifest(rows):
     picks.extend(take(buckets["true_outside"], "OUT-06", 2))
     picks.extend(take(buckets["true_outside"], "OUT-07", 2))
     picks.extend(buckets["false_inside"])  # only 1 image, so it must be OUT-06
-    picks.extend(take(buckets["false_outside"], "IN-03", 2))
+    picks.extend(take(buckets["false_outside"], "IN-05", 2))
     picks.extend(take(buckets["false_outside"], "IN-07", 2))
-    picks.extend(take(buckets["true_inside"], "IN-03", 2))
+    picks.extend(take(buckets["true_inside"], "IN-05", 2))
     picks.extend(take(buckets["true_inside"], "IN-07", 2))
 
     with open(manifest, "w", encoding="utf-8", newline="") as fh:
@@ -507,15 +507,15 @@ def main():
     draw_confusion(
         TEST_CM,
         "Test confusion matrix",
-        "69 images. True class by row, predicted class by column. Source: the single locked test evaluation.",
-        "Accuracy 41/69, reported 0.594. Outside recall 26/27, reported 0.963. Inside recall 15/42, reported 0.357.",
+        "60 images. True class by row, predicted class by column. Source: the single locked test evaluation.",
+        "Accuracy 44/60, reported 0.733. Outside recall 26/27, reported 0.963. Inside recall 18/33, reported 0.545.",
         OUT_DIR / "task4_test_confusion_matrix.png",
     )
     draw_confusion(
         VAL_CM,
         "Validation confusion matrix",
-        "68 images. Reported after the model was locked. Not used to choose features or the classifier.",
-        "Accuracy 47/68, reported 0.691. Outside recall 26/30, reported 0.867. Inside recall 21/38, reported 0.553.",
+        "69 images. Reported after the model was locked. Not used to choose features or the classifier.",
+        "Accuracy 54/69, reported 0.783. Outside recall 23/29, reported 0.793. Inside recall 31/40, reported 0.775.",
         OUT_DIR / "task4_val_confusion_matrix.png",
     )
     draw_groups(OUT_DIR / "task4_test_per_group.png")

@@ -7,16 +7,44 @@ What is there
 -------------
 Folder name: COMP4423_A2_Pictures
 Contents: 27 zip parts, COMP4423_A2_dataset_part01.zip through
-          COMP4423_A2_dataset_part27.zip (no gaps in the numbering).
+          COMP4423_A2_dataset_part27.zip (no gaps in the numbering),
+          plus README_DATASET.txt.
+
+The 27 parts are NOT 27 separate archives. They are one archive cut into
+27 equal byte chunks, because the whole set is about 2.3 GB. Each part
+begins in the middle of the archive, so no single part can be opened on
+its own. Join them first, then unpack once.
 
 How to use it
 -------------
 1. Open the link above. The folder is shared as "anyone with the link", so
    no Google sign-in, password, or access request is required.
-2. Download all 27 parts.
-3. Unpack them into a single directory. The photographs inside keep the file
-   names used throughout the report (for example IN-03_001_IMG_1444.jpg and
-   OUT-06_001_IMG_0863.jpg).
+   Each part is larger than 100 MB, so Google shows a "Google Drive can't
+   scan this file for viruses" page with a "Download anyway" button.
+   That button needs no account and no permission: click it for each part.
+2. Download all 27 parts into one directory. Keep the names as they are.
+3. Join the 27 parts into a single archive, in numeric order:
+
+   Linux / macOS:
+     cat COMP4423_A2_dataset_part*.zip > COMP4423_A2_dataset.zip
+   Windows (Command Prompt):
+     copy /b COMP4423_A2_dataset_part*.zip COMP4423_A2_dataset.zip
+   Windows (PowerShell):
+     Get-Content COMP4423_A2_dataset_part*.zip -AsByteStream `
+       | Set-Content COMP4423_A2_dataset.zip -AsByteStream
+
+4. Unpack the joined archive:
+
+     unzip COMP4423_A2_dataset.zip
+
+   The photographs inside keep the file names used throughout the report
+   (for example IN-03_001_IMG_1444.jpg and OUT-06_001_IMG_0863.jpg), and
+   the annotation files are under data/annotations/.
+
+Check before you unpack: the joined file must end with the archive's end
+record. `unzip -t COMP4423_A2_dataset.zip` should report "No errors
+detected"; if it says "End-of-central-directory signature not found", the
+parts are out of order or one is missing.
 
 The same URL appears in the report, on the dataset line under the title.
 

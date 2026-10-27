@@ -35,12 +35,16 @@ BOW_BATCH = 4096
 PCA_DIM = 100
 
 # 5-fold venue holdout (location-group holdout). OUT-05 and OUT-08 form one
-# atomic unit.
+# atomic unit. The four folds hold out one inside group and one outside group
+# each, in ascending group order, and the fifth fold repeats the first inside
+# group because the inside side has only four training groups while the
+# outside side has six. After the 2026-10-27 repair of the location groups the
+# inside training groups are IN-01, IN-02, IN-03 and IN-04.
 FOLDS = (
     {"inside": ("IN-01",), "outside": ("OUT-01",)},
     {"inside": ("IN-02",), "outside": ("OUT-02",)},
-    {"inside": ("IN-04",), "outside": ("OUT-03",)},
-    {"inside": ("IN-06",), "outside": ("OUT-04",)},
+    {"inside": ("IN-03",), "outside": ("OUT-03",)},
+    {"inside": ("IN-04",), "outside": ("OUT-04",)},
     {"inside": ("IN-01",), "outside": ("OUT-05", "OUT-08")},
 )
 

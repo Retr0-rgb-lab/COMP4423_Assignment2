@@ -1,6 +1,6 @@
 {
-  "feature_id": "F4",
+  "feature_id": "F2",
   "clf_id": "C4",
-  "ba_mean": 0.7574852941176471,
-  "val_accuracy": 0.6911764705882353
+  "ba_mean": 0.7215869905956113,
+  "val_accuracy": 0.782608695652174
 }

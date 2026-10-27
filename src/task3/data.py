@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from src.task3.config import FOLDS, PICTURES, SPLITS_CSV
 
-EXPECTED = 540
+EXPECTED = 534
 
 
 def _index_pictures(root):

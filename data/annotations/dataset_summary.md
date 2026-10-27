@@ -4,7 +4,7 @@
 
 ## Cleaning rules
 
-- Only `status = include` is kept; 16 exclude rows and 0 review rows are dropped
+- Only `status = include` is kept; 18 exclude rows and 0 review rows are dropped
 - At most 50 images per location group (evenly spaced inside the group, so the spread of viewpoints is kept)
 - The two classes are aligned to the smaller side
 - **A location group is indivisible**: every photograph of a group enters the same split
@@ -14,12 +14,12 @@
 
 | split | class | images | groups | group ids |
 |---|---|---:|---:|---|
-| train | outside | 213 | 6 | OUT-01, OUT-02, OUT-03, OUT-04, OUT-05, OUT-08 |
-| train | inside | 190 | 4 | IN-01, IN-02, IN-04, IN-06 |
-| val | outside | 30 | 1 | OUT-09 |
-| val | inside | 38 | 1 | IN-05 |
+| train | outside | 211 | 6 | OUT-01, OUT-02, OUT-03, OUT-04, OUT-05, OUT-08 |
+| train | inside | 194 | 4 | IN-01, IN-02, IN-03, IN-04 |
+| val | outside | 29 | 1 | OUT-09 |
+| val | inside | 40 | 1 | IN-06 |
 | test | outside | 27 | 2 | OUT-06, OUT-07 |
-| test | inside | 42 | 2 | IN-03, IN-07 |
+| test | inside | 33 | 2 | IN-05, IN-07 |
 
 ## Per-group detail
 
@@ -28,22 +28,22 @@
 | OUT-01 | Jordan | outside | 82 | 50 | train |
 | OUT-02 | HKU | outside | 57 | 50 | train |
 | OUT-03 | Kowloon Park | outside | 72 | 32 | train |
-| OUT-04 | Elements | outside | 62 | 30 | train |
+| OUT-04 | Elements | outside | 62 | 29 | train |
 | OUT-05 | West Kowloon | outside | 21 | 21 | train |
 | OUT-06 | HKU - Main Building | outside | 20 | 20 | test |
 | OUT-07 | HKU - campus green | outside | 7 | 7 | test |
-| OUT-08 | West Kowloon - Art Park | outside | 38 | 30 | train |
-| OUT-09 | West Kowloon - harbourfront | outside | 53 | 30 | val |
-| IN-01 | PolyU walkway (J block to VA block) | inside | 71 | 50 | train |
+| OUT-08 | West Kowloon - Art Park | outside | 41 | 29 | train |
+| OUT-09 | West Kowloon - harbourfront | outside | 50 | 29 | val |
+| IN-01 | PolyU walkway (J block to VA block) | inside | 72 | 50 | train |
 | IN-02 | PolyU P/Q coffered walkway | inside | 62 | 50 | train |
-| IN-03 | PolyU University Library and central podium | inside | 25 | 25 | test |
+| IN-03 | PolyU University Library and central podium | inside | 44 | 44 | train |
 | IN-04 | PolyU FSCH / VS block / swimming pool | inside | 53 | 50 | train |
-| IN-05 | PolyU campus gate and main entrance | inside | 38 | 38 | val |
-| IN-06 | PolyU building courtyard and Block A entrance | inside | 40 | 40 | train |
+| IN-05 | PolyU campus gate and main entrance | inside | 16 | 16 | test |
+| IN-06 | PolyU building courtyard and Block A entrance | inside | 40 | 40 | val |
 | IN-07 | PolyU CMA Building courtyard | inside | 17 | 17 | test |
 
 ## Totals
 
-- inside 270 images, outside 270 images
+- inside 267 images, outside 267 images
 - 16 location groups (inside 7, outside 9)
-- 540 images in total
+- 534 images in total
