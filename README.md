@@ -32,7 +32,7 @@ src/tools/           dataset construction and the dataset check tools
 models/              the locked pipeline (HOG with a random forest)
 data/annotations/    the split table, the per-class counts and the source manifests
 outputs/task3/       the raw result tables of the locked run
-docs/figures/        the report figures and the script that draws them
+docs/figures/        the report figures
 ```
 
 The photographs themselves are not in this repository; they are on Google
@@ -51,9 +51,6 @@ python -m src.task3.evaluate
 # Task 5 -- the local application
 python -m src.task5.app
 python -m src.task5.app --image path\to\photo.jpg
-
-# the report figures
-python docs/figures/plot_task4_locked.py
 ```
 
 The two training stages resume instead of recomputing. The result tables in

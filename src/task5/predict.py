@@ -4,7 +4,7 @@
 File name, folder, EXIF and GPS never reach this module; the caller only
 hands in an RGB array. Preprocessing must use the same ``resize_and_crop``
 function as the evaluation: short side to 256, then a center crop to 256×256.
-``HogLbp.transform`` calls it once more; when the size is already 256×256 the
+``HogFeat.transform`` calls it once more; when the size is already 256×256 the
 function returns it unchanged.
 """
 from pathlib import Path

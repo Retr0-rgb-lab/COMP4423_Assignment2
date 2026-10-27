@@ -1,11 +1,12 @@
 Provenance of the files in this directory
 =========================================
 
-These are the raw artefacts behind every number quoted in the report. They are
-included so that the tables in the report can be checked without rerunning
-anything.
+These are the raw artefacts behind every number in the report. They are
+included so that its tables can be checked without rerunning anything.
 
-stage_a.csv            6 feature rows, fixed linear SVM, 5 venue-holdout folds
+stage_a.csv            6 feature rows, fixed linear SVM, 5 place-holdout folds
+stage_a_nb.csv         the same folds under the supplementary naive Bayes pass,
+                       which produced the C6 columns of the report's Section 3.4
 stage_b.csv            10 feature/classifier rows, same folds; also carries the
                        per-fold columns ba_0 .. ba_4
 selection.json         the feature and classifier that were locked
@@ -14,33 +15,31 @@ test_metrics.json      test confusion matrix and per-class metrics
 test_predictions.csv   one row per test image: filename, group_id, y_true, y_pred
 dataset_summary.md     the per-class, per-split counts
 
-They were produced by the run of 2026-10-14.
+All of them come from one run on 2026-10-27, on the 534-image split that the
+location repair described in Section 2.7 of the report produced. The three
+pipeline commands and the supplementary naive Bayes pass were run in that
+order against this source tree:
 
-Two things changed in src/task3/ after that run:
+  python -m src.task3.run_stage_a
+  python -m src.tools.run_stage_a_nb
+  python -m src.task3.run_stage_b
+  python -m src.task3.evaluate
 
-  2026-10-15  the crop cache key gained the image size (s256__filename)
-  2026-10-21  comments and docstrings were translated to English; no
-              executable statement was changed
-
-Both commands were run again on 2026-10-23 from the code in this archive and
-rewrote stage_a.csv and stage_b.csv byte for byte. The replay is what the
-stamp file now records, so the fingerprint matches the shipped source and a
-rerun resumes instead of asking for --force. A resume no longer re-evaluates
-the locked configuration a second time: the already-evaluated row was excluded
-from the resume set, which used to append a duplicate of it.
-
-evaluate.py was not rerun. test_metrics.json, test_predictions.csv and the
-numbers of Section 4.4 remain the single 2026-10-14 evaluation.
-
-Because the replay rewrote them from the code in this archive, the fingerprint
-in run_stamp.json matches that code, and a plain
+run_stamp.json therefore records the fingerprint of the code under src/task3/
+and of data/annotations/splits.csv exactly as they are shipped here. A plain
 
   python -m src.task3.run_stage_a
   python -m src.task3.run_stage_b
 
-reuses the tables above instead of asking for --force. The guard still fires
-when splits.csv or src/task3 is edited after the stamp was written, which is
-what it is for: a stale table is never quoted as a fresh result.
+reuses the tables above instead of asking for --force.
 
-No new training run produced a different number, and the test set was scored
-once.
+The guard is deliberate: it fires when splits.csv or src/task3 is edited after
+the stamp was written, so a table produced by other code is never quoted as a
+fresh result.
+
+The test set was scored once, after the selection was locked. Section 3.6 of
+the report states the limitation that goes with that sentence.
+
+Figure files live in docs/figures/. The scripts that drew them are tools of the
+working repository and are not part of this archive; nothing in the classifier
+depends on them.
