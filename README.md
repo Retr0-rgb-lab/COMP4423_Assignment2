@@ -28,7 +28,6 @@ pip install -r requirements.txt
 ```
 src/task3/           training pipeline: features, classifiers, venue-holdout CV, evaluation
 src/task5/           the desktop application that classifies one photograph
-src/tools/           dataset construction and the dataset check tools
 models/              the locked pipeline (HOG with a random forest)
 data/annotations/    the split table, the per-class counts and the source manifests
 outputs/task3/       the raw result tables of the locked run

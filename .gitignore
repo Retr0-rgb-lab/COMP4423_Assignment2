@@ -108,3 +108,14 @@ desktop.ini
 
 # ---- submission directory: the report PDF and the archive stay local ----
 submission/
+
+# ---- local helpers: not part of the graded code archive ----
+src/tools/
+src/_gen_annotated_map.py
+src/_gen_location_map.py
+src/task5/make_app_figure.py
+docs/figures/plot_task4_locked.py
+docs/figures/campus_map_base.png
+docs/figures/campus_zoom_base.png
+docs/figures/location_map_base.png
+docs/figures/task5_application.png
